@@ -665,7 +665,7 @@ img[src*="/api/texture/"], img.gsearch-head, .avatar { image-rendering: pixelate
   .sidebar nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.14); border-radius: var(--r-pill); }
   .sidebar nav a { flex: none; }
   .sidebar-foot { margin-top: 0; }
-  .mobile-foot { display: none; }
+  .sf-mobile { display: none; }
 }
 /* Окно ниже 960px: пункты меню плотнее, чтобы прокручивать приходилось как можно реже */
 @media (min-width: 801px) and (max-height: 960px) {
@@ -683,11 +683,6 @@ img[src*="/api/texture/"], img.gsearch-head, .avatar { image-rendering: pixelate
   .sidebar .disclaimer { margin-top: 6px; }
 }
 /* Телефон: подвал сайдбара спрятан, оговорка и правовые ссылки — в конце страницы */
-@media (max-width: 800px) {
-  .mobile-foot { display: block; margin-top: 24px; padding: 14px 4px 0; border-top: 1px solid var(--card-b); }
-  .mobile-foot .donate { margin-bottom: 4px; }
-}
-
 /* Разбор метода: таблица дропов (шанс × цена) */
 .md-break-wrap { overflow-x: auto; }
 .md-break { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -720,7 +715,6 @@ img[src*="/api/texture/"], img.gsearch-head, .avatar { image-rendering: pixelate
 /* ---------- «Сообщить об ошибке» и раздел «Отзывы» ---------- */
 .fb-btn { display: block; width: 100%; margin: 6px 0 2px; text-align: center; color: var(--muted); }
 .fb-btn:hover { color: var(--text); }
-.mobile-foot .fb-btn { width: auto; display: inline-block; margin: 0 0 6px; }
 @media (min-width: 801px) and (max-height: 760px) { .sidebar-foot .fb-btn { padding-top: 4px; padding-bottom: 4px; } }
 .fb-modal { width: min(560px, 100%); }
 .fb-modal h3 { margin: 0 34px 12px 0; }
@@ -897,7 +891,7 @@ a.acct.acct-login:hover { background: rgba(124,92,255,.16); border-color: rgba(1
 .acct-out-btn:hover { background: rgba(248,113,113,.10); color: #fca5a5; }
 /* Подвал меню: кнопки одной колонкой, одинаковые по ширине и высоте */
 .sidebar-foot .btn.donate, .sidebar-foot .fb-btn { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; margin: 0 0 6px; padding: 7px 10px; font-size: 12.5px; }
-.btn.donate, .fb-btn, .mobile-foot .fb-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.btn.donate, .fb-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 .fb-btn .ico, .btn.donate .ico { opacity: .85; }
 .sidebar-foot .btn.donate, .sidebar-foot .fb-btn { display: flex; }
 /* Ссылки в новостях и подсветка блока, к которому привела ссылка (client/src/newsLinks.jsx) */
@@ -909,3 +903,29 @@ a.acct.acct-login:hover { background: rgba(124,92,255,.16); border-color: rgba(1
 /* Плашка «Сайт обновился» — в углу окошка новостей, спокойного цвета */
 .news-pop.update-pop { --news-c: var(--accent); }
 .update-pop .news-pop-title { margin-right: 30px; }
+
+/* Подвал страницы (components/SiteFooter.jsx): о проекте, колонки ссылок, строка © и оговорка */
+.site-foot { text-align: left; margin-top: 40px; padding: 24px 4px 0; border-top: 1px solid var(--card-b); font-size: 13px; line-height: 1.5; }
+.sf-grid { display: grid; grid-template-columns: minmax(220px, 1.6fr) repeat(3, minmax(130px, 1fr)); gap: 24px 32px; }
+.sf-brand { display: flex; align-items: center; gap: 9px; font-size: 15px; }
+.sf-brand img { border-radius: 8px; }
+.sf-about p { margin: 8px 0 0; max-width: 300px; font-size: 12.5px; }
+.sf-col { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.sf-col h4 { margin: 0 0 4px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text); opacity: .7; }
+.sf-col a, .sf-col span, .sf-col .linklike { color: var(--muted); text-decoration: none; font-size: 12.5px; }
+.sf-col a:hover, .sf-col .linklike:hover { color: var(--text); }
+.sf-bottom { display: flex; justify-content: space-between; gap: 6px 24px; flex-wrap: wrap; margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--card-b); font-size: 11px; }
+.sf-bottom a { color: inherit; text-decoration: underline; text-decoration-color: rgba(255,255,255,.2); text-underline-offset: 2px; }
+.sf-bottom a:hover { color: var(--text); }
+@media (max-width: 1100px) and (min-width: 801px) {
+  .sf-grid { grid-template-columns: repeat(3, 1fr); }
+  .sf-about { grid-column: 1 / -1; }
+}
+@media (max-width: 800px) {
+  .site-foot { margin-top: 28px; padding-top: 18px; }
+  .sf-grid { grid-template-columns: 1fr 1fr; gap: 20px 16px; }
+  .sf-about { grid-column: 1 / -1; }
+  .sf-data { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; gap: 4px 12px; }
+  .sf-data h4 { flex-basis: 100%; }
+  .sf-bottom { flex-direction: column; padding-bottom: 64px; }
+}
