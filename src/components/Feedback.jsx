@@ -35,7 +35,7 @@ async function shrink(file) {
   } finally { URL.revokeObjectURL(url); }
 }
 
-function FeedbackModal({ onClose }) {
+export function FeedbackModal({ onClose }) {
   const [type, setType] = useState('bug');
   const [text, setText] = useState('');
   const [contact, setContact] = useState('');

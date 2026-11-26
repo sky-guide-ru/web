@@ -906,7 +906,9 @@ a.acct.acct-login:hover { background: rgba(124,92,255,.16); border-color: rgba(1
 
 /* Подвал страницы (components/SiteFooter.jsx): о проекте, колонки ссылок, строка © и оговорка */
 .site-foot { text-align: left; margin-top: 40px; padding: 24px 4px 0; border-top: 1px solid var(--card-b); font-size: 13px; line-height: 1.5; }
-.sf-grid { display: grid; grid-template-columns: minmax(220px, 1.6fr) repeat(3, minmax(130px, 1fr)); gap: 24px 32px; }
+/* Плавающие «Опрос» и «Советчик» не закрывают нижнюю строку подвала (там оговорка Hypixel/Mojang) */
+@media (min-width: 801px) { body:has(.chat-fab, .survey-fab, .to-top) .site-foot { padding-bottom: 64px; } }
+.sf-grid { display: grid; grid-template-columns: minmax(220px, 1.6fr) repeat(4, minmax(120px, 1fr)); gap: 24px 32px; }
 .sf-brand { display: flex; align-items: center; gap: 9px; font-size: 15px; }
 .sf-brand img { border-radius: 8px; }
 .sf-about p { margin: 8px 0 0; max-width: 300px; font-size: 12.5px; }
@@ -918,14 +920,14 @@ a.acct.acct-login:hover { background: rgba(124,92,255,.16); border-color: rgba(1
 .sf-bottom a { color: inherit; text-decoration: underline; text-decoration-color: rgba(255,255,255,.2); text-underline-offset: 2px; }
 .sf-bottom a:hover { color: var(--text); }
 @media (max-width: 1100px) and (min-width: 801px) {
-  .sf-grid { grid-template-columns: repeat(3, 1fr); }
+  .sf-grid { grid-template-columns: repeat(4, 1fr); }
   .sf-about { grid-column: 1 / -1; }
 }
 @media (max-width: 800px) {
   .site-foot { margin-top: 28px; padding-top: 18px; }
   .sf-grid { grid-template-columns: 1fr 1fr; gap: 20px 16px; }
   .sf-about { grid-column: 1 / -1; }
-  .sf-data { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; gap: 4px 12px; }
-  .sf-data h4 { flex-basis: 100%; }
+  .sf-data, .sf-contact { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; gap: 4px 12px; }
+  .sf-data h4, .sf-contact h4 { flex-basis: 100%; }
   .sf-bottom { flex-direction: column; padding-bottom: 64px; }
 }
