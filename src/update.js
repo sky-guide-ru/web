@@ -42,7 +42,10 @@ export function onBuild(build) {
   setTimeout(tryFetch, 1000 + Math.random() * 4000);
 }
 
+let reloading = false; // вкладка уже перезагружается — куски дальше не рисуем
+
 function reloadNow(keep) {
+  reloading = true;
   if (keep) savePlace();
   try { sessionStorage.setItem(UPDATED, String(Date.now())); } catch { /* приватный режим */ }
   location.reload();
@@ -80,7 +83,8 @@ function mayReload() {
     return ok;
   } catch { return false; } // sessionStorage недоступен — не рискуем циклом
 }
-export const chunk = load => () => load().catch(e => {
+// Если сбой поймал слушатель vite:preloadError ниже, import() вернёт undefined — ждём перезагрузки, а не роняем страницу
+export const chunk = load => () => load().then(m => (m === undefined && reloading ? new Promise(() => {}) : m), e => {
   const again = mayReload();
   if (again) { reloadNow(true); return new Promise(() => {}); }
   throw e;
