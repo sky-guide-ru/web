@@ -19,7 +19,7 @@ import { reportError } from './telemetry.js';
 // Обёртка .nav-ico тогда показывает запасной значок из data-fb.
 document.addEventListener('error', e => {
   const img = e.target;
-  // Аватар в подвале меню (mc-heads.net недоступен): просто убираем, имя рядом и так видно
+  // Аватар в подвале меню (сервер не отдал голову): просто убираем, имя рядом и так видно
   if (img?.tagName === 'IMG' && img.closest?.('.acct')) { img.style.display = 'none'; return; }
   if (img?.tagName !== 'IMG' || !/\/api\/(texture|img|skin)\//.test(img.src)) return;
   img.classList.add('tex-broken');
