@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>SkyBlock трекер на русском: профиль, прогрессия, заработок</title>
+    <meta name="description" content="Трекер Hypixel SkyBlock на русском: введи ник и получи план прогрессии, снаряжение, аксессуары, питомцев, гайды и способы заработка по живым ценам Bazaar и аукциона." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SkyBlock трекер на русском" />
+    <meta property="og:description" content="Введи ник Minecraft и узнай, что делать дальше в Hypixel SkyBlock: план, снаряжение, заработок, гайды." />
+    <meta property="og:locale" content="ru_RU" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- Страховка от белого экрана: если файл сайта не пришёл (сервер перезапускается, ошибка 502) или загрузка висит,
+         показываем понятное сообщение, сами пробуем ещё раз (3 раза: через 3, 8 и 20 с) и открываем текст для поисковиков.
+         Успешный запуск (start.jsx) вызывает __sbBooted. -->
+    <script>
+      (function () {
+        var en = /^\/en(\/|$)/.test(location.pathname), done = false, box = null, K = 'sb-boot-retry';
+        var T = function (ru, e) { return en ? e : ru; };
+        function show(msg, wait) {
+          if (!box) {
+            box = document.createElement('div');
+            box.setAttribute('role', 'alert');
+            box.style.cssText = 'position:fixed;left:50%;top:24px;transform:translateX(-50%);z-index:99999;max-width:min(520px,calc(100vw - 32px));padding:14px 18px;border-radius:12px;background:#1d1d29;color:#e8e8f0;border:1px solid #3a3a52;box-shadow:0 8px 30px rgba(0,0,0,.4);font:15px/1.45 system-ui,sans-serif;text-align:center';
+            (document.body || document.documentElement).appendChild(box);
+          }
+          box.innerHTML = '';
+          var p = document.createElement('div'); p.textContent = msg; box.appendChild(p);
+          var b = document.createElement('button');
+          b.textContent = wait ? T('Обновить сейчас', 'Reload now') + ' (' + wait + ')' : T('Обновить страницу', 'Reload page');
+          b.style.cssText = 'margin-top:10px;padding:6px 14px;border-radius:8px;border:0;background:#6c5ce7;color:#fff;font:inherit;cursor:pointer';
+          b.onclick = function () { location.reload(); };
+          box.appendChild(b);
+          return b;
+        }
+        window.__sbBooted = function () {
+          done = true;
+          try { sessionStorage.removeItem(K); } catch (e) { /* */ }
+          if (box) { box.remove(); box = null; }
+        };
+        window.__sbBootFail = function () {
+          if (done) return;
+          done = true;
+          document.documentElement.classList.remove('js'); // хотя бы текст раздела для поисковиков, если он есть
+          var n = 3;
+          try { n = +sessionStorage.getItem(K) || 0; sessionStorage.setItem(K, n + 1); } catch (e) { /* */ }
+          var msg = T('Сайт не загрузился: сервер обновляется или перезапускается.', 'The site did not load: the server is updating or restarting.');
+          if (n >= 3) { show(msg + ' ' + T('Попробуйте обновить страницу через минуту.', 'Try reloading the page in a minute.')); return; }
+          var left = [3, 8, 20][n], b = show(msg + ' ' + T('Повтор через несколько секунд.', 'Retrying in a few seconds.'), left);
+          var t = setInterval(function () {
+            if (--left <= 0) { clearInterval(t); location.reload(); return; }
+            b.textContent = T('Обновить сейчас', 'Reload now') + ' (' + left + ')';
+          }, 1000);
+        };
+        // Не пришёл свой файл сборки (скрипт, его заранее подгружаемая часть или стили). Чужие скрипты (счётчик, реклама) не в счёт
+        addEventListener('error', function (e) {
+          var t = e.target, u = t && (t.src || t.href) || '';
+          if (!done && (t.tagName === 'SCRIPT' || t.tagName === 'LINK') && u.indexOf(location.origin + '/assets/') === 0) window.__sbBootFail();
+        }, true);
+        setTimeout(function () {
+          if (!done) show(T('Сайт загружается дольше обычного.', 'The site is taking longer than usual to load.'));
+        }, 25000);
+      })();
+    </script>
+    <!-- Облегчённый режим (client/src/lite.js): решаем до первой отрисовки, чтобы на телефоне не запускать анимации зря -->
+    <script>
+      (function () {
+        var on = false;
+        try {
+          var p = localStorage.getItem('sb-lite'), n = navigator, c = n.connection || {}, mm = function (q) { return !!(window.matchMedia && matchMedia(q).matches); };
+          on = p === 'on' ? true : p === 'off' ? false
+            : mm('(prefers-reduced-motion: reduce)') || !!c.saveData || /(^|-)2g$|^3g$/.test(c.effectiveType || '')
+              || Date.now() - Number(localStorage.getItem('sb-lite-slow')) < 2592e5 /* недавно заметили медленную отрисовку, 3 дня */
+              || (n.deviceMemory && n.deviceMemory <= 2) || (n.hardwareConcurrency && n.hardwareConcurrency <= 2)
+              || (mm('(pointer: coarse)') && mm('(max-width: 900px)'));
+        } catch (e) { /* без localStorage — обычный режим */ }
+        if (on) document.documentElement.classList.add('lite');
+        document.documentElement.classList.add('js'); // готовый текст для поисковиков (.seo-pre) не показываем: сайт сам нарисует раздел
+      })();
+    </script>
+    <style>html.js .seo-pre{display:none}.seo-pre{max-width:860px;margin:0 auto;padding:16px;font:16px/1.5 system-ui,sans-serif;color:#e8e8f0;background:#14141c}.seo-pre a{color:#9cf}.seo-pre table{border-collapse:collapse}.seo-pre td,.seo-pre th{border:1px solid #444;padding:2px 6px}</style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
