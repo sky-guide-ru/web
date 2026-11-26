@@ -909,15 +909,11 @@ a.acct.acct-login:hover { background: rgba(124,92,255,.16); border-color: rgba(1
 .sf-grid { display: grid; grid-template-columns: minmax(220px, 1.6fr) repeat(3, minmax(130px, 1fr)); gap: 24px 32px; }
 .sf-brand { display: flex; align-items: center; gap: 9px; font-size: 15px; }
 .sf-brand img { border-radius: 8px; }
-.sf-about p { margin: 8px 0 12px; max-width: 300px; font-size: 12.5px; }
-.sf-social { display: flex; gap: 8px; }
-.sf-social a { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; color: var(--muted); background: rgba(255,255,255,.04); border: 1px solid var(--card-b); }
-.sf-social a:hover { color: var(--text); border-color: rgba(255,255,255,.18); }
+.sf-about p { margin: 8px 0 0; max-width: 300px; font-size: 12.5px; }
 .sf-col { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
 .sf-col h4 { margin: 0 0 4px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text); opacity: .7; }
 .sf-col a, .sf-col span, .sf-col .linklike { color: var(--muted); text-decoration: none; font-size: 12.5px; }
 .sf-col a:hover, .sf-col .linklike:hover { color: var(--text); }
-.sf-col span { opacity: .75; cursor: default; }
 .sf-bottom { display: flex; justify-content: space-between; gap: 6px 24px; flex-wrap: wrap; margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--card-b); font-size: 11px; }
 .sf-bottom a { color: inherit; text-decoration: underline; text-decoration-color: rgba(255,255,255,.2); text-underline-offset: 2px; }
 .sf-bottom a:hover { color: var(--text); }
