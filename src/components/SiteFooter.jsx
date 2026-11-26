@@ -1,5 +1,8 @@
 import { EN } from '../i18n.js';
-import { needsConsent, reopenConsent } from '../ads.js';
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
+import { needsConsent, reopenConsent, pub } from '../ads.js';
+import { FeedbackModal } from './Feedback.jsx';
 
 /* global __BUILD__ */
 const BUILD = typeof __BUILD__ !== 'undefined' ? __BUILD__ : { v: '', date: '', sha: '' };
@@ -24,6 +27,7 @@ const fmtDate = iso => {
  * Здесь же правовые ссылки и оговорка Mojang/Hypixel — в боковой панели их больше нет, чтобы не дублировать.
  */
 export default function SiteFooter() {
+  const [fb, setFb] = useState(false);
   return (
     <footer className="site-foot">
       <div className="sf-grid">
@@ -46,6 +50,11 @@ export default function SiteFooter() {
           <a href={`${L}/terms`}>Условия</a>
           {needsConsent() && <button type="button" className="linklike" onClick={reopenConsent}>Cookie</button>}
         </nav>
+        <nav className="sf-col sf-contact" aria-label="Связь">
+          <h4>Связь</h4>
+          {pub.contactEmail && <a href={`mailto:${pub.contactEmail}`}>{pub.contactEmail}</a>}
+          <button type="button" className="linklike" onClick={() => setFb(true)}>Сообщить об ошибке</button>
+        </nav>
         <div className="sf-col sf-data">
           <h4>Данные</h4>
           {SOURCES.map(([name, href]) => <a key={name} href={href} {...ext}>{name}</a>)}
@@ -60,6 +69,7 @@ export default function SiteFooter() {
         </span>
         <span>Неофициальный фан-сайт, не связан с Hypixel, Mojang и Microsoft и не одобрен ими.</span>
       </div>
+      {fb && createPortal(<FeedbackModal onClose={() => setFb(false)} />, document.body)}
     </footer>
   );
 }
