@@ -432,7 +432,14 @@ img.tex-broken { visibility: hidden; }
   .topbar { flex-wrap: nowrap; gap: 8px; margin-bottom: 8px; align-items: center; }
   .topbar .who-btn .avatar { width: 32px; height: 32px; }
   .topbar .who-btn .muted.small { display: none; }
-  .topbar .gsearch { order: 0; flex: 1 1 160px; min-width: 0; }
+  /* длинный ник и профиль сжимаются с «…», а не выталкивают «Обновить» за край экрана */
+  .topbar .who-wrap { min-width: 0; flex: 0 1 auto; }
+  .topbar .who-btn { min-width: 0; }
+  .topbar .who-btn > div { min-width: 0; }
+  .topbar .who-name { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+  .topbar .who-name > span { margin-left: 6px; }
+  /* сначала сжимается поиск (до 44px), ник — только когда поиск уже узкий */
+  .topbar .gsearch { order: 0; flex: 1 1000 160px; min-width: 44px; }
   .topbar .gsearch-input { padding-top: 7px; padding-bottom: 7px; }
   .topbar-right { width: auto; flex: none; margin-left: 0; gap: 6px; }
   .topbar-right .demo-badge { display: none; }
@@ -443,6 +450,8 @@ img.tex-broken { visibility: hidden; }
 @media (max-height: 500px) and (orientation: landscape) and (max-width: 700px) {
   .topbar .live { font-size: 0; gap: 0; padding: 9px; max-width: none; }
   .topbar .gsearch { flex-basis: 120px; }
+  /* кооп-соседи — только в списке игроков, как на узком телефоне: иначе шапка шире экрана */
+  .coop-quick { display: none; }
 }
 
 /* ---------- Полировка: единые мелочи для всего сайта ---------- */
