@@ -31,7 +31,7 @@ export default function Landing() {
       <section className="card landing-hero">
         {/* значок SkyBlock Menu в паке текстур — три точки, похожие на «загрузку»: ставим знак сайта */}
         <img src="/favicon.svg" width={56} height={56} alt="" className="landing-mark" />
-        <h1>SkyBlock трекер на русском</h1>
+        <h1>Sky Guide — гид по SkyBlock на русском</h1>
         <p className="muted">Введи ник в Minecraft, и сайт покажет твой профиль Hypixel SkyBlock, план прогрессии, снаряжение и способы заработка. Без регистрации и паролей.</p>
         <form className="landing-form" onSubmit={open}>
           <input className="input" value={nick} onChange={e => setNick(e.target.value)} placeholder="Ник, например Steve" maxLength={16} autoFocus aria-label="Ник Minecraft" />
