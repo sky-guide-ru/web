@@ -19,3 +19,13 @@ jobs:
         working-directory: web
       - run: npm run build
         working-directory: web
+  docker:
+    # Образ сайта собирается и кладёт сборку в общий том (так его запускает deploy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t sky-guide-web .
+      - run: |
+          mkdir -p out
+          docker run --rm -v "$PWD/out:/out" sky-guide-web true
+          test -s out/index.html && test -s out/og.png && ls out/assets | grep -q '^index-.*\.js$'

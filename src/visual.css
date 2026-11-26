@@ -468,7 +468,7 @@ img.tex-broken { visibility: hidden; }
 .btn.ghost:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.16); box-shadow: none; }
 
 /* Пиксельные текстуры и головы не размываются при увеличении */
-img[src*="/api/texture/"], img[src*="mc-heads.net"], .avatar { image-rendering: pixelated; }
+img[src*="/api/texture/"], img.gsearch-head, .avatar { image-rendering: pixelated; }
 
 /* Подпись под предметом: длинное слово переносится, а не обрезается посередине («Recombobulat») */
 .drop-name { overflow-wrap: anywhere; }
