@@ -1621,3 +1621,7 @@ html.has-news-pop .survey-fab { bottom: calc(18px + var(--news-pop-h, 160px) + 1
 .var-table th, .var-table td { text-align: left; padding: 4px 8px; border-bottom: 1px solid rgba(255,255,255,.06); }
 .var-table th { font-weight: 600; color: var(--muted, #8b90b0); font-size: 12px; }
 .var-table tr.on td { background: rgba(168,85,247,.18); font-weight: 700; }
+/* «Мои аксессуары»: фильтры по пробелам (без рекомба, не макс. tier…) */
+.acc-gaps { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.acc-gaps .chip:disabled { opacity: .4; cursor: default; }
+.acc-gap-hint { margin-bottom: 10px; }
