@@ -114,7 +114,7 @@ export default function Overview({ state }) {
         </div>
       </Card>
 
-      <Card title="Живая лента" className="span-4 feed-card">
+      <Card title="Живая лента" className="span-4 feed-card" news="feed">
         {state.feed.length ? (
           <ul className="feed">
             {state.feed.slice(0, 30).map((e, i) => <li key={i} className={`feed-${e.kind}`}><span>{e.text}</span><time>{ago(e.t)}</time></li>)}
