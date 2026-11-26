@@ -1762,3 +1762,23 @@ tr.grp td { background: rgba(255,255,255,.04); font-weight: 700; font-size: 12px
   .pl-row > :first-child { grid-row: 1 / 3; }
   .pl-res b { font-size: 15px; }
 }
+
+/* «Мои лоты» (MyAuctions.jsx): свои лоты Auction House и ставки */
+.myah-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.myah-chip { padding: 3px 10px; border-radius: var(--r-pill); font-size: 12px; font-weight: 600; background: rgba(255,255,255,.06); border: 1px solid var(--card-b); }
+.myah-chip.ok { color: var(--green); border-color: rgba(74,222,128,.35); }
+.myah-chip.warn { color: #fbbf24; border-color: rgba(251,191,36,.35); }
+.myah-chip.mute { color: var(--muted); }
+.myah-list { list-style: none; margin: 0 0 10px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 4px 12px; }
+.myah-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: var(--r-md); background: rgba(255,255,255,.03); border-left: 3px solid transparent; min-width: 0; }
+.myah-row.ok { border-left-color: rgba(74,222,128,.6); }
+.myah-row.warn { border-left-color: rgba(251,191,36,.7); }
+.myah-main { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.myah-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.myah-state { font-size: 12px; color: var(--muted); }
+.myah-state.ok { color: var(--green); }
+.myah-state.warn { color: #fbbf24; }
+.myah-side { display: flex; flex-direction: column; align-items: flex-end; white-space: nowrap; }
+.myah-note { margin: 6px 0 0; }
+@media (max-width: 560px) { .myah-list { grid-template-columns: 1fr; } }
+.myah-noico { width: 28px; height: 28px; flex: none; }
