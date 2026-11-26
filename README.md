@@ -45,8 +45,10 @@
 ## Код
 
 ```
-npm install && npm run dev   # http://localhost:5173, /api — на сервер :3000 (см. CONTRIBUTING.md)
-npm run build               # dist/
+npm install && npm run dev               # http://localhost:5173, /api — на сервер :3000 (см. CONTRIBUTING.md)
+SKY_API=https://sky-guide.ru npm run dev  # то же, но данные с живого сайта: сервер у себя поднимать не нужно
+npm run build                           # dist/
+docker build -t sky-guide-web .         # образ: только собранные файлы (как его запускают — в репо deploy)
 ```
 
 Страницы — `src/pages/`, список разделов — `PAGES` в `src/App.jsx`, нижнее меню — `src/components/BottomNav.jsx`, текст с подсказками — `src/guides/Rich.jsx`.

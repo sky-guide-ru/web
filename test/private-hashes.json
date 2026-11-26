@@ -1,0 +1,10 @@
+{
+  "about": "sha256 от слов в нижнем регистре, которых не должно быть в репо (ники, почта). Добавить: node scripts/private-hash.mjs слово",
+  "hashes": [
+    "d96a34ac0c17043c781f84cac4de9947874fe9cebbec8e50f6069e8fe37d6252",
+    "44a6b5e2877a3406ee4119eb42f69fea8a0a8b924b28a8bb5a4cd6947106021a",
+    "b65b02a9b264fb63059148963fbadaa8558b72c85d251c55127bba429ff329dd",
+    "5c62016e1756ddf5c995ee2a261f51286d3646bec72e8228ef5fe4fbb7082da8",
+    "6b8cfa6917451c6f7429c38969089457629252e38adcf770dc6048ef1b17ca54"
+  ]
+}
