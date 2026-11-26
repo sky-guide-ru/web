@@ -12,8 +12,6 @@ const fmtDate = iso => {
 /** Источники данных — коротко; ссылки и лицензии подробно на /legal (браузер не ходит на чужие сайты сам) */
 const SOURCES = ['Hypixel API', 'NotEnoughUpdates', 'Hypixel SkyBlock Wiki', 'SkyCofl'];
 
-const REPOS = ['core', 'api', 'web', 'deploy'];
-
 const ext = { target: '_blank', rel: 'noopener noreferrer' };
 
 /**
@@ -43,8 +41,7 @@ export default function SiteFooter() {
         Данные: {SOURCES.join(' · ')} · <a href={`${EN ? '/en' : ''}/legal`}>источники и лицензии</a>
       </p>
       <p className="sf-line sf-meta muted">
-        Открытый код: {REPOS.map((r, i) => <span key={r}>{i > 0 && ' · '}<a href={`https://github.com/sky-guide-ru/${r}`} {...ext}>{r}</a></span>)}
-        {' · '}<a href="https://www.gnu.org/licenses/agpl-3.0.html" {...ext}>AGPL-3.0</a>
+        Открытый код, лицензия <a href="https://www.gnu.org/licenses/agpl-3.0.html" {...ext}>AGPL-3.0</a>
         {BUILD.v && <> · версия {BUILD.v}</>}
         {BUILD.date && <> · сборка {fmtDate(BUILD.date)}</>}
         {BUILD.sha && <> · <a href={`https://github.com/sky-guide-ru/web/commit/${BUILD.sha}`} {...ext}><code>{BUILD.sha.slice(0, 7)}</code></a></>}
