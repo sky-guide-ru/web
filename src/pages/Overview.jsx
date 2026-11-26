@@ -78,7 +78,7 @@ export default function Overview({ state }) {
             <Stat href="#/accessories" title="Как поднять — на «Аксессуарах»" label="Magical Power" value={num(m.magicalPower)} sub={m.selectedPower ? `сила: ${prettyId(m.selectedPower)}` : 'сила не выбрана'} accent="#c879ff" icon={<img src="/api/texture/ender_eye" alt="" />} />
             <Stat href="#/skills" title="Классы и этажи — на «Прогрессе»" label="Catacombs" value={m.dungeons.catacombs.level} sub={`классы ~${m.dungeons.classAverage.toFixed(1).replace('.', DEC)}`} accent="#ff5e5e" icon={<img src="/api/texture/bone" alt="" />} />
             <Stat href="#/skills" title="Все скиллы — на «Прогрессе»" label="Skill Average" value={m.skillAverage.toFixed(1).replace('.', DEC)} sub="9 основных скиллов" accent="#4ade80" icon={<img src="/api/texture/experience_bottle" alt="" />} />
-            <Stat href="#/money" title="Как заработать — на «Заработке»" label="Bank" value={coins(m.bank)} sub={`кошелёк ${coins(m.purse)}`} accent="#60a5fa" icon={<img src="/api/texture/gold_block" alt="" />} />
+            <Stat href="#/money" title={m.coopMembers > 1 ? 'Общий Bank кооп-острова. Как заработать — на «Заработке»' : 'Как заработать — на «Заработке»'} label={m.coopMembers > 1 ? 'Bank коопа' : 'Bank'} value={coins(m.bank)} sub={m.personalBank >= 1000 ? `кошелёк ${coins(m.purse)} · личный ${coins(m.personalBank)}` : `кошелёк ${coins(m.purse)}`} accent="#60a5fa" icon={<img src="/api/texture/gold_block" alt="" />} />
           </div>
         </div>
       </div>
