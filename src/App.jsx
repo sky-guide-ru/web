@@ -15,6 +15,7 @@ import { GlobalSearch } from './components/GlobalSearch.jsx';
 import Landing from './components/Landing.jsx';
 import Status, { LoadDot, HypixelBanner } from './pages/Status.jsx';
 import { AdSlot, DonateButton, Disclaimer, CookieBanner } from './components/Ads.jsx';
+import SiteFooter from './components/SiteFooter.jsx';
 import { installMetrikaHits } from './ads.js';
 import { FeedbackButton } from './components/Feedback.jsx';
 import LiteToggle from './components/LiteToggle.jsx';
@@ -384,8 +385,8 @@ export default function App() {
               </Suspense>
             </div>
             {!landing && <AdSlot where="bottom" page={P.id + viewKey(view)} />}
-            {/* На телефоне подвал сайдбара скрыт: аккаунт и настройки — в листе «Ещё», оговорка и правовые ссылки — внизу страницы */}
-            <footer className="mobile-foot"><Disclaimer /></footer>
+            {/* Подвал: о проекте и источники. На телефоне подвал сайдбара скрыт, поэтому оговорка и правовые ссылки — тоже здесь */}
+            <SiteFooter />
           </main>
         </div>
         <BottomNav pages={PAGES} current={P.id} badges={{ news: newsUnread }} prefetch={id => LOAD[id]?.().catch(() => {})}>
