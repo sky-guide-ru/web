@@ -177,7 +177,7 @@ export function GlobalSearch({ onOpen }) {
             }
             if (e.kind === 'player') return (
               <div {...props}>
-                <img className="gsearch-head" src={`https://mc-heads.net/avatar/${encodeURIComponent(nick)}/56`} width={28} height={28} alt="" onError={ev => { ev.currentTarget.style.visibility = 'hidden'; }} />
+                <img className="gsearch-head" src={`/api/head/${encodeURIComponent(nick)}?size=64`} width={28} height={28} alt="" onError={ev => { ev.currentTarget.style.visibility = 'hidden'; }} />
                 <div className="grow"><div>Профиль игрока <b>{nick}</b></div><div className="muted tiny">{me.guest ? 'Открыть его прогресс по нику' : 'Посмотреть его прогресс, как свой'}</div></div>
               </div>
             );
