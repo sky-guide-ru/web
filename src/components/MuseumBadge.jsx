@@ -14,7 +14,7 @@ export function MuseumBadge({ id, onOpen }) {
     if (mu.status === 'special-donated') { tone = 'good'; text = <>🏛 Особый предмет, уже выставлен в музее ✔</>; }
     else text = <>🏛 Особый предмет (Special Items): можно выставить в музее, XP не даёт.</>;
   } else if (mu.status === 'donated') { tone = 'good'; text = <>🏛 В музее ✔ <span className="muted">({where})</span></>; }
-  else if (mu.status === 'borrowed') { tone = 'good'; text = <>🏛 В музее ✔, сейчас одолжен обратно: XP засчитан <span className="muted">({where})</span></>; }
+  else if (mu.status === 'borrowed') { tone = 'good'; text = <>🏛 В музее ✔, сейчас одолжен обратно: XP засчитан <span className="muted">({where})</span>. Он стал Co-op Soulbound: продать или передать его нельзя.</>; }
   else if (mu.status === 'counted') { tone = 'good'; text = <>🏛 Засчитан в музее через <a className="link" onClick={() => onOpen?.(mu.via)}>{nm(mu.via)}</a> ✔ <span className="muted">(высший тир засчитывает низший)</span></>; }
   else if (mu.status === 'missing' && mu.owned) { tone = 'warn'; text = <>🏛 Можно пожертвовать: +{mu.gain} SkyBlock XP. Он у тебя есть, но ещё не в музее. После пожертвования предмет станет Co-op Soulbound, но его можно забрать обратно.</>; }
   else if (mu.status === 'missing') { text = <>🏛 Нет в музее: пожертвуешь — +{mu.gain} SkyBlock XP <span className="muted">({where})</span></>; }

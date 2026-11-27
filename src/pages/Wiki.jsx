@@ -119,7 +119,7 @@ export function ItemView({ id, uuid, onOpen }) {
       </div>
       {data.variable && <VariableBonus v={data.variable} bonus={copy?.bonus} />}
       {data.ru?.descriptionRu && <p className="desc-ru"><Rich text={data.ru.descriptionRu} /></p>}
-      {data.props && <ItemProps p={data.props} />}
+      {data.props && <ItemProps p={data.props} copy={copy} />}
       {/^ABIPHONE_/.test(data.id) && <PhoneContacts />}
       <div className="item-view-body">
         <div>
@@ -130,7 +130,7 @@ export function ItemView({ id, uuid, onOpen }) {
           {copy && <>
             <h4 className="sub-h">Как улучшить до максимума</h4>
             <UpgradePlan copies={copies} sel={copy.uuid} setSel={setSel} open={open} />
-            {copy.family && <AccFamily f={copy.family} id={data.id} open={open} />}
+            {copy.family && <AccFamily f={copy.family} id={data.id} open={open} sellable={copy.sellable !== false} />}
           </>}
           <ObtainSection collapsed={!!copy}>
           <h4 className="sub-h">Как получить — пошагово</h4>
@@ -158,7 +158,7 @@ export function ItemView({ id, uuid, onOpen }) {
 }
 
 // Свойства предмета, как «Item Properties» на вики: продажа NPC, передача, аукцион, музей
-function ItemProps({ p }) {
+function ItemProps({ p, copy }) {
   const cell = (ok, label, note) => <div className={`ip-cell ${ok ? 'yes' : 'no'}`}><div className="ip-label"><Rich text={label} /></div><div className="ip-val">{ok ? '✓ да' : '✕ нет'}{note ? <span className="muted tiny"> · {note}</span> : null}</div></div>;
   return (
     <div className="item-props">
@@ -166,6 +166,7 @@ function ItemProps({ p }) {
       {cell(p.tradeable, 'Обмен с игроками', p.soulbound ? (p.soulbound === 'COOP' ? 'Co-op Soulbound' : 'Soulbound') : null)}
       {cell(p.auctionable, 'Auction House', p.bazaar ? 'торгуется на Bazaar' : null)}
       {cell(p.museum, 'Museum')}
+      {copy?.sellable === false && <div className="ip-note small muted">Твой экземпляр {copy.museum ? 'сдан в Museum' : 'Soulbound'}: продать или передать его нельзя.</div>}
     </div>
   );
 }
@@ -212,7 +213,7 @@ function VariableBonus({ v, bonus }) {
 }
 
 // Линейка аксессуара: младшие и старшие версии; из одной линейки Magical Power даёт только старший в сумке
-function AccFamily({ f, id, open }) {
+function AccFamily({ f, id, open, sellable }) {
   const chain = [...f.lower.map(x => x.id), id, ...f.higher.map(x => x.id)];
   const inBag = new Set([...f.lower, ...f.higher].filter(x => x.inBag).map(x => x.id));
   return (
@@ -222,7 +223,7 @@ function AccFamily({ f, id, open }) {
         {chain.map((x, i) => <span key={x} className={`acc-fam-step${x === id ? ' me' : ''}`}>{i > 0 && <span className="muted"> → </span>}
           <ItemIcon id={x} size={26} onClick={x === id ? undefined : () => open(x)} title={x} />{inBag.has(x) && <span className="tiny green" title="Лежит в Accessory Bag">✓</span>}</span>)}
       </div>
-      {!f.active && f.coveredBy && <div className="red">Этот аксессуар не даёт Magical Power: в сумке есть старшая версия. Его можно продать.</div>}
+      {!f.active && f.coveredBy && <div className="red">Этот аксессуар не даёт Magical Power: в сумке есть старшая версия.{sellable ? ' Его можно продать.' : ''}</div>}
       {f.active && f.duplicates.length > 0 && <div className="gold">В сумке лежит и младшая версия ({f.duplicates.length} шт.) — она не даёт Magical Power, её можно продать.</div>}
     </div>
   );
