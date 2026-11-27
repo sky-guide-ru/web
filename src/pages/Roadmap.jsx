@@ -68,7 +68,7 @@ function CartAdd({ onAdd }) {
   return (
     <div className="cart-add">
       <div className="gsearch">
-        <input className="gsearch-input" value={q} onChange={e => setQ(e.target.value)} placeholder="Добавить свою вещь: название предмета" aria-label="Добавить вещь в план покупок"
+        <input className="gsearch-input" value={q} onChange={e => setQ(e.target.value)} placeholder="+ Своя вещь" aria-label="Добавить вещь в план покупок"
           onKeyDown={e => { if (e.key === 'Enter' && res[0]) pick(res[0]); if (e.key === 'Escape') setQ(''); }} />
         {res.length > 0 && (
           <div className="gsearch-pop" role="listbox">
@@ -82,7 +82,7 @@ function CartAdd({ onAdd }) {
           </div>
         )}
       </div>
-      <label className="cart-qty small muted">шт. <input type="number" min={1} max={100000} value={qty} onChange={e => setQty(Math.max(1, Number(e.target.value) || 1))} /></label>
+      <input className="cart-qty" type="number" min={1} max={100000} value={qty} title="Сколько штук" aria-label="Сколько штук" onChange={e => setQty(Math.max(1, Number(e.target.value) || 1))} />
     </div>
   );
 }
@@ -108,6 +108,16 @@ export function fitBudget(rows, budget) {
   return { take, left, spent: budget - left };
 }
 
+// Иконка шага плана покупок: последняя вещь шага — обычно то, к чему идёт улучшение («A → B» — это B)
+// Нет вещей у шага — значок его категории (ключ категории не переводится)
+const CAT_ICON = {
+  'Аксессуары и Magical Power': 'HEGEMONY_ARTIFACT', 'Питомцы': 'GOLDEN_DRAGON;4', 'Снаряжение': 'ASPECT_OF_THE_DRAGON',
+  'Mining': 'DIAMOND_PICKAXE', 'Fishing': 'FISHING_ROD', 'Garden': 'WHEAT', 'Slayers': 'REAPER_SWORD', 'Dungeons': 'HYPERION',
+  'Crimson Isle и Kuudra': 'BURNING_CRIMSON_CHESTPLATE', 'Миньоны': 'COBBLESTONE', 'Деньги': 'GOLD_INGOT',
+};
+const stepIcon = st => (st?.items?.length ? st.items[st.items.length - 1]
+  : /^museum/.test(st?.id || '') ? 'MUSEUM_PORTAL' : CAT_ICON[st && catKey(st)] || null);
+
 function PurchasePlan({ state, onStep }) {
   const { data, mode, change, error, loading } = usePurchaseCart(state);
   const { openItem } = useApp();
@@ -117,49 +127,72 @@ function PurchasePlan({ state, onStep }) {
   if (!data && loading) return <div className="muted small"><div className="spinner" />Считаю план покупок…</div>;
   // Сервер не ответил — показываем план как есть, без правок
   const rows = data?.rows || (plan || []).map(p => ({ kind: 'step', ...p }));
-  const budget = parseCoins(budgetText);
+  const liquid = data?.liquid > 0 ? Math.round(data.liquid) : 0;
+  // Пустое поле — считаем от монет, что есть сейчас (кошелёк + банк)
+  const typed = parseCoins(budgetText);
+  const budget = typed || (budgetText ? null : liquid || null);
   const fit = budget ? fitBudget(rows, budget) : null;
+  const total = rows.reduce((s, r) => s + (r.cost || 0), 0);
   const rowKey = p => (p.kind === 'item' ? 'i:' + p.id : p.stepId);
   const inBudget = p => fit?.take.has(rowKey(p));
   // «Что даст»: итог шага плана (payoff), иначе первое предложение объяснения
   const gives = p => { const st = stepById.get(p.stepId); return st?.payoff || (st?.why ? String(st.why).split(/(?<=\.)\s/)[0] : ''); };
   const edit = mode !== 'none' && !!data;
-  const when = p => (p.affordableNow ? <span className="green">хватает уже сейчас</span> : p.hoursOfFarming != null ? `~${Math.ceil(p.hoursOfFarming)} ч лучшего заработка` : 'нужно накопить');
+  const when = p => (inBudget(p) ? <span className="green">хватает</span>
+    : !p.cost ? null
+    : p.hoursOfFarming != null ? <span title="Столько часов лучшего заработка, чтобы накопить до этой строки">~{num(Math.ceil(p.hoursOfFarming))} ч</span>
+    : <span>накопить</span>);
+  const n = fit?.take.size || 0;
   return (
     <div className="cart" data-news="cart">
       {rows.length > 0 && (
-        <div className="cart-budget" data-news="budget">
-          <label className="small">Бюджет: <input className="gsearch-input" value={budgetText} onChange={e => setBudgetText(e.target.value)} placeholder="например, 70m или 1.5b" aria-label="Бюджет в монетах" /></label>
-          {data?.liquid > 0 && <button className="chip tiny" onClick={() => setBudgetText(String(Math.round(data.liquid)))}>сколько есть: {coins(data.liquid)}</button>}
-          {budgetText && <button className="chip tiny" onClick={() => setBudgetText('')}>сбросить</button>}
-          {fit && <span className="small">{fit.take.size ? <>На {coins(budget)}: <b>{fit.take.size}</b> {plural(fit.take.size, 'покупка', 'покупки', 'покупок')} на {coins(fit.spent)}, останется {coins(fit.left)}.</> : <span className="muted">На {coins(budget)} пока ничего не хватает.</span>}</span>}
-          {budgetText && !budget && <span className="small muted">Не понял сумму: напиши число, можно с k, m или b.</span>}
+        <div className="cart-top">
+          <div className="cart-budget" data-news="budget">
+            <div className="cart-budget-row">
+              <label className="cart-budget-in">
+                <span className="muted small">Бюджет</span>
+                <input className="gsearch-input" value={budgetText} onChange={e => setBudgetText(e.target.value)} placeholder={liquid ? coins(liquid) : 'например, 70m'} aria-label="Бюджет в монетах" inputMode="decimal" />
+              </label>
+              {budgetText && <button className="chip tiny" onClick={() => setBudgetText('')}>{liquid ? 'сколько есть' : 'сбросить'}</button>}
+              <span className="small cart-budget-sum">
+                {budgetText && !typed ? <span className="muted">Не понял сумму: число, можно с k, m или b.</span>
+                  : fit ? (n ? <>Хватает на <b>{n}</b> из {rows.length} · останется {coins(fit.left)}</> : <span className="muted">Пока ничего не хватает</span>)
+                  : null}
+              </span>
+            </div>
+            <div className="cart-bar" title={fit ? `${coins(fit.spent)} из ${coins(total)}` : ''}>
+              <div className="cart-bar-fill" style={{ width: `${fit && total ? Math.max(fit.spent ? 1.5 : 0, Math.min(100, fit.spent / total * 100)) : 0}%` }} />
+            </div>
+            <div className="cart-bar-legend tiny muted"><span>{!budgetText && liquid ? 'монеты, что есть сейчас' : ''}</span><span>всё вместе: {coins(total)}</span></div>
+          </div>
+          {edit && <CartAdd onAdd={(id, qty) => change({ add: id, qty })} />}
         </div>
       )}
       {rows.length ? (
-        <table className="table">
-          <thead><tr><th>#</th><th>Что купить</th><th>Что даст</th><th>Цена</th><th>Нарастающим итогом</th><th>Когда</th>{edit && <th />}</tr></thead>
-          <tbody>{rows.map((p, i) => p.kind === 'item' ? (
-            <tr key={'i:' + p.id} className={`clickable-row ${inBudget(p) ? 'in-budget' : ''}`} onClick={() => openItem(p.id)} title="Открыть предмет: цена и где взять">
-              <td>{inBudget(p) ? '✓' : i + 1}</td>
-              <td><span className="cart-item"><ItemIcon id={p.id} size={24} />{p.name}{p.qty > 1 && ` ×${num(p.qty)}`}<span className="cart-own">своё</span>{p.have > 0 && <span className="muted small">есть {num(p.have)}</span>}</span></td>
-              <td className="muted small">—</td>
-              <td>{p.cost ? coins(p.cost) : <span className="muted">нет цены</span>}</td><td>{coins(p.cumulative)}</td><td>{when(p)}</td>
-              {edit && <td><button className="x-btn sm danger" title="Убрать из плана" aria-label="Убрать из плана" onClick={e => { e.stopPropagation(); change({ remove: p.id }); }}>×</button></td>}
-            </tr>
-          ) : (
-            <tr key={p.stepId} className={`clickable-row ${inBudget(p) ? 'in-budget' : ''}`} onClick={() => onStep(p.stepId)} title="Открыть шаг плана: что именно и где взять">
-              <td>{inBudget(p) ? '✓' : i + 1}</td><td><Rich text={p.title} /></td><td className="muted small cart-gives"><Rich text={gives(p)} /></td><td>{coins(p.cost)}</td><td>{coins(p.cumulative)}</td><td>{when(p)}</td>
-              {edit && <td><button className="x-btn sm danger" title="Не покупать: убрать из плана покупок" aria-label="Убрать из плана" onClick={e => { e.stopPropagation(); change({ skip: p.stepId, value: true }); }}>×</button></td>}
-            </tr>
-          ))}</tbody>
-        </table>
+        <ol className="cart-list">{rows.map((p, i) => {
+          const item = p.kind === 'item';
+          const st = item ? null : stepById.get(p.stepId);
+          const icon = item ? p.id : stepIcon(st);
+          const g = item ? '' : gives(p);
+          return (
+            <li key={rowKey(p)} className={`cart-row ${inBudget(p) ? 'in-budget' : ''}`} onClick={() => (item ? openItem(p.id) : onStep(p.stepId))}
+              title={item ? 'Открыть предмет: цена и где взять' : 'Открыть шаг плана: что именно и где взять'}>
+              <span className="cart-n">{inBudget(p) ? '✓' : i + 1}</span>
+              <span className="cart-ico">{icon ? <ItemIcon id={icon} size={32} /> : null}</span>
+              <span className="cart-main">
+                <span className="cart-title">{item ? <>{p.name}{p.qty > 1 && ` ×${num(p.qty)}`} <span className="cart-own">своё</span>{p.have > 0 && <span className="muted small"> · есть {num(p.have)}</span>}</> : <Rich text={p.title} />}</span>
+                {g && <span className="cart-gives muted small"><Rich text={g} /></span>}
+              </span>
+              <span className="cart-price" title={p.cumulative ? `Нарастающим итогом: ${coins(p.cumulative)}` : ''}>
+                <b>{p.cost ? coins(p.cost) : <span className="muted">нет цены</span>}</b>
+                <span className="small muted">{when(p)}</span>
+              </span>
+              {edit ? <button className="x-btn sm danger cart-x" title={item ? 'Убрать из плана' : 'Не покупать: убрать из плана покупок'} aria-label="Убрать из плана"
+                onClick={e => { e.stopPropagation(); change(item ? { remove: p.id } : { skip: p.stepId, value: true }); }}>×</button> : <span />}
+            </li>
+          );
+        })}</ol>
       ) : <Empty>{plan?.length || data?.skipped?.length ? 'В плане покупок пусто.' : 'План покупок появится, когда загрузятся цены Bazaar и аукциона.'}</Empty>}
-      {edit && <CartAdd onAdd={(id, qty) => change({ add: id, qty })} />}
-      <p className="muted small plan-note">
-        Список собирается сам из шагов плана с ценой.{' '}
-        {edit ? <>Ненужное можно убрать, своё — добавить здесь или кнопкой «+ В план покупок» в карточке предмета. Что уже лежит у тебя, вычитается, а купленное уходит само.{mode === 'local' ? ' Правки видно только в этом браузере.' : ''}</> : mode === 'none' ? 'Это чужой план: править его может только сам игрок.' : ''}
-      </p>
       {error && <div className="step-undo small warn" role="alert">{error}</div>}
       {data?.bought?.length > 0 && <div className="small green cart-bought">✔ Куплено: {data.bought.map(b => b.name).join(' · ')}</div>}
       {data?.skipped?.length > 0 && (
@@ -170,6 +203,10 @@ function PurchasePlan({ state, onStep }) {
           ))}</ul>
         </details>
       )}
+      <p className="muted small plan-note">
+        Список собирается из шагов плана с ценой, купленное уходит само.{' '}
+        {edit ? <>Своё можно добавить и из карточки предмета.{mode === 'local' ? ' Правки видно только в этом браузере.' : ''}</> : mode === 'none' ? 'Это чужой план: править его может только сам игрок.' : ''}
+      </p>
     </div>
   );
 }
@@ -216,7 +253,7 @@ export default function Roadmap({ state, sub }) {
   return (
     <div className="grid">
       <Card className="span-12" title="Персональный план прогрессии" right={<Tabs value={view} onChange={setView} tabs={[{ id: 'steps', label: 'Шаги' }, { id: 'map', label: 'Карта прогрессии' }, { id: 'plan', label: 'План покупок' }]} />}>
-        {a?.summary?.headline && <div className="plan-summary">🎯 <Rich text={a.summary.headline} />{a.summary.quickWins ? ` · быстрых побед: ${a.summary.quickWins}` : ''}</div>}
+        {a?.summary?.headline && <div className="plan-summary"><span aria-hidden="true">🎯</span><span><Rich text={a.summary.headline} />{a.summary.quickWins ? ` · быстрых побед: ${a.summary.quickWins}` : ''}</span></div>}
         {view === 'map' && (map || !state.parts?.map ? <ProgressMap map={map} goStep={goStep} /> : <div className="muted small"><div className="spinner" />Загружаю карту…</div>)}
         {view === 'plan' && <PurchasePlan state={state} onStep={goStep} />}
         {view === 'steps' && <div className="chips">
