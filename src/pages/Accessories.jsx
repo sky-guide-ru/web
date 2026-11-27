@@ -236,7 +236,7 @@ export default function Accessories({ state, sub }) {
     { id: 'next', l: 'Дальше', cls: 'c-next keep', sort: a => (a.step ? perMp(a.step) : Infinity), cell: a => {
       const s = nextOf(a);
       if (!a.own) return <>{s.cost ? coins(s.cost) : <span className="muted">цены нет</span>} <span className="gold">+{s.gain}</span></>;
-      if (!a.active) return <span className="muted">не считается, можно продать</span>;
+      if (!a.active) return <span className="muted">{a.sellable === false ? 'не считается, продать нельзя' : 'не считается, можно продать'}</span>;
       if (!s) return <span className="green">✓ готово</span>;
       return <><Bdg k={s.kind} /> {s.kind === 'tier' ? `→ ${s.name} ` : ''}{s.cost ? coins(s.cost) : ''} {s.gain ? <span className="gold">+{s.gain}</span> : <span className="green">+1 Tuning</span>}</>;
     } },
@@ -274,7 +274,7 @@ export default function Accessories({ state, sub }) {
         {a.req && !a.own && <div className="acc-req">Крафт после: {a.req}</div>}
         <div className="acc-cf">{s ? <><Bdg k={s.kind} label={s.kind === 'buy' ? 'Добавить' : null} /><span className="acc-ft">{s.kind === 'tier' ? s.name : s.kind === 'buy' ? HOW_L[a.how] : s.kind === 'recomb' ? 'Recombobulator' : ''}</span>
           <span className="acc-fp">{s.cost ? coins(s.cost) : ''}</span>{s.gain ? <span className="gold">+{s.gain} MP</span> : <span className="green">+1 Tuning</span>}</>
-          : a.own && a.active ? <span className="green">✓ Всё сделано</span> : <span className="muted">можно продать</span>}</div>
+          : a.own && a.active ? <span className="green">✓ Всё сделано</span> : <span className="muted">{a.sellable === false ? 'продать нельзя' : 'можно продать'}</span>}</div>
       </div>);
   }
 
