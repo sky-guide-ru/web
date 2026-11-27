@@ -5,6 +5,7 @@ import { LOCALE } from '../i18n.js';
 import { useEffect, useState } from 'react';
 import { Card, Empty } from '../components/ui.jsx';
 import { coins, num, ago, setView, useHashTab, plural } from '../api.js';
+import GuildTag from '../components/GuildTag.jsx';
 
 // Без заголовков открытого профиля: рейтинг общий и не зависит от того, чей профиль сейчас открыт
 async function lb(path, opts) {
@@ -111,6 +112,7 @@ export default function Leaderboard({ sub }) {
             <div>
               {r.rank?.id && r.rank.id !== 'NONE' && <span className={`rank-chip rank-${r.rank.id.toLowerCase()}`}>{r.rank.label}</span>}
               <b>{r.name}</b>
+              {r.guild && <GuildTag tag={r.guild.tag} color={r.guild.color} />}
               {MODE_LABEL[r.mode] && <span className="mode-chip">{MODE_LABEL[r.mode]}</span>}
             </div>
             <div className="muted tiny">{r.profile}{r.coop > 1 ? ` · кооп из ${r.coop}` : ''}{details(board, r) ? ` · ${details(board, r)}` : ''}</div>
