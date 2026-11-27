@@ -6,7 +6,7 @@ import { SKILL_ICON } from './Overview.jsx';
 import ProgressExtras from './ProgressExtras.jsx';
 import TrophyTiers from '../components/TrophyTiers.jsx';
 import HistoryCharts from '../components/HistoryCharts.jsx';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Rich } from '../guides/Rich.jsx';
 
 const fx2 = v => v.toFixed(2).replace('.', DEC);
@@ -23,6 +23,51 @@ function PlanLink({ steps, cat, hidden }) {
   const n = steps.filter(s => s.cat === cat && !hidden[s.id]).length;
   if (!n) return null;
   return <a className="link small" href={`#/roadmap/cat:${encodeURIComponent(cat)}`}>шагов в плане: {n} →</a>;
+}
+
+// «Открывать сундуки или нет»: по открытым этажам, по живым ценам (цена открытия уже вычтена)
+function DungeonChests({ c }) {
+  const [open, setOpen] = useState(false);
+  if (!c?.floors?.length) return null;
+  const list = open ? c.floors : c.floors.slice(-3);
+  return (
+    <div className="chests" data-news="chests">
+      <div className="progress-labels"><b>Сундуки: открывать или нет</b>{c.floors.length > 3 && <button className="chip tiny" onClick={() => setOpen(!open)}>{open ? 'последние 3' : `все этажи (${c.floors.length})`}</button>}</div>
+      <table className="chest-table small">
+        <thead><tr><th>Этаж</th><th>Сундук</th><th>В среднем</th><th>С ключом</th><th>Kismet</th><th>Ради чего</th></tr></thead>
+        <tbody>{list.map(f => (
+          <tr key={f.floor}>
+            <td><b>{f.floor}</b></td>
+            <td>{f.main}</td>
+            <td>{f.ev > 0 ? `+${coins(f.ev)}` : <span className="muted">≈0</span>}</td>
+            <td>{f.keyEv == null ? <span className="muted">—</span> : f.keyWorth ? <span title={f.keyItems.map(k => `${k.name}: +${coins(k.gain)}`).join(', ')}>+{coins(f.keyEv)}</span> : <span className="muted">не стоит</span>}</td>
+            <td>{f.kismetWorth ? <Badge color="#4ade80">да</Badge> : <span className="muted">нет</span>}</td>
+            <td className="muted"><Rich text={f.worth.slice(0, 2).map(w => w.name).join(', ') || '—'} /></td>
+          </tr>
+        ))}</tbody>
+      </table>
+      <div className="muted tiny"><Rich text={`Считается сундук на S+: открывать, если внутри предмет дороже цены открытия. Dungeon Chest Key ${coins(c.key)}${c.kismet ? `, Kismet Feather ${coins(c.kismet)}` : ''}.`} /></div>
+    </div>
+  );
+}
+
+// «Дешёвый SkyBlock XP»: что даёт XP бесплатно сейчас, что дешевле всего за монету, что требует только времени
+function SbXp({ p }) {
+  if (!p?.rows?.length) return null;
+  return (
+    <Card title="SkyBlock Level: где XP дешевле" className="span-12" news="sbxp" right={<span className="muted small">уровень {p.level} · до {p.level + 1}: {p.toNext} XP</span>}>
+      <div className="sbxp-rows">
+        {p.rows.map(r => (
+          <a key={r.id} className="sbxp-row" href={r.href}>
+            <b>{r.title}</b>
+            <span className="sbxp-val">{r.free > 0 ? <Badge color="#4ade80">+{num(r.free)} XP бесплатно</Badge> : r.perXp > 0 ? <Badge color="#f5c542">{coins(r.perXp)} за 1 XP</Badge> : <span className="muted tiny">за время</span>}</span>
+            <span className="muted small grow"><Rich text={r.text} /></span>
+            {r.max ? <span className="sbxp-bar"><Progress value={Math.min(1, (r.have || 0) / r.max)} /><span className="muted tiny">{num(r.have || 0)} / {num(r.max)}</span></span> : <span className="sbxp-bar" />}
+          </a>
+        ))}
+      </div>
+    </Card>
+  );
 }
 
 export default function Skills({ state, sub }) {
@@ -108,6 +153,7 @@ export default function Skills({ state, sub }) {
             <Rich text={[d.watcherKills > 0 ? `Watcher убит ${num(d.watcherKills)} раз` : null, ...Object.entries(d.mostDamage || {}).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([k, v]) => `рекорд урона за ${d.classes[k]?.name || k}: ${coins(v)}`)].filter(Boolean).join(' · ')} />
           </div>
         )}
+        <DungeonChests c={state.analysis?.chests} />
       </Card>
 
       <Card title="Mining и Crimson Isle" className="span-5" right={<PlanLink steps={steps} hidden={hidden} cat="Mining" />}>
@@ -131,6 +177,7 @@ export default function Skills({ state, sub }) {
           </div>
         )}
       </Card>
+      <SbXp p={state.analysis?.sbxp} />
       <HistoryCharts state={state} id="history" />
       {ex?.extras ? <ProgressExtras m={{ ...m, extras: ex.extras }} advice={ex.chocolate} /> : m.hasExtras ? <div className="span-12 muted small"><div className="spinner" />Загружаю остальной прогресс…</div> : null}
     </div>

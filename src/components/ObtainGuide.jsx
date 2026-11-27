@@ -43,7 +43,8 @@ function Node({ n, open, depth = 0 }) {
           {viaText && n.via !== 'coins' && <span className={`ob-via ob-via-${n.via}`}>{viaText}</span>}
           {n.reqRu && <span className="muted tiny"> · нужно: {n.reqRu}</span>}
         </span>
-        {n.via !== 'coins' && <span className="ob-price">{n.total != null ? coins(n.total) : n.partial ? 'часть без цены' : ''}</span>}
+        {n.have > 0 && <span className={`ob-have ${n.need ? '' : 'full'}`} title="Уже лежит в Sacks">{n.need ? `есть ${n.have.toLocaleString(LOCALE)} · нужно ещё ${n.need.toLocaleString(LOCALE)}` : `есть ${n.have.toLocaleString(LOCALE)} ✓`}</span>}
+        {n.via !== 'coins' && <span className="ob-price">{n.rest != null && n.total != null ? <span title={`Без запасов: ${coins(n.total)}`}>{n.rest ? coins(n.rest) : '0'}</span> : n.total != null ? coins(n.total) : n.partial ? 'часть без цены' : ''}</span>}
       </div>
       {n.alt?.unit != null && n.unit != null && Math.abs(n.alt.unit - n.unit) / n.unit > 0.03 && (
         <div className="muted tiny ob-alt">{n.alt.viaRu === 'скрафтить' ? 'Скрафтить' : `Купить (${n.alt.viaRu})`}: {coins(n.alt.unit * n.count)}{n.alt.unit > n.unit ? ` — дороже на ${coins((n.alt.unit - n.unit) * n.count)}` : ''}</div>
@@ -93,6 +94,7 @@ function Method({ m, open, startOpen }) {
           </li>
         ))}
       </ol>
+      {m.fromStock > 0 && <div className="ob-stock small">Из своих Sacks: −{coins(m.fromStock)}{m.total != null ? `, докупить на ${coins(Math.max(0, m.total - m.fromStock))}` : ''}</div>}
       {m.grid && <div className="ob-grid-wrap"><div className="muted tiny">Как разложить на верстаке:</div><Grid grid={m.grid} open={open} /></div>}
       {m.guide && <a className="link small" href={`#/guides/${m.guide}`}>Подробный гайд на сайте →</a>}
     </details>

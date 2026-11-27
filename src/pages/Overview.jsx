@@ -12,6 +12,8 @@ import GuildTag from '../components/GuildTag.jsx';
 import LiveAdvisor from '../components/LiveAdvisor.jsx';
 import { EventsStrip } from './Events.jsx';
 import ShareCard from '../components/ShareCard.jsx';
+import { Returning, Dailies } from '../components/Comeback.jsx';
+import { useInterests, applyInterests } from '../interests.js';
 
 const SKILL_ICON = { farming: 'golden_hoe', mining: 'stone_pickaxe', combat: 'stone_sword', foraging: 'jungle_sapling', fishing: 'fishing_rod', enchanting: 'enchanting_table', alchemy: 'brewing_stand', carpentry: 'crafting_table', runecrafting: 'magma_cream', taming: 'bone', social: 'emerald', hunting: 'lead' };
 export { SKILL_ICON };
@@ -102,6 +104,7 @@ export default function Overview({ state }) {
   const [share, setShare] = useState(false);
   // Скрытые шаги: у вошедшего владельца — на сервере, у гостя — в этом браузере, в чужом плане скрывать нельзя
   const hs = useHiddenSteps(state);
+  const { interests } = useInterests(); // «Нравится / Не хочу» из плана
   const [undo, setUndo] = useState(null); // только что скрытый шаг: «Отменить» несколько секунд
   useEffect(() => { if (!undo) return; const t = setTimeout(() => setUndo(null), 8000); return () => clearTimeout(t); }, [undo]);
   if (!m || !a) return <Empty>Профиль ещё не загружен.</Empty>;
@@ -114,7 +117,8 @@ export default function Overview({ state }) {
     hs.hide(s.id);
     setUndo(s);
   };
-  const top = a.roadmap.filter(s => !hs.hidden[s.id]).slice(0, 6);
+  const visible = applyInterests(a.roadmap.filter(s => !hs.hidden[s.id]), interests);
+  const top = visible.slice(0, 6);
   return (
     <div className="grid">
       <div className="hero card span-12">
@@ -150,6 +154,8 @@ export default function Overview({ state }) {
 
       {share && <ShareCard name={state.player.name} member={m} analysis={a} onClose={() => setShare(false)} />}
       <EventsStrip className="span-12" />
+      <Returning info={a.returning} steps={visible} />
+      <Dailies d={a.dailies} />
 
       {!me.guest && <LiveAdvisor className="span-12" />}
 
