@@ -3,6 +3,7 @@ import { EN } from '../i18n.js';
 import { useState } from 'react';
 import { setView } from '../api.js';
 import { AdSlot, DonateButton } from './Ads.jsx';
+import { DiscordCard } from './Discord.jsx';
 
 const NICK = /^[A-Za-z0-9_]{1,16}$/;
 const FEATURES = [
@@ -50,6 +51,7 @@ export default function Landing() {
             <div><b>{f.title}</b><p className="muted small">{f.text}</p></div>
           </div>
         ))}
+        <DiscordCard />
       </section>
       <div className="landing-donate"><DonateButton /></div>
       <AdSlot where="landing" page="landing" />
