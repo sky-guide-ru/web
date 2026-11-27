@@ -4,6 +4,7 @@ import { ItemIcon } from '../components/ItemIcon.jsx';
 import { coins, itemValue, useApi, api, usePart, RARITY_COLOR } from '../api.js';
 import { useApp } from '../App.jsx';
 import PlayerModel from '../components/PlayerModel.jsx';
+import { Rich } from '../guides/Rich.jsx';
 
 // Шлем → нагрудник → поножи → ботинки, как в игре
 const PIECE_ORDER = ['HELMET', 'CHESTPLATE', 'LEGGINGS', 'BOOTS'];
@@ -157,7 +158,14 @@ function Networth({ nw, pricing }) {
       <div className="nw-parts">{parts.map(p => (
         <div key={p.k} className="nw-part"><span className="nw-dot" style={{ background: p.color }} /><span className="muted">{p.label}</span><b>{coins(p.v)}</b><span className="muted tiny">{total ? Math.round((p.v / total) * 100) : 0}%</span></div>
       ))}</div>
-      <div className="muted tiny">Рыночная оценка по самым дешёвым лотам аукциона и Bazaar: база предмета плюс зачарования, гемы, звёзды, свитки, рекомб и книги. SkyCrypt считает иначе (вложенные улучшения и привязанные предметы по цене крафта), поэтому у него цифра выше.</div>
+      {nw.cosmetic > 0 && (
+        <div className="nw-cos small" data-news="cosmetic">
+          <span className="muted"><Rich text="Из них косметика (скины и краски)" /></span> <b>{coins(nw.cosmetic)}</b>
+          <span className="muted tiny"> · {total ? Math.round((nw.cosmetic / total) * 100) : 0}%</span>
+          <div className="muted tiny"><Rich text="У редких скинов почти нет продаж, поэтому эта часть оценки самая приблизительная." /></div>
+        </div>
+      )}
+      <div className="muted tiny"><Rich text="Рыночная оценка по самым дешёвым лотам аукциона и Bazaar: база предмета плюс зачарования, гемы и открытые слоты, звёзды, свитки, рекомб и книги. Вещи без рынка — по цене крафта. Скины без продаж не оцениваются, поэтому у SkyCrypt цифра бывает выше." /></div>
     </div>
   );
 }
@@ -204,7 +212,7 @@ export default function Gear({ state }) {
       </div>
       </div>
       <Card title="Хранилища" className="span-12"><Storage openItem={openItem} /></Card>
-      <Card title="Оценка состояния" className="span-12"><Networth nw={g.networth} pricing={!pricesLoaded(state)} /></Card>
+      <Card title="Оценка состояния" className="span-12" news="networth"><Networth nw={g.networth} pricing={!pricesLoaded(state)} /></Card>
     </div>
   );
 }
