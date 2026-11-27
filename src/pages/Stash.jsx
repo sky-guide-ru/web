@@ -45,9 +45,9 @@ export default function Stash({ state, sub }) {
     { id: 'essence', news: 'essence', icon: 'ESSENCE_WITHER', title: 'Essence и перки', value: ed ? coins(ed.total) : '…',
       sub: ed ? `${essCount} ${plural(essCount, 'вид', 'вида', 'видов')} · ${buyable ? `можно купить ${num(buyable)} ${plural(buyable, 'уровень', 'уровня', 'уровней')} перков` : 'перки, звёзды, продажа'}` : 'считаю…' },
   ];
-  // «Что продать» (pages/StashSell.jsx); для профилей без рынка — пока не показываем
+  // «Что продать» (pages/StashSell.jsx); без рынка — торговцы и «На что потратить»
   const sl = sell.data?.status === 'ok' ? sell.data : null;
-  if (sl?.market !== false) tiles.push(sellTile(sl));
+  tiles.push(sellTile(sl));
   return (
     <div className="grid stash">
       <div className={`span-12 stash-switch ${tiles.length > 2 ? 'three' : ''}`} role="tablist">
