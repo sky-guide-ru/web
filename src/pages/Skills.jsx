@@ -1,6 +1,6 @@
 import { DEC } from '../i18n.js';
 import { Card, Progress, Stat, Badge } from '../components/ui.jsx';
-import { num, plural, usePart } from '../api.js';
+import { num, plural, usePart, coins } from '../api.js';
 import { useHiddenSteps } from '../hiddenSteps.js';
 import { SKILL_ICON } from './Overview.jsx';
 import ProgressExtras from './ProgressExtras.jsx';
@@ -12,6 +12,10 @@ import { Rich } from '../guides/Rich.jsx';
 const fx2 = v => v.toFixed(2).replace('.', DEC);
 
 const SLAYER_ICON = { zombie: 'rotten_flesh', spider: 'cobweb', wolf: 'mutton', enderman: 'ender_pearl', blaze: 'blaze_rod', vampire: 'redstone' };
+// Время забега: мин:сек
+const mmss = ms => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, '0')}`;
+// Оценка по счёту: 300+ — S+, 270+ — S
+const grade = sc => (sc >= 300 ? 'S+' : sc >= 270 ? 'S' : sc >= 230 ? 'A' : sc >= 160 ? 'B' : 'C');
 const FLOOR_BOSS = ['Вход', 'Bonzo', 'Scarf', 'The Professor', 'Thorn', 'Livid', 'Sadan', 'Necron'];
 
 // Ссылка «в плане: N →» на шаги нужной категории: увидел слабое место — сразу видно, что с ним делать
@@ -92,10 +96,18 @@ export default function Skills({ state, sub }) {
               <div className="floor-n">{i === 0 ? 'E' : `F${i}`}</div>
               <div className="tiny muted">{b}</div>
               <div><b>{d.floors[i] || 0}</b> <span className="tiny muted">{plural(d.floors[i] || 0, 'раз', 'раза', 'раз')}</span></div>
+              {d.bestScore?.[i] > 0 && <div className="tiny floor-best" title={`Лучший счёт ${num(d.bestScore[i])}${d.fastestSPlus?.[i] ? `, самый быстрый S+ за ${mmss(d.fastestSPlus[i])}` : d.fastestS?.[i] ? `, самый быстрый S за ${mmss(d.fastestS[i])}` : ''}`}>
+                <b>{grade(d.bestScore[i])}</b> {d.fastestSPlus?.[i] ? mmss(d.fastestSPlus[i]) : d.fastestS?.[i] ? mmss(d.fastestS[i]) : num(d.bestScore[i])}
+              </div>}
               {i > 0 && <div className={`floor-m ${d.masterFloors[i] ? 'on' : ''}`}>M{i}: {d.masterFloors[i] || 0}</div>}
             </div>
           ))}
         </div>
+        {(d.watcherKills > 0 || Object.keys(d.mostDamage || {}).length > 0) && (
+          <div className="muted small dungeon-records">
+            <Rich text={[d.watcherKills > 0 ? `Watcher убит ${num(d.watcherKills)} раз` : null, ...Object.entries(d.mostDamage || {}).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([k, v]) => `рекорд урона за ${d.classes[k]?.name || k}: ${coins(v)}`)].filter(Boolean).join(' · ')} />
+          </div>
+        )}
       </Card>
 
       <Card title="Mining и Crimson Isle" className="span-5" right={<PlanLink steps={steps} hidden={hidden} cat="Mining" />}>

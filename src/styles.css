@@ -158,6 +158,8 @@ main { padding: 18px 26px 40px; min-width: 0; }
 .floor { padding: 8px 6px; border-radius: var(--r-md); background: rgba(255,255,255,.035); text-align: center; display: flex; flex-direction: column; gap: 3px; }
 .floor-n { font-family: var(--mc); font-size: 18px; color: var(--red); }
 .floor-m { font-size: 11px; color: var(--muted); border-top: 1px solid var(--card-b); padding-top: 3px; } .floor-m.on { color: var(--gold); }
+.floor-best { color: var(--muted); } .floor-best b { color: var(--gold); }
+.dungeon-records { margin-top: 10px; }
 .kv { display: grid; grid-template-columns: auto 1fr; gap: 9px 18px; font-size: 13px; } .kv span { color: var(--muted); } .kv b { text-align: right; }
 .kv.wide { grid-template-columns: repeat(6, auto); }
 
@@ -676,6 +678,8 @@ button.ps-row:hover, .ps-row-main:hover, .ps-row:has(.ps-row-main:hover) { backg
 .ex-pills { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .ex-pill { padding: 4px 10px; border-radius: var(--r-pill); background: rgba(74,222,128,.1); border: 1px solid rgba(74,222,128,.25); font-size: 12px; }
 .ex-pill b { color: var(--green); margin-left: 3px; }
+.jacob-pills { margin-top: 6px; }
+.jacob-pills .ex-pill { background: rgba(255,255,255,.04); border-color: var(--card-b); }
 .ex-visitors { display: flex; flex-direction: column; gap: 6px; }
 .ex-visitor { display: grid; grid-template-columns: 30px minmax(110px, 150px) 1fr; gap: 10px; align-items: center; padding: 6px 10px; border-radius: var(--r-md); background: rgba(255,255,255,.03); font-size: 13px; }
 .ex-wants { display: flex; flex-wrap: wrap; gap: 4px 12px; }
@@ -1568,6 +1572,10 @@ html.has-news-pop .survey-fab { bottom: calc(18px + var(--news-pop-h, 160px) + 1
 @media (max-width: 900px) { .power-cells { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .power-cell { display: flex; flex-direction: column; min-width: 0; }
 .power-cell b { font-size: 15px; font-variant-numeric: tabular-nums; }
+.power-buff { margin-left: 4px; font-size: 11px; font-weight: 600; color: var(--green); }
+.power-effects { display: flex; flex-wrap: wrap; gap: 6px; }
+.power-effects .chip { cursor: default; padding: 3px 8px; }
+.hero-hypixel { margin-top: 2px; }
 .step-calc { margin-top: 4px; color: #c9b8ff; }
 .step-calc::before { content: '≈ '; opacity: .7; }
 

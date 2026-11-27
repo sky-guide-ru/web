@@ -6,7 +6,7 @@ import { Card, Progress } from '../components/ui.jsx';
 import { ItemIcon } from '../components/ItemIcon.jsx';
 import { useApp } from '../App.jsx';
 import { Rich } from '../guides/Rich.jsx';
-import { num, coins, plural, RARITY_COLOR } from '../api.js';
+import { num, coins, plural, RARITY_COLOR, prettyId } from '../api.js';
 
 const SLAYER_RU = { zombie: 'Revenant Horror', spider: 'Tarantula Broodfather', wolf: 'Sven Packmaster', enderman: 'Voidgloom Seraph', blaze: 'Inferno Demonlord', vampire: 'Riftstalker Bloodfiend' };
 const SLAYER_ICON = { zombie: 'REVENANT_FLESH', spider: 'TARANTULA_WEB', wolf: 'WOLF_TOOTH', enderman: 'NULL_SPHERE', blaze: 'DERELICT_ASHE', vampire: 'COVEN_SEAL' };
@@ -181,6 +181,29 @@ function Hunting({ x, view }) {
   );
 }
 
+// Культуры Jacob's Contest: id из API → название в игре
+const CROP = { WHEAT: 'Wheat', CARROT_ITEM: 'Carrot', POTATO_ITEM: 'Potato', PUMPKIN: 'Pumpkin', MELON: 'Melon', SUGAR_CANE: 'Sugar Cane', CACTUS: 'Cactus', 'INK_SACK:3': 'Cocoa Beans', MUSHROOM_COLLECTION: 'Mushroom', NETHER_STALK: 'Nether Wart', DOUBLE_PLANT: 'Sunflower', MOONFLOWER: 'Moonflower', WILD_ROSE: 'Wild Rose' };
+const MEDAL = [['diamond', 'Diamond', '#7dd3fc'], ['platinum', 'Platinum', '#a5f3fc'], ['gold', 'Gold', '#f5c542'], ['silver', 'Silver', '#cbd5e1'], ['bronze', 'Bronze', '#d97706']];
+
+// Jacob's Contest: сколько участвовал, медали за всё время, лучшее место и лучшая медаль по каждой культуре
+function JacobContests({ j }) {
+  const c = j?.contests;
+  if (!c?.total) return null;
+  const ub = j.uniqueBrackets || {};
+  const bestOf = crop => MEDAL.find(([k]) => (ub[k] || []).includes(crop));
+  const crops = Object.keys(CROP).map(id => [id, bestOf(id)]);
+  return <>
+    <Section right={<span className="ex-note">{num(c.total)} {plural(c.total, 'контест', 'контеста', 'контестов')}</span>}>Jacob's Contest</Section>
+    <div className="ex-pills jacob-pills" data-news="jacob">
+      {MEDAL.map(([k, name, color]) => <span key={k} className="ex-pill"><Rich text={name} /> <b style={{ color }}>{num(c.medals?.[k] || 0)}</b></span>)}
+    </div>
+    {c.best && <div className="muted small"><Rich text={`Лучшее место: ${num(c.best.place)} из ${num(c.best.of)} (${CROP[c.best.crop] || c.best.crop}).`} /></div>}
+    <div className="ex-pills jacob-pills">
+      {crops.map(([id, m]) => <span key={id} className="ex-pill" title={m ? `Лучшая медаль: ${m[1]}` : 'Медали ещё нет'} style={m ? { borderColor: m[2] } : { opacity: 0.5 }}><Rich text={CROP[id]} />{m && <b style={{ color: m[2] }}> {m[1]}</b>}</span>)}
+    </div>
+  </>;
+}
+
 function Garden({ m, x, view }) {
   const { openItem } = useApp();
   const gd = m.garden || {};
@@ -201,6 +224,7 @@ function Garden({ m, x, view }) {
         <span className="muted small">Теплица:</span>
         {view.greenhouse.map(u => <span key={u.key} className="ex-pill">{u.name} <b>{u.level}</b></span>)}
       </div>}
+      <JacobContests j={m.jacob} />
       {view?.chips?.length > 0 && <>
         <Section right={<span className="ex-note">{view.chips.filter(c => c.level >= c.max).length} из {view.chips.length} на макс.</span>}>Garden Chips</Section>
         <div className="ex-chips">
@@ -259,12 +283,13 @@ function IslandCoop({ x, view }) {
           ))}
         </div>
       </>}
+      {view?.upgrading && <div className="muted small" style={{ marginTop: 10 }}><Rich text={`Сейчас строится: ${view.upgrading.name}${view.upgrading.tier ? `, уровень ${view.upgrading.tier}` : ''}${view.upgrading.startedAt ? ` (начато ${new Date(view.upgrading.startedAt).toLocaleDateString(EN ? 'en-GB' : 'ru-RU')})` : ''}.`} /></div>}
       {x.harpSong && <div className="muted small" style={{ marginTop: 10 }}>Выбранная мелодия арфы: {title(x.harpSong)}</div>}
     </Card>
   );
 }
 
-function Records({ x }) {
+function Records({ x, h }) {
   const r = x.races || {};
   const tiles = [
     ['DIAMOND_SWORD', 'Макс. урон за удар', num(x.highestDamage)],
@@ -279,6 +304,12 @@ function Records({ x }) {
     ['HEAVY_PEARL', 'Жемчуг Matriarch', num(x.matriarchPearls)],
     ['TRAPPER_CREST', 'Trapper: шкур', num(x.trapperPelts)],
   ].filter(Boolean);
+  const dc = x.deathCauses || [];
+  if (dc.length) tiles.push(['ZOMBIE_HEART', 'Чаще всего убивает', prettyId(dc[0].id), `${num(dc[0].n)} ${plural(dc[0].n, 'раз', 'раза', 'раз')}${dc[1] ? ` · затем ${prettyId(dc[1].id)} (${num(dc[1].n)})` : ''}`]);
+  for (const p of x.view?.petMilestones || []) tiles.push([p.icon, p.key === 'ores' ? 'Rock: руды для вех' : 'Dolphin: морских существ', num(p.n), p.next ? `${p.rank ? `веха ${p.rank} · ` : ''}до ${p.nextRank}: ${num(p.next - p.n)}` : 'все вехи пройдены']);
+  if (x.firstJoin) { const days = Math.floor((Date.now() - x.firstJoin) / 86400000); tiles.push(['WATCH', 'Возраст профиля', `${num(days)} ${plural(days, 'день', 'дня', 'дней')}`, `с ${new Date(x.firstJoin).toLocaleDateString(EN ? 'en-GB' : 'ru-RU')}`]); }
+  // SkyBlock-достижения Hypixel (/player): счётчики сразу по всем профилям игрока
+  for (const a of h?.achievements || []) tiles.push([a.icon, a.label, num(a.value), 'по всем профилям']);
   const races = [['End', r.end_race_best_time], ['Rift', r.rift_race_best_time], ['Foraging', r.foraging_race_best_time]].filter(([, v]) => v);
   return (
     <Card title="Рекорды и статистика" icon={<ItemIcon id="NETHER_STAR" size={22} />} className="span-12 ex-card">
@@ -300,7 +331,7 @@ export default function ProgressExtras({ m, advice }) {
       <Hunting x={x} view={view} />
       <Garden m={m} x={x} view={view} />
       <IslandCoop x={x} view={view} />
-      <Records x={x} />
+      <Records x={x} h={m.hypixel} />
     </>
   );
 }
