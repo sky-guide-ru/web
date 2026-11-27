@@ -339,12 +339,12 @@ export function ago(ts) {
 
 export const RARITY_COLOR = {
   COMMON: '#ffffff', UNCOMMON: '#55ff55', RARE: '#5555ff', EPIC: '#aa00aa', LEGENDARY: '#ffaa00',
-  MYTHIC: '#ff55ff', DIVINE: '#55ffff', SPECIAL: '#ff5555', 'VERY SPECIAL': '#ff5555', ULTIMATE: '#aa0000',
+  MYTHIC: '#ff55ff', DIVINE: '#55ffff', SPECIAL: '#ff5555', 'VERY SPECIAL': '#ff5555', VERY_SPECIAL: '#ff5555', ULTIMATE: '#aa0000',
 };
 // Редкость — как в игре, на английском (имя RARITY_RU оставлено, чтобы не трогать все страницы)
 export const RARITY_RU = {
   COMMON: 'Common', UNCOMMON: 'Uncommon', RARE: 'Rare', EPIC: 'Epic', LEGENDARY: 'Legendary',
-  MYTHIC: 'Mythic', DIVINE: 'Divine', SPECIAL: 'Special', 'VERY SPECIAL': 'Very Special', ULTIMATE: 'Ultimate',
+  MYTHIC: 'Mythic', DIVINE: 'Divine', SPECIAL: 'Special', 'VERY SPECIAL': 'Very Special', VERY_SPECIAL: 'Very Special', ULTIMATE: 'Ultimate', // у питомцев (Phoenix) — с «_»
 };
 
 // Недавно открытые предметы (для пустого поиска и вики)
