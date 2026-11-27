@@ -5,6 +5,7 @@ import { coins, itemValue, useApi, api, usePart, RARITY_COLOR } from '../api.js'
 import { useApp } from '../App.jsx';
 import PlayerModel from '../components/PlayerModel.jsx';
 import { Rich } from '../guides/Rich.jsx';
+import { DEC } from '../i18n.js';
 
 // Шлем → нагрудник → поножи → ботинки, как в игре
 const PIECE_ORDER = ['HELMET', 'CHESTPLATE', 'LEGGINGS', 'BOOTS'];
@@ -170,6 +171,71 @@ function Networth({ nw, pricing }) {
   );
 }
 
+// Magic Find после реворка 0.27.3: что уже даёт MF, что взять дальше (дешевле за 1 MF — выше) и что не видно в профиле
+const mfNum = v => `+${String(Math.round(v * 10) / 10).replace('.', DEC)}`;
+function MagicFind({ mf, openItem }) {
+  const [more, setMore] = useState(false);
+  const extra = (mf.hidden?.length || 0) + (mf.situational?.length || 0) + (mf.bestiary ? 1 : 0);
+  return (
+    <div className="mf">
+      <div className="mf-total"><b className="gold">{String(mf.total).replace('.', DEC)}</b><span className="muted small"> / {mf.cap} Magic Find</span></div>
+      <div className="chips mf-have">
+        {mf.sources.map(s => (
+          <span key={s.key} className="chip" title={[s.note, s.sure === false ? 'Примерно' : ''].filter(Boolean).join(' · ')}>
+            <Rich text={s.label} /> <b className="mf-plus">{mfNum(s.mf)}</b>
+          </span>
+        ))}
+      </div>
+      {mf.next.length > 0 && (
+        <>
+          <div className="muted tiny mf-sub">Что взять дальше</div>
+          <div className="item-list">
+            {mf.next.slice(0, 4).map(n => (
+              <div key={n.key} className="item-line" onClick={n.id ? () => openItem(n.id) : undefined} style={n.id ? null : { cursor: 'default' }}>
+                <div className="grow"><Rich text={n.label} /><div className="muted tiny"><Rich text={n.how} /></div></div>
+                <b className="mf-plus">{mfNum(n.mf)}</b>
+                <div className="price">{n.cost ? <>{coins(n.cost)}<div className="muted tiny">{coins(n.perMf)} за 1 MF</div></> : <span className="muted small">бесплатно</span>}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      <div className="muted tiny mf-sub">На время охоты за дропом</div>
+      <div className="chips">
+        {mf.temp.map(t => (
+          <span key={t.key} className={`chip${t.active ? ' done' : ''}`} title={t.active ? 'Действует сейчас' : ''}>
+            <Rich text={t.label} /> <b className="mf-plus">{mfNum(t.mf)}</b>{t.active ? ' ✓' : ''}
+          </span>
+        ))}
+      </div>
+      {extra > 0 && <button className="link-btn small mf-more" onClick={() => setMore(v => !v)}>{more ? 'Скрыть' : 'Ещё: что не видно в профиле и MF на отдельных мобов'}</button>}
+      {more && (
+        <>
+          <div className="muted tiny mf-sub">Не видно в профиле — проверь в игре</div>
+          <div className="chips">
+            {mf.hidden.map(h => (
+              <span key={h.key} className="chip" title={h.note}><Rich text={h.label} /> <b className="mf-plus">{mfNum(h.mf)}</b>{h.cost ? <span className="muted"> · {coins(h.cost)}</span> : null}</span>
+            ))}
+          </div>
+          {(mf.situational.length > 0 || mf.bestiary) && <div className="muted tiny mf-sub">Только на отдельных мобов</div>}
+          {mf.situational.length > 0 && (
+            <div className="chips">
+              {mf.situational.map(s => <span key={s.id} className="chip"><Rich text={`${s.label}: ${mfNum(s.mf)} на ${s.on}`} /></span>)}
+            </div>
+          )}
+          {mf.bestiary && (
+            <div className="small mf-best">
+              <Rich text={`Bestiary: моб на tier 15 даёт +45 Magic Find на нём, на tier 20 — +60, на tier 25 — +75. У тебя tier 15+ у ${mf.bestiary.t15} мобов, 20+ у ${mf.bestiary.t20}, 25 у ${mf.bestiary.t25}.`} />
+              {mf.bestiary.near.length > 0 && <div className="muted tiny"><Rich text={`Ближе всего к tier 15: ${mf.bestiary.near.map(b => `${b.name} (${b.kills}/${b.need})`).join(', ')}.`} /></div>}
+            </div>
+          )}
+        </>
+      )}
+      <div className="muted tiny mf-foot"><Rich text="По правилам реворка Magic Find (17.11.2026): потолок 500, Looting даёт MF, пока оружие в руке. Сверх 100% шанса предмет иногда выпадает вдвое." /></div>
+    </div>
+  );
+}
+
 // Цены Bazaar и аукциона пришли — без них оценка предметов после перезапуска сервера «0»
 export const pricesLoaded = state => !!state?.pricesAt?.bazaar && !!(state.pricesAt.auctions || state.pricesAt.auctionsError);
 
@@ -211,6 +277,7 @@ export default function Gear({ state }) {
       <Card title="Инструменты"><ItemList items={g.tools.slice(0, 8)} openItem={openItem} /></Card>
       </div>
       </div>
+      {g.mf && <Card title="Magic Find" className="span-12" news="mf"><MagicFind mf={g.mf} openItem={openItem} /></Card>}
       <Card title="Хранилища" className="span-12"><Storage openItem={openItem} /></Card>
       <Card title="Оценка состояния" className="span-12" news="networth"><Networth nw={g.networth} pricing={!pricesLoaded(state)} /></Card>
     </div>
