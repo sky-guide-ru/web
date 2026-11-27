@@ -105,8 +105,10 @@ export default function Minions({ state }) {
             {list.map(t => <MinionCard key={t.type} t={t} openItem={openItem} />)}
           </div>
         ) : <Empty>Под фильтр ничего не подходит.</Empty>}
-        <div className="museum-legend tiny muted">
-          <span><i className="st-donated" /> скрафчен</span><span><i className="st-missing owned" /> пропущен: даст уникальный крафт</span><span><i className="st-missing" /> ещё нет</span>
+        <div className="minion-legend tiny muted">
+          <span><i className="on" />засчитан</span>
+          <span><i className="gap" />пропущен: скрафти ради слота</span>
+          <span><i />ещё нет</span>
         </div>
       </Card>
 
