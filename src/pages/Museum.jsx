@@ -73,7 +73,7 @@ export default function Museum({ state, sub }) {
         <MilestoneStrip list={mu.milestones} n={ms.n} />
         {plan && (plan.steps.length ? (
           <div className="museum-plan">
-            <div className="small"><b>{plan.free ? 'Можно дойти бесплатно — тем, что уже есть:' : plan.reached ? `Дешевле всего добрать за ${coins(plan.coins)}:` : 'На рынке не хватает предметов до вехи, вот что есть:'}</b></div>
+            <div className="small"><b>{plan.free ? 'Можно дойти бесплатно — тем, что уже есть:' : plan.reached ? `Дешевле всего добрать за ${coins(plan.coins)}:` : (mu.npcOnly ? 'У NPC не хватает предметов до вехи, остальное добывается самому:' : 'На рынке не хватает предметов до вехи, вот что есть:')}</b></div>
             <div className="museum-tiles">
               {plan.steps.map(s => <Tile key={s.id} id={ic(s.id)} name={nm(s.id)} sub={`+${s.gain} XP · ${s.free ? 'уже есть' : `~${coins(s.cost)}`}`} tone={s.free ? 'good' : ''} onClick={() => openItem(ic(s.id))} />)}
             </div>
@@ -128,7 +128,7 @@ export default function Museum({ state, sub }) {
                 ))}
               </tbody>
             </table>
-          ) : <Empty>{state.pricesAt?.auctions ? 'Всё, что продаётся на рынке, уже в музее.' : 'Цены аукциона ещё загружаются (полный скан 1–2 минуты).'}</Empty>
+          ) : <Empty>{mu.npcOnly ? 'Всё, что продают NPC за монеты, уже в музее. Остальное добывается самому: оно в каталоге ниже.' : state.pricesAt?.auctions ? 'Всё, что продаётся на рынке, уже в музее.' : 'Цены аукциона ещё загружаются (полный скан 1–2 минуты).'}</Empty>
         ) : tab === 'sets' ? (
           mu.partialSets.length ? (
             <table className="table">
@@ -139,8 +139,8 @@ export default function Museum({ state, sub }) {
                     <td><ItemIcon id={ic(s.id)} size={30} onClick={() => openItem(ic(s.id))} /></td>
                     <td>{nm(s.id)}</td>
                     <td><div className="item-row">{s.have.map(p => <ItemIcon key={p} id={p} size={26} onClick={() => openItem(p)} title={nm(p)} />)}</div></td>
-                    <td><div className="item-row">{s.missing.map(p => <ItemIcon key={p.id} id={p.id} size={26} onClick={() => openItem(p.id)} title={`${nm(p.id)}${p.price ? ` · ~${coins(p.price)}` : ' · нет на рынке'}`} />)}</div></td>
-                    <td>{s.costLeft ? coins(s.costLeft) : <span className="muted">нет на рынке</span>}</td>
+                    <td><div className="item-row">{s.missing.map(p => <ItemIcon key={p.id} id={p.id} size={26} onClick={() => openItem(p.id)} title={`${nm(p.id)}${p.price ? ` · ~${coins(p.price)}` : (mu.npcOnly ? ' · у NPC не купить' : ' · нет на рынке')}`} />)}</div></td>
+                    <td>{s.costLeft ? coins(s.costLeft) : <span className="muted">{mu.npcOnly ? 'у NPC не купить' : 'нет на рынке'}</span>}</td>
                     <td className="gold">+{s.gain}</td>
                   </tr>
                 ))}
@@ -164,7 +164,7 @@ export default function Museum({ state, sub }) {
             </>}
           </>
         )}
-        {mu.unpriced > 0 && (tab === 'cheap' || tab === 'value') && <div className="tiny muted" style={{ marginTop: 8 }}>Ещё {mu.unpriced} {plural(mu.unpriced, 'недостающий предмет не продаётся', 'недостающих предмета не продаются', 'недостающих предметов не продаются')} на рынке (их добывают сами): они в каталоге ниже.</div>}
+        {mu.unpriced > 0 && (tab === 'cheap' || tab === 'value') && <div className="tiny muted" style={{ marginTop: 8 }}>Ещё {mu.unpriced} {plural(mu.unpriced, 'недостающий предмет не продаётся', 'недостающих предмета не продаются', 'недостающих предметов не продаются')} {mu.npcOnly ? 'у NPC за монеты' : 'на рынке'} (их добывают сами): они в каталоге ниже.</div>}
       </Card>
 
       <Card className="span-12" title="Каталог музея" right={<span className="tiny muted">{catalog.length} {plural(catalog.length, 'запись', 'записи', 'записей')}</span>}>
