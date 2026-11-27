@@ -1805,3 +1805,15 @@ tr.grp td { background: rgba(255,255,255,.04); font-weight: 700; font-size: 12px
 .myah-row.pick { cursor: pointer; }
 .myah-row.pick:hover { background: rgba(255,255,255,.06); }
 .myah-row.on { background: rgba(124,92,255,.14); }
+
+/* Discord: кнопка в шапке и карточка на стартовой */
+.discord-btn { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: 1px solid rgba(88, 101, 242, .55); border-radius: 999px; background: rgba(88, 101, 242, .14); color: #c9cdff; font-size: 12px; font-weight: 600; line-height: 1.4; text-decoration: none; flex: none; transition: background .15s, color .15s; }
+.discord-btn:hover { background: #5865f2; color: #fff; }
+.discord-btn svg { width: 15px; height: 15px; }
+@media (max-width: 560px) { .discord-btn { padding: 3px 7px; } .discord-btn-text { display: none; } }
+.discord-card { grid-column: 1 / -1; align-items: center; color: inherit; text-decoration: none; border-color: rgba(88, 101, 242, .4); transition: border-color .15s, background .15s; }
+.discord-card:hover { border-color: #5865f2; background: rgba(88, 101, 242, .08); }
+.discord-card-ico { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; background: #5865f2; color: #fff; flex-shrink: 0; }
+.discord-card > div { flex: 1; }
+.discord-card-go { background: #5865f2; flex: none; }
+@media (max-width: 560px) { .discord-card-go { display: none; } }

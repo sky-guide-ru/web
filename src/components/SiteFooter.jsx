@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { needsConsent, reopenConsent, pub } from '../ads.js';
 import { FeedbackModal } from './Feedback.jsx';
+import { DISCORD_URL } from './Discord.jsx';
 
 /* global __BUILD__ */
 const BUILD = typeof __BUILD__ !== 'undefined' ? __BUILD__ : { date: '', sha: '', core: '' };
@@ -53,7 +54,7 @@ export default function SiteFooter() {
         <nav className="sf-col sf-contact" aria-label="Связь">
           <h4>Связь</h4>
           {pub.contactEmail && <a href={`mailto:${pub.contactEmail}`}>{pub.contactEmail}</a>}
-          <a href="https://discord.gg/hHgJJFCGQe" {...ext}>Discord</a>
+          <a href={DISCORD_URL} {...ext}>Discord</a>
           {pub.discordLink && <a href={`${L}/discord`}>Привязать Discord</a>}
           <button type="button" className="linklike" onClick={() => setFb(true)}>Сообщить об ошибке</button>
         </nav>

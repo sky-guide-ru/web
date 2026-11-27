@@ -24,6 +24,7 @@ import { useNewsUnread } from './news.js';
 import SurveyDock from './components/SurveyDock.jsx';
 import NewsPopup, { NewsBadge, UpdateBar } from './components/NewsPopup.jsx';
 import { LangSwitch } from './components/LangSwitch.jsx';
+import { DiscordButton } from './components/Discord.jsx';
 
 // Страницы грузятся отдельными кусками, когда их открывают (раньше весь сайт — один файл 626 КБ).
 // На телефоне первым приходит только каркас и открытая страница; остальные подтягиваются в простое (prefetchPages).
@@ -342,6 +343,7 @@ export default function App() {
               <PlayerSwitcher state={state} view={view} />
               <GlobalSearch onOpen={openItem} />
               <div className="topbar-right">
+                <DiscordButton />
                 <LangSwitch />
                 {state?.demo && <span className="badge warn demo-badge" title="Демо-данные: добавь API-ключ в .env"><span className="demo-long">Демо-данные: добавь API-ключ в .env</span><span className="demo-short">Демо</span></span>}
                 <LoadDot />
