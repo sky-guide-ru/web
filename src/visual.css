@@ -322,7 +322,7 @@ canvas.player-3d.ready { animation: modelIn .6s cubic-bezier(.2,.8,.2,1) both; }
 
 /* Демо-плашка: на телефоне коротко, полный текст в подсказке */
 .demo-badge .demo-short { display: none; }
-@media (max-width: 800px) { .demo-badge .demo-long { display: none; } .demo-badge .demo-short { display: inline; } }
+@media (max-width: 1199px) { .demo-badge .demo-long { display: none; } .demo-badge .demo-short { display: inline; } }
 
 /* Карточка предмета: левая колонка по ширине тултипа, правая забирает остальное (без дыры посередине) */
 @media (min-width: 801px) { .item-view-body { grid-template-columns: fit-content(440px) minmax(0, 1fr); } }
@@ -483,6 +483,14 @@ img.tex-broken { visibility: hidden; }
 @media (min-width: 801px) and (max-width: 1199px) {
   .topbar .coop-quick { display: none; }
   .topbar .live { font-size: 0; gap: 0; padding: 9px; }
+}
+/* Окно 801-1099px: от кнопки Discord остаётся значок, а аватар игрока не сжимается и не наезжает на поиск */
+@media (min-width: 801px) and (max-width: 1099px) {
+  .topbar .discord-btn { padding: 3px 7px; }
+  .topbar .discord-btn-text { display: none; }
+  .topbar .who-wrap:has(.avatar) { min-width: 48px; }
+  .topbar .who-btn .avatar { flex: none; }
+  .topbar .gsearch { min-width: 110px; }
 }
 /* Нагрузка в шапке — только цветная точка (жёлтая или красная с пульсом), причина — в подсказке */
 .topbar .load-dot { padding: 6px; }
