@@ -635,11 +635,8 @@ img[src*="/api/texture/"], img.gsearch-head, .avatar { image-rendering: pixelate
 .lb-gap:hover { background: none !important; }
 .lb-foot { margin: 10px 0 0; }
 .lb-remove { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--card-b); }
-.lb-remove summary { cursor: pointer; color: var(--muted); font-size: 12px; width: fit-content; }
-.lb-remove summary:hover { color: var(--text); }
-.lb-remove p { margin: 8px 0; max-width: 640px; }
-.lb-msg { margin-top: 6px; }
-.lb-bad { color: var(--red); }
+.lb-remove .linklike { color: var(--muted); font-size: 12px; }
+.lb-remove .linklike:hover { color: var(--text); }
 @media (max-width: 600px) {
   .lb-when { display: none; }
   .lb-place { width: 28px; padding-left: 2px !important; padding-right: 2px !important; }
@@ -719,9 +716,11 @@ img[src*="/api/texture/"], img.gsearch-head, .avatar { image-rendering: pixelate
 .fb-modal { width: min(560px, 100%); }
 .fb-modal h3 { margin: 0 34px 12px 0; }
 .fb-hint { margin: 6px 0 8px; }
-.fb-text, .fb-contact { display: block; width: 100%; box-sizing: border-box; background: rgba(255,255,255,.04); color: var(--text); border: 1px solid var(--card-b); border-radius: var(--r-md); padding: 9px 11px; font: inherit; font-size: 14px; }
+.fb-text, .fb-contact, .fb-target { display: block; width: 100%; box-sizing: border-box; background: rgba(255,255,255,.04); color: var(--text); border: 1px solid var(--card-b); border-radius: var(--r-md); padding: 9px 11px; font: inherit; font-size: 14px; }
 .fb-text { resize: vertical; min-height: 120px; }
 .fb-contact { margin-top: 8px; }
+.fb-target { margin-bottom: 8px; }
+.fb-target + .fb-text { min-height: 72px; }
 .fb-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 .fb-shot { margin: 10px 0 6px; }
 .fb-shot-pick { cursor: pointer; }
@@ -740,11 +739,14 @@ img[src*="/api/texture/"], img.gsearch-head, .avatar { image-rendering: pixelate
 .fb-msg { margin: 8px 0 0; }
 .fb-item.done { opacity: .7; }
 .fb-item-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.fb-nick { margin: 10px 0; align-items: center; }
+.fb-removed .chip { display: inline-flex; align-items: center; gap: 4px; }
+.fb-removed .x-btn { position: static; width: 18px; height: 18px; font-size: 14px; line-height: 1; }
 .fb-item-text { white-space: pre-wrap; overflow-wrap: anywhere; margin: 10px 0; }
 .fb-item-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-bottom: 8px; }
 .fb-item-meta a { overflow-wrap: anywhere; }
 .fb-item-shot img { max-width: min(420px, 100%); max-height: 260px; border-radius: var(--r-sm); border: 1px solid var(--card-b); margin-bottom: 8px; }
-.fb-t-bug { color: #f87171; } .fb-t-translate { color: #60a5fa; } .fb-t-data { color: #fbbf24; } .fb-t-idea { color: #4ade80; }
+.fb-t-bug { color: #f87171; } .fb-t-translate { color: #60a5fa; } .fb-t-data { color: #fbbf24; } .fb-t-idea { color: #4ade80; } .fb-t-nick { color: #c084fc; }
 
 /* ---------- Нижняя панель на телефоне (BottomNav.jsx) ----------
    Вместо ленты из 17 вкладок сверху: четыре главных раздела и «Ещё» внизу, под большим пальцем.

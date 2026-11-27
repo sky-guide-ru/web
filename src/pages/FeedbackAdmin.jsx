@@ -10,15 +10,27 @@ export default function FeedbackAdmin() {
   const [err, setErr] = useState(null);
   const [filter, setFilter] = useState('new');
   const [msg, setMsg] = useState(null);
-  const load = useCallback(() => fetch('/api/admin/feedback', { cache: 'no-store' })
-    .then(r => (r.ok ? r.json() : Promise.reject(new Error(r.status === 403 ? 'Раздел только для владельца сайта' : `Ошибка ${r.status}`))))
-    .then(j => { setD(j); setErr(null); }).catch(e => setErr(e.message)), []);
+  const [removed, setRemoved] = useState([]); // кто убран из рейтинга (ники в нижнем регистре)
+  const load = useCallback(() => {
+    fetch('/api/admin/leaderboard/removed', { cache: 'no-store' }).then(r => (r.ok ? r.json() : null)).then(j => j && setRemoved(j.items || [])).catch(() => {});
+    return fetch('/api/admin/feedback', { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error(r.status === 403 ? 'Раздел только для владельца сайта' : `Ошибка ${r.status}`))))
+      .then(j => { setD(j); setErr(null); }).catch(e => setErr(e.message));
+  }, []);
   useEffect(() => { load(); }, [load]);
 
   if (err) return <div className="card warn-card">{err}</div>;
   if (!d) return <div className="muted small"><div className="spinner" /> Загружаю отзывы…</div>;
 
   const act = async (id, what, body) => { const r = await post(`/api/admin/feedback/${id}/${what}`, body); if (r?.error) setMsg(r.error); load(); };
+  // Запрос «Убрать ник»: убрать из рейтинга или вернуть
+  const board = async (what, player, id) => {
+    const r = await post(`/api/leaderboard/${what}`, { player });
+    if (r?.error) setMsg(r.error);
+    else if (what === 'remove' && id) await post(`/api/admin/feedback/${id}/status`, { status: 'done' });
+    load();
+  };
+  const isRemoved = n => removed.some(x => x.name === String(n || '').toLowerCase());
   const test = async () => { setMsg('Отправляю письмо-проверку…'); const r = await post('/api/admin/feedback-test'); setMsg(r.ok ? 'Письмо-проверка ушло — посмотри почту ✓' : `Не ушло: ${r.error}`); };
   const counts = { new: d.items.filter(f => f.status === 'new').length, done: d.items.filter(f => f.status === 'done').length, all: d.items.length };
   const shown = d.items.filter(f => filter === 'all' || f.status === filter);
@@ -50,7 +62,15 @@ export default function FeedbackAdmin() {
             <span className="muted small">{new Date(f.at).toLocaleString(LOCALE)} · {ago(f.at)}</span>
             <span className="muted tiny">№ {f.id}</span>
           </div>
-          <p className="fb-item-text">{f.text}</p>
+          {f.type === 'nick' && f.target && (
+            <div className="fb-nick row-gap">
+              <span>Убрать из рейтинга: <b>{f.target}</b></span>
+              {isRemoved(f.target)
+                ? <><span className="green small">убран ✓</span><button className="btn ghost small" onClick={() => board('restore', f.target)}>Вернуть</button></>
+                : <button className="btn small" onClick={() => board('remove', f.target, f.id)}>Убрать из рейтинга</button>}
+            </div>
+          )}
+          {f.text && <p className="fb-item-text">{f.text}</p>}
           <div className="muted small fb-item-meta">
             {f.page && <span>Страница: <a href={f.page} target="_blank" rel="noopener">{f.page}</a></span>}
             <span>Ник в поле: {f.player ? <b>{f.player}{f.profile ? ` / ${f.profile}` : ''}</b> : '—'}</span>
@@ -71,6 +91,14 @@ export default function FeedbackAdmin() {
           </div>
         </div>
       ))}
+      {removed.length > 0 && (
+        <div className="card fb-removed">
+          <h3>Убраны из рейтинга · {removed.length}</h3>
+          <div className="row-gap">
+            {removed.map(x => <span key={x.uuid || x.name} className="chip">{x.name || x.uuid}<button className="x-btn" title="Вернуть в рейтинг" aria-label={`Вернуть ${x.name || x.uuid}`} onClick={() => board('restore', x.name || x.uuid)}>×</button></span>)}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
