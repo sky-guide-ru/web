@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Card, Empty, Badge, Tabs, Progress } from '../components/ui.jsx';
-import { coins, useHashTab, usePart } from '../api.js';
+import { api, coins, num, useHashTab, usePart, RARITY_COLOR } from '../api.js';
+import { usePurchaseCart } from '../purchaseCart.js';
 import { useHiddenSteps } from '../hiddenSteps.js';
 import { ItemIcon } from '../components/ItemIcon.jsx';
 import { useApp } from '../App.jsx';
@@ -51,18 +52,86 @@ function ProgressMap({ map, goStep }) {
   );
 }
 
-function PurchasePlan({ plan, onStep }) {
-  if (!plan?.length) return <Empty>План покупок появится, когда загрузятся цены Bazaar и аукциона.</Empty>;
+// Поиск предмета, чтобы добавить свою вещь в план покупок
+function CartAdd({ onAdd }) {
+  const [q, setQ] = useState('');
+  const [res, setRes] = useState([]);
+  const [qty, setQty] = useState(1);
+  useEffect(() => {
+    const s = q.trim();
+    if (s.length < 2) { setRes([]); return; }
+    let alive = true;
+    const t = setTimeout(() => api(`/search?q=${encodeURIComponent(s)}`).then(r => alive && setRes(r.slice(0, 6))).catch(() => alive && setRes([])), 150);
+    return () => { alive = false; clearTimeout(t); };
+  }, [q]);
+  const pick = r => { onAdd(r.id, qty); setQ(''); setRes([]); setQty(1); };
   return (
-    <table className="table">
-      <thead><tr><th>#</th><th>Что купить</th><th>Цена</th><th>Нарастающим итогом</th><th>Когда</th></tr></thead>
-      <tbody>{plan.map((p, i) => (
-        <tr key={p.stepId} className="clickable-row" onClick={() => onStep(p.stepId)} title="Открыть шаг плана: что именно и где взять">
-          <td>{i + 1}</td><td>{p.title}</td><td>{coins(p.cost)}</td><td>{coins(p.cumulative)}</td>
-          <td>{p.affordableNow ? <span className="green">хватает уже сейчас</span> : p.hoursOfFarming != null ? `~${Math.ceil(p.hoursOfFarming)} ч лучшего заработка` : 'нужно накопить'}</td>
-        </tr>
-      ))}</tbody>
-    </table>
+    <div className="cart-add">
+      <div className="gsearch">
+        <input className="gsearch-input" value={q} onChange={e => setQ(e.target.value)} placeholder="Добавить свою вещь: название предмета" aria-label="Добавить вещь в план покупок"
+          onKeyDown={e => { if (e.key === 'Enter' && res[0]) pick(res[0]); if (e.key === 'Escape') setQ(''); }} />
+        {res.length > 0 && (
+          <div className="gsearch-pop" role="listbox">
+            {res.map(r => (
+              <div key={r.id} role="option" aria-selected="false" className="gsearch-item" onMouseDown={e => { e.preventDefault(); pick(r); }}>
+                <ItemIcon id={r.id} size={28} />
+                <div className="grow" style={{ color: RARITY_COLOR[r.rarity] }}>{r.name || r.id}</div>
+                <span className="muted tiny">+ в план</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <label className="cart-qty small muted">шт. <input type="number" min={1} max={100000} value={qty} onChange={e => setQty(Math.max(1, Number(e.target.value) || 1))} /></label>
+    </div>
+  );
+}
+
+function PurchasePlan({ state, onStep }) {
+  const { data, mode, change, error, loading } = usePurchaseCart(state);
+  const { openItem } = useApp();
+  const plan = state.analysis?.plan;
+  if (!data && loading) return <div className="muted small"><div className="spinner" />Считаю план покупок…</div>;
+  // Сервер не ответил — показываем план как есть, без правок
+  const rows = data?.rows || (plan || []).map(p => ({ kind: 'step', ...p }));
+  const edit = mode !== 'none' && !!data;
+  const when = p => (p.affordableNow ? <span className="green">хватает уже сейчас</span> : p.hoursOfFarming != null ? `~${Math.ceil(p.hoursOfFarming)} ч лучшего заработка` : 'нужно накопить');
+  return (
+    <div className="cart" data-news="cart">
+      {rows.length ? (
+        <table className="table">
+          <thead><tr><th>#</th><th>Что купить</th><th>Цена</th><th>Нарастающим итогом</th><th>Когда</th>{edit && <th />}</tr></thead>
+          <tbody>{rows.map((p, i) => p.kind === 'item' ? (
+            <tr key={'i:' + p.id} className="clickable-row" onClick={() => openItem(p.id)} title="Открыть предмет: цена и где взять">
+              <td>{i + 1}</td>
+              <td><span className="cart-item"><ItemIcon id={p.id} size={24} />{p.name}{p.qty > 1 && ` ×${num(p.qty)}`}<span className="cart-own">своё</span>{p.have > 0 && <span className="muted small">есть {num(p.have)}</span>}</span></td>
+              <td>{p.cost ? coins(p.cost) : <span className="muted">нет цены</span>}</td><td>{coins(p.cumulative)}</td><td>{when(p)}</td>
+              {edit && <td><button className="x-btn sm danger" title="Убрать из плана" aria-label="Убрать из плана" onClick={e => { e.stopPropagation(); change({ remove: p.id }); }}>×</button></td>}
+            </tr>
+          ) : (
+            <tr key={p.stepId} className="clickable-row" onClick={() => onStep(p.stepId)} title="Открыть шаг плана: что именно и где взять">
+              <td>{i + 1}</td><td>{p.title}</td><td>{coins(p.cost)}</td><td>{coins(p.cumulative)}</td><td>{when(p)}</td>
+              {edit && <td><button className="x-btn sm danger" title="Не покупать: убрать из плана покупок" aria-label="Убрать из плана" onClick={e => { e.stopPropagation(); change({ skip: p.stepId, value: true }); }}>×</button></td>}
+            </tr>
+          ))}</tbody>
+        </table>
+      ) : <Empty>{plan?.length || data?.skipped?.length ? 'В плане покупок пусто.' : 'План покупок появится, когда загрузятся цены Bazaar и аукциона.'}</Empty>}
+      {edit && <CartAdd onAdd={(id, qty) => change({ add: id, qty })} />}
+      <p className="muted small plan-note">
+        Список собирается сам из шагов плана с ценой.{' '}
+        {edit ? <>Ненужное можно убрать, своё — добавить здесь или кнопкой «+ В план покупок» в карточке предмета. Что уже лежит у тебя, вычитается, а купленное уходит само.{mode === 'local' ? ' Правки видно только в этом браузере.' : ''}</> : mode === 'none' ? 'Это чужой план: править его может только сам игрок.' : ''}
+      </p>
+      {error && <div className="step-undo small warn" role="alert">{error}</div>}
+      {data?.bought?.length > 0 && <div className="small green cart-bought">✔ Куплено: {data.bought.map(b => b.name).join(' · ')}</div>}
+      {data?.skipped?.length > 0 && (
+        <details className="hidden-steps">
+          <summary className="small">Убрано из плана покупок ({data.skipped.length})</summary>
+          <ul>{data.skipped.map(s => (
+            <li key={s.stepId}><span>{s.title} <span className="muted small">· {coins(s.cost)}</span></span><button className="chip tiny" onClick={() => change({ skip: s.stepId, value: false })}>вернуть</button></li>
+          ))}</ul>
+        </details>
+      )}
+    </div>
   );
 }
 
@@ -110,7 +179,7 @@ export default function Roadmap({ state, sub }) {
       <Card className="span-12" title="Персональный план прогрессии" right={<Tabs value={view} onChange={setView} tabs={[{ id: 'steps', label: 'Шаги' }, { id: 'map', label: 'Карта прогрессии' }, { id: 'plan', label: 'План покупок' }]} />}>
         {a?.summary?.headline && <div className="plan-summary">🎯 <Rich text={a.summary.headline} />{a.summary.quickWins ? ` · быстрых побед: ${a.summary.quickWins}` : ''}</div>}
         {view === 'map' && (map || !state.parts?.map ? <ProgressMap map={map} goStep={goStep} /> : <div className="muted small"><div className="spinner" />Загружаю карту…</div>)}
-        {view === 'plan' && <PurchasePlan plan={a?.plan} onStep={goStep} />}
+        {view === 'plan' && <PurchasePlan state={state} onStep={goStep} />}
         {view === 'steps' && <div className="chips">
           <button className={cat === 'all' ? 'chip active' : 'chip'} onClick={() => setCat('all')}>Все ({steps.length - hiddenSteps.length})</button>
           {cats.map(([c, n]) => <button key={c} className={cat === c ? 'chip active' : 'chip'} onClick={() => setCat(c)}>{c} ({n})</button>)}

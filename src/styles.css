@@ -1853,3 +1853,13 @@ tr.grp td { background: rgba(255,255,255,.04); font-weight: 700; font-size: 12px
 .ob-have.full { background: rgba(74, 222, 128, .14); color: #bbf7d0; }
 .ob-stock { margin: 6px 0 0 22px; color: #a5f3fc; }
 .interests > summary { cursor: pointer; color: var(--accent2); }
+/* План покупок с правками игрока */
+.cart .table td:last-child { width: 1%; }
+.cart-item { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cart-own { font-size: 11px; border-radius: var(--r-pill); padding: 1px 8px; background: rgba(124,92,255,.15); color: var(--accent); }
+.cart-add { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 12px 0 4px; }
+.cart-add .gsearch { max-width: 420px; }
+.cart-qty { display: inline-flex; align-items: center; gap: 6px; }
+.cart-qty input { width: 76px; font: inherit; color: var(--text); background: var(--bg2); border: 1px solid var(--card-b); border-radius: var(--r-md); min-height: 34px; padding: 0 8px; }
+.cart-bought { margin: 6px 0; }
+.item-cart { margin-top: 6px; }

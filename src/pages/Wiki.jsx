@@ -6,6 +6,7 @@ import { ItemIcon } from '../components/ItemIcon.jsx';
 import { McTooltipBox } from '../components/Tooltip.jsx';
 import { coins, num, api, useApi, RARITY_COLOR, RARITY_RU, getRecent, pushRecent, variantLabel } from '../api.js';
 import { useApp } from '../App.jsx';
+import { usePurchaseCart } from '../purchaseCart.js';
 import { UpgradePlan } from '../components/UpgradePlan.jsx';
 import { ObtainGuide } from '../components/ObtainGuide.jsx';
 import { RefsProvider, Rich } from '../guides/Rich.jsx';
@@ -54,6 +55,21 @@ function ItemError({ id, error }) {
   );
 }
 
+// «+ В план покупок»: своя вещь в план покупок раздела «Что делать» (только в своём плане или у гостя)
+function CartButton({ id }) {
+  const { state } = useApp() || {};
+  const { data, mode, change } = usePurchaseCart(state);
+  if (mode === 'none' || !state?.analysis || !data) return null;
+  const has = [...(data.rows || []), ...(data.bought || [])].some(r => r.kind === 'item' && r.id === id);
+  return (
+    <div className="item-cart">
+      {has
+        ? <span className="small green">✔ В плане покупок («Что делать» → «План покупок»)</span>
+        : <button className="btn small" onClick={() => change({ add: id, qty: 1 })}>+ В план покупок</button>}
+    </div>
+  );
+}
+
 export function ItemView({ id, uuid, onOpen }) {
   const { data, error } = useApi(`/item/${encodeURIComponent(id)}`, [id]);
   const { data: inv } = useApi('/inventory', [], { keep: true });
@@ -94,6 +110,7 @@ export function ItemView({ id, uuid, onOpen }) {
             {data.npc && <Badge color="#aaa">NPC: {coins(data.npc)}</Badge>}
             {!q && <span className="muted small">На Bazaar и аукционе сейчас не продаётся — где взять, смотри в блоке «Как получить».</span>}
           </div>
+          <CartButton id={data.id} />
           {copy && <MyCopyPrice copy={copy} />}
           <MuseumBadge id={data.id} onOpen={open} />
           {owned.length > 0 && <div className="owned small">✔ У тебя: {owned.map(([p, n]) => `${p}${n > 1 ? ` ×${num(n)}` : ''}`).join(' · ')}</div>}
