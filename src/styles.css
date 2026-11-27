@@ -1934,3 +1934,40 @@ tr.grp td { background: rgba(255,255,255,.04); font-weight: 700; font-size: 12px
   .cart-x { opacity: .5; width: 24px; height: 24px; }
   .cart-budget-sum { margin-left: 0; flex-basis: 100%; }
 }
+
+/* Запасы → Что продать (pages/StashSell.jsx) */
+.stash-switch.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.sl-bar { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.sl-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.sl-row input { width: 18px; height: 18px; accent-color: var(--accent); }
+.sl-head, .sl-row { display: grid; grid-template-columns: 24px minmax(0,2.4fr) minmax(0,1.2fr) minmax(0,1.3fr) minmax(0,1fr); gap: 12px; align-items: center; }
+.sl-head { padding: 4px 4px 6px; }
+.sl-row { padding: 9px 4px; border-top: 1px solid var(--card-b); }
+.sl-item, .sl-krow { display: flex; gap: 10px; align-items: center; min-width: 0; background: none; border: 0; padding: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.sl-item > span, .sl-where, .sl-val, .sl-krow > span:not(.r) { display: flex; flex-direction: column; min-width: 0; }
+.sl-where { align-items: flex-start; gap: 3px; }
+.sl-val { align-items: flex-end; text-align: right; }
+.sl-head .r, .sl-krow .r { text-align: right; }
+.sl-src { font-size: 11px; border: 1px solid var(--card-b); border-radius: var(--r-pill); padding: 1px 8px; white-space: nowrap; }
+.sl-ah { color: #fbbf24; border-color: rgba(251,191,36,.35); } .sl-bazaar { color: var(--accent2); border-color: rgba(34,211,238,.35); } .sl-npc { color: var(--green); border-color: rgba(74,222,128,.35); }
+.sl-note { margin: 8px 4px 0; }
+.sl-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid var(--card-b); padding-top: 10px; margin-top: 4px; }
+.sl-keep { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 4px 24px; }
+.sl-krow { padding: 6px 0; }
+.sl-krow > span:not(.r) { flex: 1; }
+.sl-craft { display: flex; flex-direction: column; }
+.sl-crow { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(0,.8fr) minmax(0,2fr); gap: 14px; align-items: center; padding: 10px 0; border-top: 1px solid var(--card-b); }
+.sl-crow:first-child { border-top: 0; }
+.sl-parts { display: flex; flex-wrap: wrap; gap: 6px; }
+.sl-part { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 12px; color: var(--text); background: rgba(255,255,255,.04); border: 1px solid var(--card-b); border-radius: var(--r-pill); padding: 3px 10px 3px 4px; cursor: pointer; }
+.sl-part.ok b { color: var(--green); } .sl-part.can b { color: var(--gold); } .sl-part.miss b { color: var(--red); }
+.sl-part .tiny { color: var(--gold); }
+@media (max-width: 760px) {
+  .stash-switch.three { grid-template-columns: minmax(0,1fr); }
+  .sl-head { display: none; }
+  .sl-row { grid-template-columns: 22px minmax(0,1fr) auto; grid-template-areas: 'c i v' 'c w v' 'c d d'; row-gap: 4px; }
+  .sl-row input { grid-area: c; align-self: start; margin-top: 8px; }
+  .sl-item { grid-area: i; } .sl-where { grid-area: w; flex-direction: row; align-items: center; gap: 6px; padding-left: 42px; }
+  .sl-val { grid-area: v; } .sl-dem { grid-area: d; padding-left: 42px; }
+  .sl-keep, .sl-crow { grid-template-columns: minmax(0,1fr); }
+}
