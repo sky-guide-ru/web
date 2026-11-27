@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Card, Empty, Badge, Tabs, Progress } from '../components/ui.jsx';
-import { api, coins, num, useHashTab, usePart, RARITY_COLOR } from '../api.js';
+import { api, coins, num, plural, useHashTab, usePart, RARITY_COLOR, useProfileStore } from '../api.js';
 import { usePurchaseCart } from '../purchaseCart.js';
 import { useHiddenSteps } from '../hiddenSteps.js';
 import { ItemIcon } from '../components/ItemIcon.jsx';
@@ -87,30 +87,67 @@ function CartAdd({ onAdd }) {
   );
 }
 
+// «70m», «1.5b», «500k», «2 500 000» → монеты
+export function parseCoins(s) {
+  const m = /^\s*([\d\s.,]+)\s*([kкmмbб]|тыс|млн|млрд)?\.?\s*$/i.exec(String(s || ''));
+  if (!m) return null;
+  const n = Number(m[1].replace(/\s/g, '').replace(',', '.'));
+  if (!Number.isFinite(n) || n <= 0) return null;
+  const u = (m[2] || '').toLowerCase();
+  const k = /^(k|к|тыс)$/.test(u) ? 1e3 : /^(m|м|млн)$/.test(u) ? 1e6 : /^(b|б|млрд)$/.test(u) ? 1e9 : 1;
+  return Math.round(n * k);
+}
+
+// Что купить на бюджет: по порядку плана; дорогое, что не влезает, пропускаем — дальше может влезть дешёвое
+export function fitBudget(rows, budget) {
+  const take = new Set();
+  let left = budget;
+  for (const r of rows) if (r.cost > 0 && r.cost <= left) { take.add(r.kind === 'item' ? 'i:' + r.id : r.stepId); left -= r.cost; }
+  return { take, left, spent: budget - left };
+}
+
 function PurchasePlan({ state, onStep }) {
   const { data, mode, change, error, loading } = usePurchaseCart(state);
   const { openItem } = useApp();
+  const [budgetText, setBudgetText] = useProfileStore('sb-cart-budget', '');
   const plan = state.analysis?.plan;
+  const stepById = useMemo(() => new Map((state.analysis?.roadmap || []).map(s => [s.id, s])), [state.analysis?.roadmap]);
   if (!data && loading) return <div className="muted small"><div className="spinner" />Считаю план покупок…</div>;
   // Сервер не ответил — показываем план как есть, без правок
   const rows = data?.rows || (plan || []).map(p => ({ kind: 'step', ...p }));
+  const budget = parseCoins(budgetText);
+  const fit = budget ? fitBudget(rows, budget) : null;
+  const rowKey = p => (p.kind === 'item' ? 'i:' + p.id : p.stepId);
+  const inBudget = p => fit?.take.has(rowKey(p));
+  // «Что даст»: итог шага плана (payoff), иначе первое предложение объяснения
+  const gives = p => { const st = stepById.get(p.stepId); return st?.payoff || (st?.why ? String(st.why).split(/(?<=\.)\s/)[0] : ''); };
   const edit = mode !== 'none' && !!data;
   const when = p => (p.affordableNow ? <span className="green">хватает уже сейчас</span> : p.hoursOfFarming != null ? `~${Math.ceil(p.hoursOfFarming)} ч лучшего заработка` : 'нужно накопить');
   return (
     <div className="cart" data-news="cart">
+      {rows.length > 0 && (
+        <div className="cart-budget" data-news="budget">
+          <label className="small">Бюджет: <input className="gsearch-input" value={budgetText} onChange={e => setBudgetText(e.target.value)} placeholder="например, 70m или 1.5b" aria-label="Бюджет в монетах" /></label>
+          {data?.liquid > 0 && <button className="chip tiny" onClick={() => setBudgetText(String(Math.round(data.liquid)))}>сколько есть: {coins(data.liquid)}</button>}
+          {budgetText && <button className="chip tiny" onClick={() => setBudgetText('')}>сбросить</button>}
+          {fit && <span className="small">{fit.take.size ? <>На {coins(budget)}: <b>{fit.take.size}</b> {plural(fit.take.size, 'покупка', 'покупки', 'покупок')} на {coins(fit.spent)}, останется {coins(fit.left)}.</> : <span className="muted">На {coins(budget)} пока ничего не хватает.</span>}</span>}
+          {budgetText && !budget && <span className="small muted">Не понял сумму: напиши число, можно с k, m или b.</span>}
+        </div>
+      )}
       {rows.length ? (
         <table className="table">
-          <thead><tr><th>#</th><th>Что купить</th><th>Цена</th><th>Нарастающим итогом</th><th>Когда</th>{edit && <th />}</tr></thead>
+          <thead><tr><th>#</th><th>Что купить</th><th>Что даст</th><th>Цена</th><th>Нарастающим итогом</th><th>Когда</th>{edit && <th />}</tr></thead>
           <tbody>{rows.map((p, i) => p.kind === 'item' ? (
-            <tr key={'i:' + p.id} className="clickable-row" onClick={() => openItem(p.id)} title="Открыть предмет: цена и где взять">
-              <td>{i + 1}</td>
+            <tr key={'i:' + p.id} className={`clickable-row ${inBudget(p) ? 'in-budget' : ''}`} onClick={() => openItem(p.id)} title="Открыть предмет: цена и где взять">
+              <td>{inBudget(p) ? '✓' : i + 1}</td>
               <td><span className="cart-item"><ItemIcon id={p.id} size={24} />{p.name}{p.qty > 1 && ` ×${num(p.qty)}`}<span className="cart-own">своё</span>{p.have > 0 && <span className="muted small">есть {num(p.have)}</span>}</span></td>
+              <td className="muted small">—</td>
               <td>{p.cost ? coins(p.cost) : <span className="muted">нет цены</span>}</td><td>{coins(p.cumulative)}</td><td>{when(p)}</td>
               {edit && <td><button className="x-btn sm danger" title="Убрать из плана" aria-label="Убрать из плана" onClick={e => { e.stopPropagation(); change({ remove: p.id }); }}>×</button></td>}
             </tr>
           ) : (
-            <tr key={p.stepId} className="clickable-row" onClick={() => onStep(p.stepId)} title="Открыть шаг плана: что именно и где взять">
-              <td>{i + 1}</td><td>{p.title}</td><td>{coins(p.cost)}</td><td>{coins(p.cumulative)}</td><td>{when(p)}</td>
+            <tr key={p.stepId} className={`clickable-row ${inBudget(p) ? 'in-budget' : ''}`} onClick={() => onStep(p.stepId)} title="Открыть шаг плана: что именно и где взять">
+              <td>{inBudget(p) ? '✓' : i + 1}</td><td><Rich text={p.title} /></td><td className="muted small cart-gives"><Rich text={gives(p)} /></td><td>{coins(p.cost)}</td><td>{coins(p.cumulative)}</td><td>{when(p)}</td>
               {edit && <td><button className="x-btn sm danger" title="Не покупать: убрать из плана покупок" aria-label="Убрать из плана" onClick={e => { e.stopPropagation(); change({ skip: p.stepId, value: true }); }}>×</button></td>}
             </tr>
           ))}</tbody>

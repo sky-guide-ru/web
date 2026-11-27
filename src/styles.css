@@ -1863,3 +1863,11 @@ tr.grp td { background: rgba(255,255,255,.04); font-weight: 700; font-size: 12px
 .cart-qty input { width: 76px; font: inherit; color: var(--text); background: var(--bg2); border: 1px solid var(--card-b); border-radius: var(--r-md); min-height: 34px; padding: 0 8px; }
 .cart-bought { margin: 6px 0; }
 .item-cart { margin-top: 6px; }
+
+/* «План покупок»: бюджет и «Что даст» */
+.cart-budget { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+.cart-budget input { width: 170px; display: inline-block; margin-left: 4px; }
+.cart tr.in-budget td { background: rgba(74, 222, 128, .07); }
+.cart tr.in-budget td:first-child { color: var(--green); font-weight: 700; }
+.cart-gives { max-width: 320px; }
+@media (max-width: 760px) { .cart th:nth-child(3), .cart td:nth-child(3) { display: none; } }
