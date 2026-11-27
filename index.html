@@ -10,6 +10,18 @@
     <meta property="og:description" content="Введи ник Minecraft и узнай, что делать дальше в Hypixel SkyBlock: план, снаряжение, заработок, гайды." />
     <meta property="og:locale" content="ru_RU" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- Тёмный фон с первой отрисовки: стили сайта приходят вместе со скриптом, а до них браузер рисовал белую страницу -->
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0a0b14" />
+    <style>
+      html,body{margin:0;background:#0a0b14;color:#e8e8f0;color-scheme:dark}
+      #boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;animation:boot-in .3s .4s forwards}
+      #boot img{width:56px;height:56px;animation:boot-pulse 1.4s ease-in-out infinite}
+      #root:has(>:not(.seo-pre))~#boot,html:not(.js) #boot{display:none}
+      @keyframes boot-in{to{opacity:1}}
+      @keyframes boot-pulse{50%{opacity:.45;transform:scale(.92)}}
+      @media (prefers-reduced-motion:reduce){#boot img{animation:none}}
+    </style>
     <!-- Страховка от белого экрана: если файл сайта не пришёл (сервер перезапускается, ошибка 502) или загрузка висит,
          показываем понятное сообщение, сами пробуем ещё раз (3 раза: через 3, 8 и 20 с) и открываем текст для поисковиков.
          Успешный запуск (start.jsx) вызывает __sbBooted. -->
@@ -33,14 +45,18 @@
           box.appendChild(b);
           return b;
         }
+        // Заставка с логотипом (#boot): уходит, как только сайт нарисовал раздел (правило в <style> выше) или не загрузился
+        function unboot() { var b = document.getElementById('boot'); if (b) b.remove(); }
         window.__sbBooted = function () {
           done = true;
+          setTimeout(unboot, 3000); // запас для браузеров без :has()
           try { sessionStorage.removeItem(K); } catch (e) { /* */ }
           if (box) { box.remove(); box = null; }
         };
         window.__sbBootFail = function () {
           if (done) return;
           done = true;
+          unboot();
           document.documentElement.classList.remove('js'); // хотя бы текст раздела для поисковиков, если он есть
           var n = 3;
           try { n = +sessionStorage.getItem(K) || 0; sessionStorage.setItem(K, n + 1); } catch (e) { /* */ }
@@ -82,6 +98,7 @@
   </head>
   <body>
     <div id="root"></div>
+    <div id="boot" aria-hidden="true"><img src="/favicon.svg" alt="" /></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
