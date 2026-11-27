@@ -47,7 +47,23 @@ function parseCoins(s) {
 const LS = (k, v) => { try { if (v === undefined) return JSON.parse(localStorage.getItem('acc:' + k)); localStorage.setItem('acc:' + k, JSON.stringify(v)); } catch { return null; } return null; };
 const perMp = s => (s.gain > 0 && s.cost ? s.cost / s.gain : Infinity);
 const Bdg = ({ k, label }) => <span className="badge" style={{ '--badge': KIND[k][1] }}>{label || KIND[k][0]}</span>;
-const Dots = ({ t }) => (t ? <span className="dots" title={`tier ${t[0]} из ${t[1]}`}>{'●'.repeat(t[0])}<i>{'●'.repeat(Math.max(t[1] - t[0], 0))}</i></span> : null);
+// Длинная цепочка ступеней (Campfire и т. п.) сжимается: 3 последние цветные, одна серая, «+N» и «21/30».
+// Полная цепочка — во всплывашке по наведению или нажатию.
+const DOTS_FULL = 5;
+const Dots = ({ t, count = true }) => {
+  const [open, setOpen] = useState(false);
+  if (!t) return null;
+  const [done, all] = t, left = Math.max(all - done, 0);
+  const full = <>{'●'.repeat(done)}<i>{'●'.repeat(left)}</i></>;
+  if (all <= DOTS_FULL) return <span className="dots" title={`tier ${done} из ${all}`}>{full}</span>;
+  const more = Math.max(left - 1, 0);
+  return (
+    <span className={`dots dots-s${open ? ' open' : ''}`} tabIndex={0} aria-label={`tier ${done} из ${all}`}
+      onClick={e => { e.stopPropagation(); setOpen(o => !o); }} onBlur={() => setOpen(false)}>
+      {'●'.repeat(Math.min(done, 3))}{left > 0 && <i>●</i>}{more > 0 && <em>+{more}</em>}{count && <b>{done}/{all}</b>}
+      <span className="dots-pop" role="tooltip"><small>tier {done} из {all}</small>{full}</span>
+    </span>);
+};
 
 function MoneyField({ label, value, onChange, placeholder }) {
   const [text, setText] = useState('');
@@ -231,7 +247,7 @@ export default function Accessories({ state, sub }) {
           <div className="acc-meta">{RARITY_RU[a.rarity]} · {HOW_L[a.how] || '—'} · {STAT_L[a.stat] || '—'}</div></div>
           <div className={`acc-cmp ${a.own && a.active ? '' : 'muted'}`}>{a.own && a.active ? a.mp : '—'}<small>MP</small></div></div>
         <div className="acc-cs">
-          {a.tier && <span className="acc-pill"><Dots t={a.tier} /> tier {a.tier[0]}/{a.tier[1]}</span>}
+          {a.tier && <span className="acc-pill"><Dots t={a.tier} count={false} /> tier {a.tier[0]}/{a.tier[1]}</span>}
           {a.own && a.active && (a.recomb ? <span className="acc-pill y">✓ Recomb</span> : a.canRecomb ? <span className="acc-pill n">✗ Recomb</span> : null)}
           {a.own && a.active && a.canEnrich && (a.enrichment ? <span className="acc-pill y">✓ Enrich</span> : <span className="acc-pill n">✗ Enrich</span>)}
           {!a.own && <span className="acc-pill">нет в сумке</span>}

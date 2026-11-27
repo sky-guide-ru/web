@@ -1693,6 +1693,12 @@ a.stat { color: inherit; text-decoration: none; }
 .acc-req { font-size: 11px; color: var(--red, #f87171); font-weight: 500; }
 .dots { color: var(--gold); letter-spacing: 1px; font-size: 12px; }
 .dots i { font-style: normal; color: rgba(255,255,255,.18); }
+.dots-s { position: relative; display: inline-flex; align-items: center; cursor: help; outline: none; }
+.dots-s em, .dots-s b { font-style: normal; font-size: 10px; font-weight: 600; letter-spacing: 0; color: var(--muted); margin-left: 4px; }
+.dots-s b { color: var(--text); }
+.dots-pop { display: none; position: absolute; z-index: 30; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); width: max-content; max-width: 230px; padding: 6px 9px; border-radius: var(--r-md); background: var(--surface-pop, #12142a); border: 1px solid var(--card-b); box-shadow: 0 10px 26px rgba(0,0,0,.45); font-size: 11px; letter-spacing: 1px; line-height: 1.4; white-space: normal; word-break: break-all; }
+.dots-pop small { display: block; font-size: 10px; letter-spacing: 0; color: var(--muted); font-weight: 600; }
+.dots-s:hover .dots-pop, .dots-s.open .dots-pop, .dots-s:focus-visible .dots-pop { display: block; }
 .re { display: inline-flex; gap: 3px; }
 .re span { padding: 2px 7px; font-size: 11px; font-weight: 600; border-radius: var(--r-pill); }
 .re .y { background: rgba(74,222,128,.18); color: var(--green); }
