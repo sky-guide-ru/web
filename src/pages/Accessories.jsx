@@ -1,6 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { createPortal } from 'react-dom';
 import { Card, Stat, Empty } from '../components/ui.jsx';
 import { ItemIcon } from '../components/ItemIcon.jsx';
 import { coins, num, RARITY_COLOR, RARITY_RU, friendlyError, usePart } from '../api.js';
