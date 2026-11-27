@@ -5,8 +5,10 @@ const COLORS = {
   LIGHT_PURPLE: '#ff77ff', YELLOW: '#ffff55', WHITE: '#ffffff',
 };
 
-export default function GuildTag({ tag, color, title }) {
-  if (!tag) return null;
+// У многих гильдий тега нет: тогда вместо него название (длинное — обрезано, целиком в подсказке)
+export default function GuildTag({ tag, name, color }) {
+  if (!tag && !name) return null;
   const c = COLORS[color] || COLORS.GRAY;
-  return <span className="guild-chip" style={{ color: c, background: `color-mix(in srgb, ${c} 16%, transparent)` }} title={title}>[{tag}]</span>;
+  const text = tag ? `[${tag}]` : name.length > 16 ? `${name.slice(0, 15)}…` : name;
+  return <span className="guild-chip" style={{ color: c, background: `color-mix(in srgb, ${c} 16%, transparent)` }} title={name ? `Гильдия ${name}` : undefined}>{text}</span>;
 }
