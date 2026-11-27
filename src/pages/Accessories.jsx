@@ -96,7 +96,12 @@ export default function Accessories({ state, sub }) {
   const [pane, setPaneRaw] = useState(() => (sub === 'norecomb' ? 'list' : LS('pane') || 'plan'));
   const setPane = p => { setPaneRaw(p); LS('pane', p); };
   const [F, setF] = useState(() => ({ own: sub === 'norecomb' ? 'yes' : 'all', gap: sub === 'norecomb' ? ['recomb'] : [], rar: [], stat: [], how: [], pmin: 0, pmax: Infinity, q: '' }));
-  const [budget, setBudget] = useState(() => LS('budget') ?? 150e6);
+  // Без своего бюджета — все монеты игрока (кошелёк и оба Bank), как в плане; 150 млн, только если монет не видно
+  const [budget, setBudgetRaw] = useState(() => {
+    const saved = LS('budget');
+    if (saved != null && saved !== 150e6) return saved; // ровно 150 млн раньше сохранялись сами — это не выбор игрока
+    return ((m?.purse || 0) + (m?.bank || 0) + (m?.personalBank || 0)) || 150e6;
+  });
   const [view, setViewRaw] = useState(() => LS('view') || 'table');
   const [grp, setGrpRaw] = useState(() => LS('grp') || 'none');
   const [sort, setSort] = useState({ k: 'next', asc: true });
@@ -114,7 +119,8 @@ export default function Accessories({ state, sub }) {
     return () => mq.removeEventListener('change', on);
   }, []);
   useEffect(() => { if (sub === 'norecomb') { setF(f => ({ ...f, own: 'yes', gap: ['recomb'] })); setPaneRaw('list'); } }, [sub]);
-  useEffect(() => { LS('budget', budget === Infinity ? null : budget); }, [budget]);
+  // Сохраняем только бюджет, заданный руками: иначе монеты одного игрока становились бюджетом для всех профилей
+  const setBudget = v => { setBudgetRaw(v); LS('budget', v === Infinity ? null : v); };
 
   // Все аксессуары: свои + недостающие (одна строка на семейство — с наибольшим +MP)
   const rows = useMemo(() => {
