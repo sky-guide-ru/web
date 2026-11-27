@@ -1818,6 +1818,28 @@ tr.grp td { background: rgba(255,255,255,.04); font-weight: 700; font-size: 12px
 .discord-card-go { background: #5865f2; flex: none; }
 @media (max-width: 560px) { .discord-card-go { display: none; } }
 
+/* Magic Find (Снаряжение) */
+.mf { display: flex; flex-direction: column; gap: 12px; }
+.mf-cols { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 12px 28px; }
+.mf-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.mf-total { display: flex; align-items: baseline; gap: 4px; }
+.mf-total b { font-size: 30px; line-height: 1; }
+.mf-goal { margin-bottom: 4px; }
+.mf-h { margin: 6px 0 0; font-size: 13px; color: var(--muted); font-weight: 600; }
+.mf-col > .mf-h:first-child { margin-top: 0; }
+.mf-list { display: flex; flex-direction: column; }
+.mf-row { display: flex; align-items: center; gap: 10px; padding: 5px 6px; border-radius: var(--r-sm); }
+.mf-row:hover { background: rgba(255,255,255,.04); }
+.mf-row.dim { opacity: .7; }
+.mf-row-text { min-width: 0; line-height: 1.25; }
+.mf-plus { color: #8fd3ff; font-weight: 700; white-space: nowrap; min-width: 42px; text-align: right; }
+.mf-price { min-width: 96px; text-align: right; line-height: 1.2; white-space: nowrap; }
+.mf-noicon { display: inline-block; flex: none; }
+.mf-more { align-self: flex-start; }
+.mf-best { padding: 6px; line-height: 1.4; }
+@media (max-width: 760px) { .mf-cols { grid-template-columns: 1fr; } .mf-price { min-width: 80px; } }
+
+
 /* «С возвращением» и «Дела на сегодня» на «Обзоре» */
 .comeback { border-color: rgba(34, 211, 238, .35); background: linear-gradient(135deg, rgba(34, 211, 238, .07), rgba(124, 92, 255, .05)); }
 .comeback-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 8px; }
