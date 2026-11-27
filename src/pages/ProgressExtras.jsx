@@ -181,6 +181,29 @@ function Hunting({ x, view }) {
   );
 }
 
+// Культуры Jacob's Contest: id из API → название в игре
+const CROP = { WHEAT: 'Wheat', CARROT_ITEM: 'Carrot', POTATO_ITEM: 'Potato', PUMPKIN: 'Pumpkin', MELON: 'Melon', SUGAR_CANE: 'Sugar Cane', CACTUS: 'Cactus', 'INK_SACK:3': 'Cocoa Beans', MUSHROOM_COLLECTION: 'Mushroom', NETHER_STALK: 'Nether Wart', DOUBLE_PLANT: 'Sunflower', MOONFLOWER: 'Moonflower', WILD_ROSE: 'Wild Rose' };
+const MEDAL = [['diamond', 'Diamond', '#7dd3fc'], ['platinum', 'Platinum', '#a5f3fc'], ['gold', 'Gold', '#f5c542'], ['silver', 'Silver', '#cbd5e1'], ['bronze', 'Bronze', '#d97706']];
+
+// Jacob's Contest: сколько участвовал, медали за всё время, лучшее место и лучшая медаль по каждой культуре
+function JacobContests({ j }) {
+  const c = j?.contests;
+  if (!c?.total) return null;
+  const ub = j.uniqueBrackets || {};
+  const bestOf = crop => MEDAL.find(([k]) => (ub[k] || []).includes(crop));
+  const crops = Object.keys(CROP).map(id => [id, bestOf(id)]);
+  return <>
+    <Section right={<span className="ex-note">{num(c.total)} {plural(c.total, 'контест', 'контеста', 'контестов')}</span>}>Jacob's Contest</Section>
+    <div className="ex-pills jacob-pills" data-news="jacob">
+      {MEDAL.map(([k, name, color]) => <span key={k} className="ex-pill"><Rich text={name} /> <b style={{ color }}>{num(c.medals?.[k] || 0)}</b></span>)}
+    </div>
+    {c.best && <div className="muted small"><Rich text={`Лучшее место: ${num(c.best.place)} из ${num(c.best.of)} (${CROP[c.best.crop] || c.best.crop}).`} /></div>}
+    <div className="ex-pills jacob-pills">
+      {crops.map(([id, m]) => <span key={id} className="ex-pill" title={m ? `Лучшая медаль: ${m[1]}` : 'Медали ещё нет'} style={m ? { borderColor: m[2] } : { opacity: 0.5 }}><Rich text={CROP[id]} />{m && <b style={{ color: m[2] }}> {m[1]}</b>}</span>)}
+    </div>
+  </>;
+}
+
 function Garden({ m, x, view }) {
   const { openItem } = useApp();
   const gd = m.garden || {};
@@ -201,6 +224,7 @@ function Garden({ m, x, view }) {
         <span className="muted small">Теплица:</span>
         {view.greenhouse.map(u => <span key={u.key} className="ex-pill">{u.name} <b>{u.level}</b></span>)}
       </div>}
+      <JacobContests j={m.jacob} />
       {view?.chips?.length > 0 && <>
         <Section right={<span className="ex-note">{view.chips.filter(c => c.level >= c.max).length} из {view.chips.length} на макс.</span>}>Garden Chips</Section>
         <div className="ex-chips">
