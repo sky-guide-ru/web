@@ -6,7 +6,7 @@ import { Card, Progress } from '../components/ui.jsx';
 import { ItemIcon } from '../components/ItemIcon.jsx';
 import { useApp } from '../App.jsx';
 import { Rich } from '../guides/Rich.jsx';
-import { num, coins, plural, RARITY_COLOR } from '../api.js';
+import { num, coins, plural, RARITY_COLOR, prettyId } from '../api.js';
 
 const SLAYER_RU = { zombie: 'Revenant Horror', spider: 'Tarantula Broodfather', wolf: 'Sven Packmaster', enderman: 'Voidgloom Seraph', blaze: 'Inferno Demonlord', vampire: 'Riftstalker Bloodfiend' };
 const SLAYER_ICON = { zombie: 'REVENANT_FLESH', spider: 'TARANTULA_WEB', wolf: 'WOLF_TOOTH', enderman: 'NULL_SPHERE', blaze: 'DERELICT_ASHE', vampire: 'COVEN_SEAL' };
@@ -283,6 +283,7 @@ function IslandCoop({ x, view }) {
           ))}
         </div>
       </>}
+      {view?.upgrading && <div className="muted small" style={{ marginTop: 10 }}><Rich text={`Сейчас строится: ${view.upgrading.name}${view.upgrading.tier ? `, уровень ${view.upgrading.tier}` : ''}${view.upgrading.startedAt ? ` (начато ${new Date(view.upgrading.startedAt).toLocaleDateString(EN ? 'en-GB' : 'ru-RU')})` : ''}.`} /></div>}
       {x.harpSong && <div className="muted small" style={{ marginTop: 10 }}>Выбранная мелодия арфы: {title(x.harpSong)}</div>}
     </Card>
   );
@@ -303,6 +304,10 @@ function Records({ x, h }) {
     ['HEAVY_PEARL', 'Жемчуг Matriarch', num(x.matriarchPearls)],
     ['TRAPPER_CREST', 'Trapper: шкур', num(x.trapperPelts)],
   ].filter(Boolean);
+  const dc = x.deathCauses || [];
+  if (dc.length) tiles.push(['ZOMBIE_HEART', 'Чаще всего убивает', prettyId(dc[0].id), `${num(dc[0].n)} ${plural(dc[0].n, 'раз', 'раза', 'раз')}${dc[1] ? ` · затем ${prettyId(dc[1].id)} (${num(dc[1].n)})` : ''}`]);
+  for (const p of x.view?.petMilestones || []) tiles.push([p.icon, p.key === 'ores' ? 'Rock: руды для вех' : 'Dolphin: морских существ', num(p.n), p.next ? `${p.rank ? `веха ${p.rank} · ` : ''}до ${p.nextRank}: ${num(p.next - p.n)}` : 'все вехи пройдены']);
+  if (x.firstJoin) { const days = Math.floor((Date.now() - x.firstJoin) / 86400000); tiles.push(['WATCH', 'Возраст профиля', `${num(days)} ${plural(days, 'день', 'дня', 'дней')}`, `с ${new Date(x.firstJoin).toLocaleDateString(EN ? 'en-GB' : 'ru-RU')}`]); }
   // SkyBlock-достижения Hypixel (/player): счётчики сразу по всем профилям игрока
   for (const a of h?.achievements || []) tiles.push([a.icon, a.label, num(a.value), 'по всем профилям']);
   const races = [['End', r.end_race_best_time], ['Rift', r.rift_race_best_time], ['Foraging', r.foraging_race_best_time]].filter(([, v]) => v);
