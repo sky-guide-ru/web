@@ -7,6 +7,7 @@ import { RefsProvider, Rich } from '../guides/Rich.jsx';
 import { ItemIcon } from '../components/ItemIcon.jsx';
 import { useApi, coins, num, plural, useHashTab } from '../api.js';
 import { useApp } from '../App.jsx';
+import StashSell, { sellTile } from './StashSell.jsx';
 
 const HOW_RU = { bazaar: 'на базаре', npc: 'торговцу', none: '—' };
 
@@ -25,7 +26,7 @@ const COLS = [
 const GROUP_SORTS = [['value', 'по стоимости'], ['name', 'по названию'], ['kinds', 'по числу видов'], ['count', 'по количеству']];
 
 export default function Stash({ state, sub }) {
-  const [tab, setTab] = useHashTab('stash', sub, ['sacks', 'essence'], 'sacks');
+  const [tab, setTab] = useHashTab('stash', sub, ['sacks', 'essence', 'sell'], 'sacks');
   // Обе части грузим сразу: крупные плитки сверху показывают итог каждой, и эссенции видно, даже пока открыты мешки
   // (раньше была мелкая вкладка, и игроки её не замечали)
   // Ждём свежий профиль (не тот, что сохранён в браузере), иначе мешки качались дважды подряд.
@@ -34,6 +35,7 @@ export default function Stash({ state, sub }) {
   const priceTick = Math.floor((state?.pricesAt?.bazaar || 0) / 300_000);
   const sacks = useApi(live ? '/sacks' : null, [upd, priceTick], { keep: true });
   const ess = useApi(live ? '/essence' : null, [upd, priceTick], { keep: true });
+  const sell = useApi(live ? '/sell' : null, [upd, priceTick], { keep: true });
   const sd = sacks.data?.status === 'ok' ? sacks.data : null, ed = ess.data?.status === 'ok' ? ess.data : null;
   const buyable = ed ? ed.types.reduce((s, t) => s + t.buyable, 0) : 0;
   const essCount = ed ? ed.types.filter(t => t.amount > 0).length : 0;
@@ -43,9 +45,12 @@ export default function Stash({ state, sub }) {
     { id: 'essence', news: 'essence', icon: 'ESSENCE_WITHER', title: 'Essence и перки', value: ed ? coins(ed.total) : '…',
       sub: ed ? `${essCount} ${plural(essCount, 'вид', 'вида', 'видов')} · ${buyable ? `можно купить ${num(buyable)} ${plural(buyable, 'уровень', 'уровня', 'уровней')} перков` : 'перки, звёзды, продажа'}` : 'считаю…' },
   ];
+  // «Что продать» (pages/StashSell.jsx); для профилей без рынка — пока не показываем
+  const sl = sell.data?.status === 'ok' ? sell.data : null;
+  if (sl?.market !== false) tiles.push(sellTile(sl));
   return (
     <div className="grid stash">
-      <div className="span-12 stash-switch" role="tablist">
+      <div className={`span-12 stash-switch ${tiles.length > 2 ? 'three' : ''}`} role="tablist">
         {tiles.map(t => (
           <button key={t.id} role="tab" aria-selected={tab === t.id} className={`stash-switch-btn ${tab === t.id ? 'active' : ''}`} data-news={t.news} onClick={() => setTab(t.id)}>
             <ItemIcon id={t.icon} size={36} />
@@ -53,7 +58,7 @@ export default function Stash({ state, sub }) {
           </button>
         ))}
       </div>
-      {tab === 'sacks' ? <Sacks res={sacks} /> : <Essence res={ess} />}
+      {tab === 'sell' ? <StashSell res={sell} /> : tab === 'sacks' ? <Sacks res={sacks} /> : <Essence res={ess} />}
     </div>
   );
 }
