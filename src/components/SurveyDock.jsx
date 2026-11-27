@@ -12,6 +12,19 @@ export const openSurvey = () => dispatchEvent(new CustomEvent('sb-survey'));
 export default function SurveyDock() {
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState(() => !!read(DONE));
+  // Кнопка висит поверх текста: при прокрутке вниз прячется, при прокрутке вверх и у верха страницы — снова видна
+  const [away, setAway] = useState(false);
+  useEffect(() => {
+    let last = scrollY;
+    const f = () => {
+      const y = scrollY, d = y - last;
+      if (Math.abs(d) < 12) return;
+      setAway(d > 0 && y > 200);
+      last = y;
+    };
+    addEventListener('scroll', f, { passive: true });
+    return () => removeEventListener('scroll', f);
+  }, []);
   useEffect(() => {
     const f = () => setOpen(true);
     addEventListener('sb-survey', f);
@@ -46,7 +59,7 @@ export default function SurveyDock() {
   }, [open]);
   if (!open) {
     return (
-      <button type="button" className={`survey-fab${done ? ' mini' : ''}`} onClick={() => setOpen(true)} title={done ? 'Опрос: посмотреть или поменять ответы' : 'Каким быть советчику? Короткий опрос'} aria-label="Открыть опрос">
+      <button type="button" className={`survey-fab${done ? ' mini' : ''}${away ? ' away' : ''}`} onClick={() => setOpen(true)} title={done ? 'Опрос: посмотреть или поменять ответы' : 'Каким быть советчику? Короткий опрос'} aria-label="Открыть опрос">
         <span aria-hidden="true">📝</span>{!done && <span className="survey-fab-text">Опрос</span>}
       </button>
     );
