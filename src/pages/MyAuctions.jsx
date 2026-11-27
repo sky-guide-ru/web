@@ -1,4 +1,4 @@
-// Вкладка «Мои лоты» на странице «Заработок»: свои лоты Auction House (продан, истёк, висит, есть дешевле) и ставки.
+// Вкладка «Мои лоты» на «Рынке» → Auction House (список слева; нажатие на лот открывает его график): свои лоты Auction House (продан, истёк, висит, есть дешевле) и ставки.
 // Данные — /api/my-auctions (core/src/player-auctions.js): лоты с Hypixel не чаще раза в 3 минуты, ставки из скана аукциона.
 import { useEffect, useState } from 'react';
 import { Empty } from '../components/ui.jsx';
@@ -29,10 +29,12 @@ function lotState(l, now) {
   return { cls: 'mute', text: 'Висит', end: left(l.end, now) };
 }
 
-function Row({ id, name, tier, state, price, openItem }) {
+function Row({ id, name, tier, state, price, openItem, onPick, on }) {
+  const pick = onPick && id ? () => onPick(id) : null;
   return (
-    <li className={`myah-row ${state.cls}`}>
-      {id ? <button className="mt-item-btn" onClick={() => openItem?.(id)} title="Открыть карточку предмета"><ItemIcon id={id} size={28} /></button> : <span className="myah-noico" />}
+    <li className={`myah-row ${state.cls} ${pick ? 'pick' : ''} ${on ? 'on' : ''}`} onClick={pick || undefined} onKeyDown={pick ? e => { if (e.key === 'Enter') pick(); } : undefined} tabIndex={pick ? 0 : undefined}>
+      {!id ? <span className="myah-noico" /> : pick ? <ItemIcon id={id} size={28} />
+        : <button className="mt-item-btn" onClick={() => openItem?.(id)} title="Открыть карточку предмета"><ItemIcon id={id} size={28} /></button>}
       <span className="myah-main">
         <span className="myah-name" style={{ color: RARITY_COLOR[tier] }}>{name}</span>
         <span className={`myah-state ${state.cls}`}>{state.text}</span>
@@ -45,7 +47,8 @@ function Row({ id, name, tier, state, price, openItem }) {
   );
 }
 
-export default function MyAuctions({ openItem }) {
+/** onPick(ключ) — открыть график лота (на «Рынке»), current — ключ открытого сейчас; без onPick значок открывает карточку предмета */
+export default function MyAuctions({ openItem, onPick, current, compact = false }) {
   const { data: d } = useApi('/my-auctions', []);
   const now = useNow();
   if (!d) return <div className="loader"><div className="spinner" /></div>;
@@ -60,18 +63,18 @@ export default function MyAuctions({ openItem }) {
     s.outbid > 0 && ['warn', `Перебили ставок: ${s.outbid}`],
   ].filter(Boolean);
   return (
-    <div className="myah" data-news="auctions">
+    <div className={`myah ${compact ? 'compact' : ''}`} data-news="auctions">
       {chips.length > 0 && <div className="myah-chips">{chips.map(([c, t]) => <span key={t} className={`myah-chip ${c}`}>{t}</span>)}</div>}
       {d.error && <div className="muted tiny myah-note">Hypixel не ответил, показаны лоты на {ago(d.at)}.</div>}
       {d.listings.length ? (
         <ul className="myah-list">
-          {d.listings.map(l => <Row key={l.id} id={l.key} name={l.count > 1 ? `${l.count}× ${l.name}` : l.name} tier={l.tier} state={lotState(l, now)} price={coins(l.status === 'sold' ? l.coins : l.price)} openItem={openItem} />)}
+          {d.listings.map(l => <Row key={l.id} id={l.key} name={l.count > 1 ? `${l.count}× ${l.name}` : l.name} tier={l.tier} state={lotState(l, now)} price={coins(l.status === 'sold' ? l.coins : l.price)} openItem={openItem} onPick={onPick} on={current && l.key === current} />)}
         </ul>
       ) : <Empty>На Auction House нет лотов.</Empty>}
       {d.bids.length > 0 && <>
         <h4 className="sub-h">Ставки</h4>
         <ul className="myah-list">
-          {d.bids.map(b => <Row key={b.id} id={b.key} name={b.name} tier={b.tier} price={coins(b.top)} openItem={openItem}
+          {d.bids.map(b => <Row key={b.id} id={b.key} name={b.name} tier={b.tier} price={coins(b.top)} openItem={openItem} onPick={onPick} on={current && b.key === current}
             state={b.status === 'outbid' ? { cls: 'warn', text: `Перебили · твоя ${coins(b.mine)}`, end: left(b.end, now) } : { cls: 'ok', text: 'Твоя ставка выше всех', end: left(b.end, now) }} />)}
         </ul>
       </>}

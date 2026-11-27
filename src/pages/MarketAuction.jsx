@@ -12,6 +12,7 @@ import '../components/chart/chart.css';
 
 import MarketFilters, { AH_CATS } from '../components/MarketFilters.jsx';
 import { chunk } from '../update.js';
+import MyAuctions from './MyAuctions.jsx';
 const TradingChart = lazy(chunk(() => import('../components/chart/TradingChart.jsx')));
 const WATCH = 'sb-watchlist-ah';
 export const AH_LAST = 'sb-market-last-ah';
@@ -50,12 +51,15 @@ const sortRows = (list, sort) => {
 /**
  * @param {{ state: any, picked: string|null, narrow: boolean, modeSwitch: any, active?: boolean }} props  active — вкладка на экране (скрытая не опрашивает график)
  */
-export default function MarketAuction({ state, picked, narrow, modeSwitch, active = true }) {
+export default function MarketAuction({ state, picked, narrow, modeSwitch, active = true, mine = 0 }) {
   const { openItem } = useApp();
   const [q, setQ] = useState('');
   const [list, setList] = useState(null);
   const [more, setMore] = useState(false);
-  const [tab, setTab] = useState('all');
+  const [tab, setTab] = useState(mine ? 'mine' : 'all');
+  // Переход по адресу #/market/mine (ссылка из новости, старая вкладка «Заработка») — открыть «Мои лоты»
+  useEffect(() => { if (mine) setTab('mine'); }, [mine]);
+  const hasPlayer = !!state?.player;
   const [sort, setSort] = useState(() => localStorage.getItem('sb-market-ah-sort') || '');
   const [cat, setCat] = useState(() => localStorage.getItem('sb-market-ah-cat') || '');
   const [rarity, setRarity] = useState(() => localStorage.getItem('sb-market-ah-rarity') || '');
@@ -130,14 +134,16 @@ export default function MarketAuction({ state, picked, narrow, modeSwitch, activ
         <div className="tc-seg" role="tablist">
           <button type="button" role="tab" aria-selected={tab === 'all'} className={tab === 'all' ? 'on' : ''} onClick={() => setTab('all')}>{q ? 'Найдено' : 'Все'}</button>
           <button type="button" role="tab" aria-selected={tab === 'fav'} className={tab === 'fav' ? 'on' : ''} onClick={() => setTab('fav')}>★ Избранное{watch.length ? ` ${watch.length}` : ''}</button>
+          {hasPlayer && <button type="button" role="tab" aria-selected={tab === 'mine'} className={tab === 'mine' ? 'on' : ''} onClick={() => setTab('mine')}>Мои лоты</button>}
         </div>
-        <label className="mk-sort muted small"><span className="sr-only">Сортировка</span>
+        {tab !== 'mine' && <label className="mk-sort muted small"><span className="sr-only">Сортировка</span>
           <select value={sort} onChange={e => pickSort(e.target.value)} aria-label="Сортировка">{SORTS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
-        </label>
+        </label>}
       </div>
+      {tab === 'mine' && <MyAuctions compact onPick={go} current={id} />}
       {tab === 'all' && <MarketFilters order={AH_CATS} counts={list?.facets?.cat} cat={cat} setCat={pickCat} rarities={list?.facets?.rarity || {}} rarity={rarity} setRarity={pickRarity} />}
       {tab === 'all' && list && <div className="muted tiny mk-count" style={{ margin: '2px 0 6px' }}>{q ? `Найдено предметов: ${num(list.total)}` : `Всего предметов на аукционе: ${num(list.total)}`}{list.total > rows?.length ? `, показано ${num(rows.length)}` : ''}</div>}
-      {rows ? (rows.length ? (<>
+      {tab === 'mine' ? null : rows ? (rows.length ? (<>
         <ul className="mk-list" role="listbox" aria-label="Предметы аукциона">
           {rows.map((r, i) => (<Fragment key={r.id}>
             {r.similar && !rows[i - 1]?.similar && <li className="mk-similar muted tiny" role="presentation">Похожие</li>}

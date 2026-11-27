@@ -6,7 +6,6 @@ import { ItemIcon } from '../components/ItemIcon.jsx';
 import { coins, num, useApi, api, useHashTab, saveLocal, friendlyError, useProfileStore, getView } from '../api.js';
 import { useApp } from '../App.jsx';
 import { BankTab, BitsTab } from './Wealth.jsx';
-import MyAuctions from './MyAuctions.jsx';
 import { RefsProvider, Rich } from '../guides/Rich.jsx'; // «подсказки по тексту», как в гайдах
 
 // ---------- общие помощники вкладки ----------
@@ -720,11 +719,13 @@ function MoneyMethods({ openItem }) {
 
 export default function Money({ state: appState, sub }) {
   const { openItem } = useApp();
-  const [tab, setTab] = useHashTab('money', sub, ['methods', 'crops', 'flips', 'crafts', 'snipes', 'movers', 'auctions', 'bank', 'bits'], 'methods');
+  // «Мои лоты» переехали на «Рынок» → Auction House: старый адрес (и ссылка из новости) ведёт туда
+  useEffect(() => { if (sub === 'auctions') location.replace('#/market/mine'); }, [sub]);
+  const [tab, setTab] = useHashTab('money', sub, ['methods', 'crops', 'flips', 'crafts', 'snipes', 'movers', 'bank', 'bits'], 'methods');
   const st = appState;
   return (
     <div className="grid">
-      <Card className="span-12" title="Как заработать с твоим профилем" right={<Tabs value={tab} onChange={setTab} tabs={[{ id: 'methods', label: 'Методы' }, { id: 'crops', label: 'Культуры' }, { id: 'flips', label: 'Флипы Bazaar', market: true }, { id: 'crafts', label: 'Крафт и Forge' }, { id: 'snipes', label: 'Дешёвые лоты AH', market: true }, { id: 'movers', label: 'Движение цен' }, { id: 'auctions', label: 'Мои лоты', market: true }, { id: 'bank', label: 'Bank' }, { id: 'bits', label: 'Bits' }].filter(t => !t.market || st?.member?.mode?.market !== false)} />}>
+      <Card className="span-12" title="Как заработать с твоим профилем" right={<Tabs value={tab} onChange={setTab} tabs={[{ id: 'methods', label: 'Методы' }, { id: 'crops', label: 'Культуры' }, { id: 'flips', label: 'Флипы Bazaar', market: true }, { id: 'crafts', label: 'Крафт и Forge' }, { id: 'snipes', label: 'Дешёвые лоты AH', market: true }, { id: 'movers', label: 'Движение цен' }, { id: 'bank', label: 'Bank' }, { id: 'bits', label: 'Bits' }].filter(t => !t.market || st?.member?.mode?.market !== false)} />}>
         {st?.member?.mode && !st.member.mode.market && <div className="mode-banner">⚠️ Профиль {st.member.mode.label}: {st.member.mode.note}. Флипы скрыты, а доход посчитан по ценам рынка, поэтому реальный ниже.</div>}
         {tab === 'methods' && <MoneyMethods openItem={openItem} />}
         {tab === 'crops' && <Crops />}
@@ -732,7 +733,6 @@ export default function Money({ state: appState, sub }) {
         {tab === 'crafts' && <Crafts openItem={openItem} />}
         {tab === 'snipes' && <Snipes openItem={openItem} pricesAt={st.pricesAt} />}
         {tab === 'movers' && <Movers openItem={openItem} />}
-        {tab === 'auctions' && <MyAuctions openItem={openItem} />}
         {tab === 'bank' && <BankTab />}
         {tab === 'bits' && <BitsTab openItem={openItem} />}
       </Card>
