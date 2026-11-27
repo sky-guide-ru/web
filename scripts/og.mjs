@@ -17,8 +17,8 @@ const faces = ['latin', 'cyrillic'].map(s => `
 const logo = fs.readFileSync(path.join(root, 'public/favicon.svg'), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
 
 const CARDS = {
-  'og.png': { lang: 'ru', kicker: 'Hypixel SkyBlock', sub: 'гид по SkyBlock на русском', lines: ['План прогрессии · гайды · вики предметов', 'цены Bazaar и аукциона · заработок'], url: 'sky-guide.ru' },
-  'og-en.png': { lang: 'en', kicker: 'Hypixel SkyBlock', sub: 'your SkyBlock guide', lines: ['Progression plan · guides · item wiki', 'Bazaar and Auction House prices · money making'], url: 'sky-guide.ru/en' },
+  'og.png': { lang: 'ru', kicker: 'Hypixel SkyBlock', sub: 'что делать дальше в SkyBlock', lines: ['План прогрессии · гайды · вики предметов', 'цены Bazaar и аукциона · заработок'], url: 'sky-guide.ru' },
+  'og-en.png': { lang: 'en', kicker: 'Hypixel SkyBlock', sub: 'what to do next in SkyBlock', lines: ['Progression plan · guides · item wiki', 'Bazaar and Auction House prices · money making'], url: 'sky-guide.ru/en' },
 };
 
 const html = c => `<!doctype html><html lang="${c.lang}"><head><meta charset="utf-8"><style>${faces}
