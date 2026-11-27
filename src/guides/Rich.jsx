@@ -11,7 +11,7 @@ import { useApp } from '../App.jsx';
 import { ensureLexicon, globalData, splitGlobal, subscribe, getVersion } from './globalRefs.js';
 
 const KIND_RU = { mech: 'Механика', stat: 'Характеристика', place: 'Место', event: 'Событие', cur: 'Валюта', npc: 'NPC', mob: 'Существо', skill: 'Навык', item: 'Предмет',
-  floor: 'Этаж данжа', rarity: 'Редкость', reforge: 'Reforge' };
+  floor: 'Этаж данжа', rarity: 'Редкость', reforge: 'Reforge', gem: 'Гем' };
 const useGlobalVersion = () => useSyncExternalStore(subscribe, getVersion, getVersion);
 const RefsCtx = createContext(null);
 
