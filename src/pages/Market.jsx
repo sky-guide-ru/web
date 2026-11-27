@@ -50,9 +50,13 @@ function useNarrow() {
  */
 export default function Market({ state, sub }) {
   const narrow = useNarrow();
-  const picked = sub ? decodeURIComponent(sub) : null;
-  const [saved, setSaved] = useState(() => localStorage.getItem(MODE) || 'bz');
-  const mode = picked ? (picked.startsWith('ah:') ? 'ah' : 'bz') : saved;
+  // #/market/mine — «Мои лоты» на вкладке Auction House
+  const mineHash = sub === 'mine';
+  const picked = sub && !mineHash ? decodeURIComponent(sub) : null;
+  const [saved, setSaved] = useState(() => (mineHash ? 'ah' : localStorage.getItem(MODE) || 'bz'));
+  const [mine, setMine] = useState(0);
+  useEffect(() => { if (mineHash) { setSaved('ah'); saveLocal(MODE, 'ah'); setMine(n => n + 1); } }, [mineHash, sub]);
+  const mode = picked ? (picked.startsWith('ah:') ? 'ah' : 'bz') : mineHash ? 'ah' : saved;
   useEffect(() => { if (picked) { setSaved(mode); saveLocal(MODE, mode); } }, [picked, mode]);
   const [seen, setSeen] = useState(() => ({ [mode]: true }));
   useEffect(() => { if (!seen[mode]) setSeen(s => ({ ...s, [mode]: true })); }, [mode, seen]);
@@ -93,7 +97,7 @@ export default function Market({ state, sub }) {
         {seen.bz && pane('bz', <MarketBazaar state={stateFor('bz')} picked={pickFor('bz')} narrow={narrow} modeSwitch={modeSwitch} active={mode === 'bz'} />)}
         {seen.ah && pane('ah', (
           <Suspense fallback={<div className="loader"><div className="spinner" /></div>}>
-            <MarketAuction state={stateFor('ah')} picked={pickFor('ah')} narrow={narrow} modeSwitch={modeSwitch} active={mode === 'ah'} />
+            <MarketAuction state={stateFor('ah')} picked={pickFor('ah')} narrow={narrow} modeSwitch={modeSwitch} active={mode === 'ah'} mine={mine} />
           </Suspense>
         ))}
       </div>

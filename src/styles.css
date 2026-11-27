@@ -1782,3 +1782,10 @@ tr.grp td { background: rgba(255,255,255,.04); font-weight: 700; font-size: 12px
 .myah-note { margin: 6px 0 0; }
 @media (max-width: 560px) { .myah-list { grid-template-columns: 1fr; } }
 .myah-noico { width: 28px; height: 28px; flex: none; }
+/* «Мои лоты» в боковой колонке «Рынка» (Auction House): одна колонка, лот открывает свой график */
+.myah.compact { margin-top: 8px; }
+.myah.compact .myah-list { grid-template-columns: 1fr; }
+.myah.compact .myah-chips { margin-bottom: 8px; }
+.myah-row.pick { cursor: pointer; }
+.myah-row.pick:hover { background: rgba(255,255,255,.06); }
+.myah-row.on { background: rgba(124,92,255,.14); }
