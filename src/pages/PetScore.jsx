@@ -52,12 +52,12 @@ export function PetScoreCard({ ps }) {
       </>}
 
       {ps.next && ps.plan.picks.length > 0 && <>
-        <div className="ex-sec"><span>Самый дешёвый путь до {ps.next.need}</span><span className="ex-note">≈ {coins(ps.plan.cost)}{ps.plan.enough ? '' : ' (на рынке не хватает вариантов)'}</span></div>
+        <div className="ex-sec"><span>{ps.npcOnly ? `Купить у NPC до ${ps.next.need}` : `Самый дешёвый путь до ${ps.next.need}`}</span><span className="ex-note">≈ {coins(ps.plan.cost)}{ps.plan.enough ? '' : ps.npcOnly ? ' (у NPC не хватает вариантов)' : ' (на рынке не хватает вариантов)'}</span></div>
         <div className="ps-list">
           {ps.plan.picks.map(o => <PetRow key={o.type} o={o} onOpen={openItem} right={<span className="ps-cost">{coins(o.cost)}<small>+{o.points} {plural(o.points, 'очко', 'очка', 'очков')}</small></span>} />)}
         </div>
       </>}
-      {!ps.plan.picks.length && ps.next && <p className="muted small">Цены аукциона ещё не загрузились: дешёвые варианты появятся через минуту.</p>}
+      {!ps.plan.picks.length && ps.next && <p className="muted small">{ps.npcOnly ? 'NPC за монеты таких питомцев не продают: новые типы и редкости добываются самому.' : 'Цены аукциона ещё не загрузились: дешёвые варианты появятся через минуту.'}</p>}
     </Card>
   );
 }
