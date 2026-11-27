@@ -96,7 +96,7 @@ export default function Leaderboard({ sub }) {
             <div>
               {r.rank?.id && r.rank.id !== 'NONE' && <span className={`rank-chip rank-${r.rank.id.toLowerCase()}`}>{r.rank.label}</span>}
               <b>{r.name}</b>
-              {r.guild && <GuildTag tag={r.guild.tag} color={r.guild.color} />}
+              {r.guild && <GuildTag tag={r.guild.tag} name={r.guild.name} color={r.guild.color} />}
               {MODE_LABEL[r.mode] && <span className="mode-chip">{MODE_LABEL[r.mode]}</span>}
             </div>
             <div className="muted tiny">{r.profile}{r.coop > 1 ? ` · кооп из ${r.coop}` : ''}{details(board, r) ? ` · ${details(board, r)}` : ''}</div>
