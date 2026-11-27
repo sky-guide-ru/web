@@ -150,7 +150,7 @@ p, .why, .desc-ru { text-wrap: pretty; }
 
 /* Карта прогрессии: легенда и подсказка, что ветку можно листать */
 .pmap-legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: -4px; }
-.pmap-legend .lg { display: inline-flex; align-items: center; gap: 6px; }
+.pmap-legend .lg { display: inline-flex; align-items: center; gap: 6px; width: auto; height: auto; border: 0; border-radius: 0; font-size: inherit; font-weight: inherit; }
 .pmap-legend .lg::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: #2a2e48; }
 .pmap-legend .done::before { background: var(--green); box-shadow: 0 0 8px rgba(74,222,128,.6); }
 .pmap-legend .current::before { background: var(--accent); box-shadow: 0 0 8px rgba(124,92,255,.7); }
