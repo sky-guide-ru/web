@@ -60,12 +60,14 @@ function CartButton({ id }) {
   const { state } = useApp() || {};
   const { data, mode, change } = usePurchaseCart(state);
   if (mode === 'none' || !state?.analysis || !data) return null;
-  const has = [...(data.rows || []), ...(data.bought || [])].some(r => r.kind === 'item' && r.id === id);
+  const has = [...(data.rows || []), ...(data.bought || []), ...(data.done || [])].some(r => r.kind === 'item' && r.id === id);
+  // Ironman, Stranded, Bingo: тот же список, но это «План добычи»
+  const name = data.farm ? 'План добычи' : 'План покупок';
   return (
     <div className="item-cart">
       {has
-        ? <span className="small green">✔ В плане покупок («Что делать» → «План покупок»)</span>
-        : <button className="btn small" onClick={() => change({ add: id, qty: 1 })}>+ В план покупок</button>}
+        ? <span className="small green">✔ {data.farm ? 'В плане добычи' : 'В плане покупок'} («Что делать» → «{name}»)</span>
+        : <button className="btn small" onClick={() => change({ add: id, qty: 1 })}>{data.farm ? '+ В план добычи' : '+ В план покупок'}</button>}
     </div>
   );
 }

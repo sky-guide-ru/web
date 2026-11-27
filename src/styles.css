@@ -1972,3 +1972,16 @@ tr.grp td { background: rgba(255,255,255,.04); font-weight: 700; font-size: 12px
   .sl-val { grid-area: v; } .sl-dem { grid-area: d; padding-left: 42px; }
   .sl-keep, .sl-crow { grid-template-columns: minmax(0,1fr); }
 }
+
+/* «План добычи» (Ironman, Stranded, Bingo): метка «где взять», материалы крафта */
+.farm-how { display: flex; flex-wrap: wrap; gap: 2px var(--sp-2); align-items: center; }
+.farm-tag { font-size: var(--fs-xs); border-radius: var(--r-pill); padding: 1px 8px; white-space: nowrap; }
+.farm-npc { background: rgba(34,211,238,.14); color: var(--accent2); }
+.farm-craft { background: rgba(124,92,255,.16); color: #b9a8ff; }
+.farm-drop { background: rgba(248,113,113,.13); color: #fca5a5; }
+.farm-other { background: rgba(255,255,255,.06); color: var(--muted); }
+.farm-xyz { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.farm-parts { display: flex; flex-wrap: wrap; gap: 2px var(--sp-3); }
+.farm-lack { color: #fbbf24; }
+.farm-step { justify-self: start; background: none; border: 0; padding: 0; font: inherit; color: var(--muted); cursor: pointer; text-align: left; }
+.farm-step:hover { color: var(--text); text-decoration: underline; }

@@ -118,10 +118,79 @@ const CAT_ICON = {
 const stepIcon = st => (st?.items?.length ? st.items[st.items.length - 1]
   : /^museum/.test(st?.id || '') ? 'MUSEUM_PORTAL' : CAT_ICON[st && catKey(st)] || null);
 
+// «План добычи»: вариант «Плана покупок» для Ironman, Stranded и Bingo (сервер отдаёт farm: true).
+// Вместо цены — где взять: купить у NPC (остров, координаты, монеты), скрафтить (сколько материалов уже есть) или выбить.
+const FARM_KIND = { npc: ['farm-npc', 'купить у NPC'], craft: ['farm-craft', 'скрафтить'], forge: ['farm-craft', 'Forge'], drop: ['farm-drop', 'выбить'], shop: ['farm-npc', 'обменять у NPC'], other: ['farm-other', 'добыть'] };
+const FARM_FILTER = [['all', 'Всё'], ['npc', 'У NPC'], ['craft', 'Крафт'], ['drop', 'Выбить']];
+const farmGroup = k => (k === 'shop' ? 'npc' : k === 'forge' ? 'craft' : k);
+export const farmSkipKey = id => `f:${String(id).replace(/;/g, '.')}`;
+
+function FarmPlan({ state, data, mode, change, error, onStep, label }) {
+  const { openItem } = useApp();
+  const [f, setF] = useState('all');
+  const rows = data.rows || [];
+  const list = rows.filter(r => f === 'all' || farmGroup(r.source?.kind) === f);
+  const doneN = data.done?.length || 0;
+  const edit = mode !== 'none';
+  return (
+    <div className="cart farm" data-news="farm">
+      <div className="cart-top">
+        <div className="cart-budget">
+          <div className="cart-budget-row">
+            <span className="small">Собрано <b>{doneN}</b> из {data.total || 0}{data.lack ? ` · для крафта не хватает материалов: ${data.lack}` : ''}{data.ready ? ` · можно скрафтить сейчас: ${data.ready}` : ''}</span>
+            <span className="chips cart-budget-sum">{FARM_FILTER.map(([k, l]) => <button key={k} className={f === k ? 'chip active' : 'chip'} onClick={() => setF(k)}>{l}</button>)}</span>
+          </div>
+          <div className="cart-bar"><div className="cart-bar-fill" style={{ width: `${data.total ? Math.min(100, doneN / data.total * 100) : 0}%` }} /></div>
+          <div className="cart-bar-legend tiny muted"><span>{label}: Bazaar и аукциона нет</span><span>монеты нужны только у NPC: {coins(data.coins || 0)}</span></div>
+        </div>
+        {edit && <CartAdd onAdd={(id, qty) => change({ add: id, qty })} />}
+      </div>
+      {list.length ? (
+        <ol className="cart-list">{list.map((p, i) => {
+          const src = p.source || {};
+          const [cls, kindRu] = FARM_KIND[src.kind] || FARM_KIND.other;
+          const ready = src.parts?.length && src.parts.every(x => x.have >= x.need);
+          const lack = (src.parts || []).filter(x => x.have < x.need).length;
+          return (
+            <li key={p.kind + p.id} className="cart-row" onClick={() => openItem(p.id)} title="Открыть предмет: где взять пошагово">
+              <span className="cart-n">{i + 1}</span>
+              <span className="cart-ico"><ItemIcon id={p.id} size={32} /></span>
+              <span className="cart-main">
+                <span className="cart-title">{p.name}{p.qty > 1 && ` ×${num(p.qty)}`}{p.kind === 'item' && <span className="cart-own">своё</span>}{p.payoff && <span className="muted small"> · <Rich text={p.payoff} /></span>}</span>
+                <span className="farm-how small muted"><span className={`farm-tag ${cls}`}>{kindRu}</span>{src.where && <span><Rich text={src.where} /></span>}{src.coords && <span className="farm-xyz">x, y, z: {src.coords}</span>}</span>
+                {src.parts?.length > 0 && <span className="farm-parts small">{src.parts.map(x => <span key={x.id} className={x.have >= x.need ? 'green' : 'farm-lack'}>{x.name}: <b>{num(x.have)}</b> / {num(x.need)}</span>)}</span>}
+                {p.stepId && <button className="farm-step tiny muted" onClick={e => { e.stopPropagation(); onStep(p.stepId); }}>шаг плана: <Rich text={p.stepTitle} /></button>}
+              </span>
+              <span className="cart-price">
+                <b className={ready ? 'green' : ''}>{src.kind === 'npc' ? coins(src.coins) : ready ? 'всё есть' : lack ? `не хватает ${lack}` : p.have ? `${num(p.have)} / ${num(p.qty)}` : '—'}</b>
+                <span className="small muted">{src.kind === 'npc' ? 'монет' : ready ? 'скрафти' : lack ? plural(lack, 'материала', 'материалов', 'материалов') : ''}</span>
+              </span>
+              {edit ? <button className="x-btn sm danger cart-x" title="Убрать из плана добычи" aria-label="Убрать из плана"
+                onClick={e => { e.stopPropagation(); change(p.kind === 'item' ? { remove: p.id } : { skip: farmSkipKey(p.id), value: true }); }}>×</button> : <span />}
+            </li>
+          );
+        })}</ol>
+      ) : <Empty>{rows.length ? 'В этом фильтре пусто.' : 'Добывать по плану пока нечего.'}</Empty>}
+      {error && <div className="step-undo small warn" role="alert">{error}</div>}
+      {doneN > 0 && <div className="small green cart-bought">✔ Собрано: {data.done.map(b => b.name).join(' · ')}</div>}
+      {data.skipped?.length > 0 && (
+        <details className="hidden-steps">
+          <summary className="small">Убрано из плана добычи ({data.skipped.length})</summary>
+          <ul>{data.skipped.map(s => (
+            <li key={s.id}><span>{s.name}</span><button className="chip tiny" onClick={() => change({ skip: farmSkipKey(s.id), value: false })}>вернуть</button></li>
+          ))}</ul>
+        </details>
+      )}
+      <p className="muted small plan-note">Список собирается из вещей в шагах плана, собранное уходит само.{edit ? <> Своё можно добавить и из карточки предмета.{mode === 'local' ? ' Правки видно только в этом браузере.' : ''}</> : ' Это чужой план: править его может только сам игрок.'}</p>
+    </div>
+  );
+}
+
 function PurchasePlan({ state, onStep }) {
   const { data, mode, change, error, loading } = usePurchaseCart(state);
   const { openItem } = useApp();
   const [budgetText, setBudgetText] = useProfileStore('sb-cart-budget', '');
+  if (data?.farm) return <FarmPlan state={state} data={data} mode={mode} change={change} error={error} onStep={onStep} label={state.member?.mode?.label || 'Ironman'} />;
   const plan = state.analysis?.plan;
   const stepById = useMemo(() => new Map((state.analysis?.roadmap || []).map(s => [s.id, s])), [state.analysis?.roadmap]);
   if (!data && loading) return <div className="muted small"><div className="spinner" />Считаю план покупок…</div>;
@@ -252,7 +321,7 @@ export default function Roadmap({ state, sub }) {
   const a = state.analysis;
   return (
     <div className="grid">
-      <Card className="span-12" title="Персональный план прогрессии" right={<Tabs value={view} onChange={setView} tabs={[{ id: 'steps', label: 'Шаги' }, { id: 'map', label: 'Карта прогрессии' }, { id: 'plan', label: 'План покупок' }]} />}>
+      <Card className="span-12" title="Персональный план прогрессии" right={<Tabs value={view} onChange={setView} tabs={[{ id: 'steps', label: 'Шаги' }, { id: 'map', label: 'Карта прогрессии' }, { id: 'plan', label: state.member?.mode?.market === false ? 'План добычи' : 'План покупок' }]} />}>
         {a?.summary?.headline && <div className="plan-summary"><span aria-hidden="true">🎯</span><span><Rich text={a.summary.headline} />{a.summary.quickWins ? ` · быстрых побед: ${a.summary.quickWins}` : ''}</span></div>}
         {view === 'map' && (map || !state.parts?.map ? <ProgressMap map={map} goStep={goStep} /> : <div className="muted small"><div className="spinner" />Загружаю карту…</div>)}
         {view === 'plan' && <PurchasePlan state={state} onStep={goStep} />}
