@@ -1,4 +1,5 @@
 import { LOCALE, EN } from '../i18n.js';
+import SellMock, { useSellTile } from '../mock/Sell.jsx';
 // Страница «Запасы»: мешки (Sacks) с ценами и эссенции с перками Essence Shop.
 // Данные — /api/sacks и /api/essence (выбранный игрок). Гайд по эссенциям — #/guides/essence.
 import { useMemo, useState } from 'react';
@@ -25,7 +26,8 @@ const COLS = [
 const GROUP_SORTS = [['value', 'по стоимости'], ['name', 'по названию'], ['kinds', 'по числу видов'], ['count', 'по количеству']];
 
 export default function Stash({ state, sub }) {
-  const [tab, setTab] = useHashTab('stash', sub, ['sacks', 'essence'], 'sacks');
+  const [tab, setTab] = useHashTab('stash', sub, ['sacks', 'essence', 'sell'], 'sacks');
+  const iron = typeof location !== 'undefined' && location.search.includes('iron');
   // Обе части грузим сразу: крупные плитки сверху показывают итог каждой, и эссенции видно, даже пока открыты мешки
   // (раньше была мелкая вкладка, и игроки её не замечали)
   // Ждём свежий профиль (не тот, что сохранён в браузере), иначе мешки качались дважды подряд.
@@ -42,6 +44,7 @@ export default function Stash({ state, sub }) {
       sub: sd ? (sd.kinds ? `${num(sd.kinds)} ${plural(sd.kinds, 'позиция', 'позиции', 'позиций')} · что продать, каких мешков нет` : 'мешки пусты') : 'считаю…' },
     { id: 'essence', news: 'essence', icon: 'ESSENCE_WITHER', title: 'Essence и перки', value: ed ? coins(ed.total) : '…',
       sub: ed ? `${essCount} ${plural(essCount, 'вид', 'вида', 'видов')} · ${buyable ? `можно купить ${num(buyable)} ${plural(buyable, 'уровень', 'уровня', 'уровней')} перков` : 'перки, звёзды, продажа'}` : 'считаю…' },
+    useSellTile(iron),
   ];
   return (
     <div className="grid stash">
@@ -53,7 +56,7 @@ export default function Stash({ state, sub }) {
           </button>
         ))}
       </div>
-      {tab === 'sacks' ? <Sacks res={sacks} /> : <Essence res={ess} />}
+      {tab === 'sell' ? <SellMock iron={iron} /> : tab === 'sacks' ? <Sacks res={sacks} /> : <Essence res={ess} />}
     </div>
   );
 }
