@@ -839,6 +839,9 @@ table.cmp { width: 100%; border-collapse: separate; border-spacing: 0; min-width
 .rank-chip.rank-vip_plus, .rank-chip.rank-vip { background: #1f3b2a; color: #55ff55; }
 .rank-chip.rank-mvp, .rank-chip.rank-mvp_plus { background: #13324a; color: #55ffff; }
 .rank-chip.rank-mvp_plus_plus { background: #3d2a0c; color: #ffaa00; }
+.guild-chip { display: inline-block; font-size: 10px; font-weight: 700; padding: 0 6px; border-radius: 6px; line-height: 16px; vertical-align: 1px; margin-left: 6px; white-space: nowrap; }
+.hero-guild { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 6px; margin-top: 4px; }
+.hero-guild .guild-chip { margin-left: 0; }
 .mode-chip { background: #3a1f1f; color: #ffb4a8; }
 .nocookie { color: #f5a623; }
 .cap-badge { font-size: 11px; font-weight: 700; color: #ffd27a; background: #3d2f0c; border-radius: 6px; padding: 1px 6px; }

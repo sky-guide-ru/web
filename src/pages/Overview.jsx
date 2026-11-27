@@ -1,4 +1,4 @@
-import { DEC } from '../i18n.js';
+import { DEC, LOCALE } from '../i18n.js';
 import { useState, useEffect } from 'react';
 import { Card, Stat, Sparkline, Progress, Empty } from '../components/ui.jsx';
 import { ItemIcon } from '../components/ItemIcon.jsx';
@@ -8,6 +8,7 @@ import { useApp } from '../App.jsx';
 import { Rich } from '../guides/Rich.jsx';
 import { pricesLoaded } from './Gear.jsx';
 import PlayerModel from '../components/PlayerModel.jsx';
+import GuildTag from '../components/GuildTag.jsx';
 import LiveAdvisor from '../components/LiveAdvisor.jsx';
 import { EventsStrip } from './Events.jsx';
 import ShareCard from '../components/ShareCard.jsx';
@@ -119,6 +120,14 @@ export default function Overview({ state }) {
               <div className="hero-title">{state.player.name} <span className="muted">на {m.profileName}</span></div>
               <div className="muted small">{Math.round((m.sbLevel % 1) * 100)}/100 опыта до {Math.floor(m.sbLevel) + 1} уровня</div>
               <HypixelLine h={m.hypixel} />
+              {m.guild && (
+                <div className="hero-guild small" data-news="guild">
+                  <span className="muted">Гильдия</span>
+                  <GuildTag tag={m.guild.tag} color={m.guild.tagColor} />
+                  <b>{m.guild.name}</b>
+                  <span className="muted">{[m.guild.rank, m.guild.joined && `с ${new Date(m.guild.joined).toLocaleDateString(LOCALE, { day: 'numeric', month: 'long', year: 'numeric' })}`, `уровень ${m.guild.level}`].filter(Boolean).join(' · ')}</span>
+                </div>
+              )}
             </div>
             <button className="btn ghost small share-btn" data-news="share" onClick={() => setShare(true)} title="Картинка с главными цифрами профиля, чтобы скинуть в Discord или ВК">Карточка для Discord</button>
           </div>
