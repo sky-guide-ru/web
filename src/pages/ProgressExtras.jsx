@@ -264,7 +264,7 @@ function IslandCoop({ x, view }) {
   );
 }
 
-function Records({ x }) {
+function Records({ x, h }) {
   const r = x.races || {};
   const tiles = [
     ['DIAMOND_SWORD', 'Макс. урон за удар', num(x.highestDamage)],
@@ -279,6 +279,8 @@ function Records({ x }) {
     ['HEAVY_PEARL', 'Жемчуг Matriarch', num(x.matriarchPearls)],
     ['TRAPPER_CREST', 'Trapper: шкур', num(x.trapperPelts)],
   ].filter(Boolean);
+  // SkyBlock-достижения Hypixel (/player): счётчики сразу по всем профилям игрока
+  for (const a of h?.achievements || []) tiles.push([a.icon, a.label, num(a.value), 'по всем профилям']);
   const races = [['End', r.end_race_best_time], ['Rift', r.rift_race_best_time], ['Foraging', r.foraging_race_best_time]].filter(([, v]) => v);
   return (
     <Card title="Рекорды и статистика" icon={<ItemIcon id="NETHER_STAR" size={22} />} className="span-12 ex-card">
@@ -300,7 +302,7 @@ export default function ProgressExtras({ m, advice }) {
       <Hunting x={x} view={view} />
       <Garden m={m} x={x} view={view} />
       <IslandCoop x={x} view={view} />
-      <Records x={x} />
+      <Records x={x} h={m.hypixel} />
     </>
   );
 }

@@ -15,26 +15,74 @@ import ShareCard from '../components/ShareCard.jsx';
 const SKILL_ICON = { farming: 'golden_hoe', mining: 'stone_pickaxe', combat: 'stone_sword', foraging: 'jungle_sapling', fishing: 'fishing_rod', enchanting: 'enchanting_table', alchemy: 'brewing_stand', carpentry: 'crafting_table', runecrafting: 'magma_cream', taming: 'bone', social: 'emerald', hunting: 'lead' };
 export { SKILL_ICON };
 
-// Боевая сводка по данным профиля: лист статов, удар лучшим мечом, EHP. Всё примерно: зелья, баффы и сетовые бонусы в API не видны
-function PowerStrip({ p }) {
+// Сколько осталось действовать зелью: зелья в SkyBlock тикают только в игре, поэтому это игровое время
+const left = sec => {
+  const h = Math.floor(sec / 3600), mn = Math.floor((sec % 3600) / 60);
+  if (!h) return `${Math.max(1, Math.round(sec / 60))} мин`;
+  return mn ? `${h} ч ${mn} мин` : `${h} ч`;
+};
+
+// Прибавка статов от действующих зелий и тортов Century Cake (выключенные и на паузе не считаем)
+function buffTotals(ef) {
+  const out = {};
+  if (!ef) return out;
+  const off = new Set(ef.disabled || []);
+  for (const e of ef.active || []) if (!off.has(e.id)) for (const [k, v] of Object.entries(e.stats || {})) out[k] = (out[k] || 0) + v;
+  for (const c of ef.cakes || []) if (c.amount && (!c.expireAt || c.expireAt > Date.now())) out[c.stat] = (out[c.stat] || 0) + c.amount;
+  return out;
+}
+
+// Боевая сводка по данным профиля: лист статов, удар лучшим мечом, EHP. Зелья и торты — зелёной прибавкой; сетовые бонусы в API не видны
+function PowerStrip({ p, effects }) {
   // Надет не боевой сет (фермерский, рыбацкий…) — показываем статы боевого набора из Wardrobe, иначе цифры занижены
   const c = p.combat && !p.combat.worn ? p.combat : null;
   const w = (c ? c.world : p.world) || {};
   const ehpN = c ? c.ehp?.world?.normal : p.ehp?.world?.normal;
   const weapon = c ? c.weapon : p.weapon;
   const r = v => num(Math.round(v || 0));
+  const buff = buffTotals(effects);
+  const off = new Set(effects?.disabled || []);
+  // Бессрочные эффекты без статов (Night Vision от предмета) — шум, их не показываем
+  const shown = (effects?.active || []).filter(e => !off.has(e.id) && !(e.infinite && !Object.keys(e.stats || {}).length));
   const cells = [
-    ['Health', r(w.health)], ['Defense', r(w.defense)], ['EHP', r(ehpN)],
-    ['Strength', r(w.strength)], ['Crit Damage', `${r(w.crit_damage)}%`], ['Crit Chance', `${r(w.crit_chance)}%`], ['Intelligence', r(w.intelligence)],
+    ['Health', r(w.health), 'health'], ['Defense', r(w.defense), 'defense'], ['EHP', r(ehpN)],
+    ['Strength', r(w.strength), 'strength'], ['Crit Damage', `${r(w.crit_damage)}%`, 'crit_damage'], ['Crit Chance', `${r(w.crit_chance)}%`, 'crit_chance'], ['Intelligence', r(w.intelligence), 'intelligence'],
   ];
   return (
-    <div className="power-strip" title="Посчитано по данным профиля. Зелья, баффы, сетовые бонусы брони и мэры в API не видны, поэтому в игре цифры могут быть выше">
+    <div className="power-strip" title="Посчитано по данным профиля. Сетовые бонусы брони и мэры в API не видны, поэтому в игре цифры могут быть выше">
       <div className="power-cells">
-        {cells.map(([k, v]) => <div key={k} className="power-cell"><span className="muted tiny"><Rich text={k} /></span><b>{v}</b></div>)}
+        {cells.map(([k, v, key]) => (
+          <div key={k} className="power-cell"><span className="muted tiny"><Rich text={k} /></span><b>{v}{buff[key] ? <span className="power-buff" title="От зелий и Century Cake, которые действуют сейчас">+{num(buff[key])}</span> : null}</b></div>
+        ))}
       </div>
+      {(shown.length > 0 || effects?.cakes?.length > 0) && (
+        <div className="power-effects small" data-news="effects">
+          {shown.map(e => (
+            <span key={e.id} className="chip tiny" title={e.infinite ? 'Действует бессрочно' : 'Время идёт, только пока ты в игре'}>
+              <Rich text={`${e.name} ${e.roman}`} />{e.infinite ? '' : ` · ${left(e.secLeft)}`}
+            </span>
+          ))}
+          {(effects?.cakes || []).map(c => <span key={c.key} className="chip tiny" title="Бафф от Century Cake"><Rich text={`Century Cake: +${num(c.amount)} ${prettyId(c.stat)}`} /></span>)}
+        </div>
+      )}
       {c && <div className="muted small"><Rich text={`Посчитано для боя: ${c.short}. Сейчас надето другое.`} /></div>}
       {weapon && <div className="muted small"><Rich text={`Удар мечом ${weapon.name}: примерно ${num(weapon.hit.normal)}, с критом ${num(weapon.hit.crit)}.`} /></div>}
-      <div className="muted tiny">Примерно: без зелий, баффов и сетовых бонусов брони. EHP — сколько урона выдержишь с учётом Defense.</div>
+      <div className="muted tiny">Примерно: без сетовых бонусов брони. Зелёным — прибавка от зелий, которые действуют сейчас. EHP — сколько урона выдержишь с учётом Defense.</div>
+    </div>
+  );
+}
+
+// Профиль Hypixel из /player: Network Level, Achievement Points, с какого года на сервере и ссылки игрока
+function HypixelLine({ h }) {
+  if (!h) return null;
+  const since = h.firstLogin ? new Date(h.firstLogin).getFullYear() : null;
+  const parts = [`Network Level ${Math.floor(h.networkLevel)}`, h.achievementPoints ? `${num(h.achievementPoints)} Achievement Points` : null, since ? `на Hypixel с ${since} года` : null].filter(Boolean);
+  return (
+    <div className="muted small hero-hypixel">
+      {parts.join(' · ')}
+      {(h.socials || []).map(s => (s.url
+        ? <a key={s.id} className="link" href={s.url} target="_blank" rel="noopener noreferrer nofollow"> · {prettyId(s.id.toLowerCase())}</a>
+        : <span key={s.id}> · Discord: {s.name}</span>))}
     </div>
   );
 }
@@ -70,6 +118,7 @@ export default function Overview({ state }) {
               <div className="muted small">Уровень SkyBlock</div>
               <div className="hero-title">{state.player.name} <span className="muted">на {m.profileName}</span></div>
               <div className="muted small">{Math.round((m.sbLevel % 1) * 100)}/100 опыта до {Math.floor(m.sbLevel) + 1} уровня</div>
+              <HypixelLine h={m.hypixel} />
             </div>
             <button className="btn ghost small share-btn" data-news="share" onClick={() => setShare(true)} title="Картинка с главными цифрами профиля, чтобы скинуть в Discord или ВК">Карточка для Discord</button>
           </div>
@@ -89,7 +138,7 @@ export default function Overview({ state }) {
       {!me.guest && <LiveAdvisor className="span-12" />}
 
       <Card title="Что делать прямо сейчас" className="span-8" news="now" right={<a href="#/roadmap" className="link">весь план →</a>}>
-        {a.power && <PowerStrip p={a.power} />}
+        {a.power && <PowerStrip p={a.power} effects={m.effects} />}
         <div className="next-steps">
           {undo && (
             <div className="step-undo small" role="status">

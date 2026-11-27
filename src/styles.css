@@ -1565,6 +1565,10 @@ html.has-news-pop .survey-fab { bottom: calc(18px + var(--news-pop-h, 160px) + 1
 @media (max-width: 900px) { .power-cells { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .power-cell { display: flex; flex-direction: column; min-width: 0; }
 .power-cell b { font-size: 15px; font-variant-numeric: tabular-nums; }
+.power-buff { margin-left: 4px; font-size: 11px; font-weight: 600; color: var(--green); }
+.power-effects { display: flex; flex-wrap: wrap; gap: 6px; }
+.power-effects .chip { cursor: default; padding: 3px 8px; }
+.hero-hypixel { margin-top: 2px; }
 .step-calc { margin-top: 4px; color: #c9b8ff; }
 .step-calc::before { content: '≈ '; opacity: .7; }
 
