@@ -74,6 +74,13 @@ function PowerStrip({ p, effects }) {
 }
 
 // Профиль Hypixel из /player: Network Level, Achievement Points, с какого года на сервере и ссылки игрока
+// Онлайн сейчас (/status, только свой профиль): остров SkyBlock или другая игра Hypixel. Не в сети — ничего
+function OnlineBadge({ o }) {
+  if (!o?.online) return null;
+  const where = o.island || (o.game && o.game !== 'SKYBLOCK' ? prettyId(o.game.toLowerCase()) : null);
+  return <span className="hero-online small" data-news="online" title="Hypixel показывает это, только если игрок не скрыл статус в настройках">{where ? `в игре: ${where}` : 'в игре'}</span>;
+}
+
 function HypixelLine({ h }) {
   if (!h) return null;
   const since = h.firstLogin ? new Date(h.firstLogin).getFullYear() : null;
@@ -117,7 +124,7 @@ export default function Overview({ state }) {
             <div className="lvl-ring" style={{ '--p': (m.sbLevel % 1) * 100 }}><span>{Math.floor(m.sbLevel)}</span></div>
             <div>
               <div className="muted small">Уровень SkyBlock</div>
-              <div className="hero-title">{state.player.name} <span className="muted">на {m.profileName}</span></div>
+              <div className="hero-title">{state.player.name} <span className="muted">на {m.profileName}</span> <OnlineBadge o={m.online} /></div>
               <div className="muted small">{Math.round((m.sbLevel % 1) * 100)}/100 опыта до {Math.floor(m.sbLevel) + 1} уровня</div>
               <HypixelLine h={m.hypixel} />
               {m.guild && (

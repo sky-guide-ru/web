@@ -1576,6 +1576,10 @@ html.has-news-pop .survey-fab { bottom: calc(18px + var(--news-pop-h, 160px) + 1
 .power-effects { display: flex; flex-wrap: wrap; gap: 6px; }
 .power-effects .chip { cursor: default; padding: 3px 8px; }
 .hero-hypixel { margin-top: 2px; }
+.hero-online { display: inline-flex; align-items: center; gap: 5px; margin-left: 6px; font-weight: 500; color: #4ade80; vertical-align: middle; }
+.hero-online::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+.news-sb { margin-bottom: 14px; }
+.news-sb-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
 .step-calc { margin-top: 4px; color: #c9b8ff; }
 .step-calc::before { content: '≈ '; opacity: .7; }
 
