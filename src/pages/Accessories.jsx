@@ -51,17 +51,28 @@ const Bdg = ({ k, label }) => <span className="badge" style={{ '--badge': KIND[k
 // Полная цепочка — во всплывашке по наведению или нажатию.
 const DOTS_FULL = 5;
 const Dots = ({ t, count = true }) => {
-  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState(null);
+  const ref = useRef(null);
   if (!t) return null;
   const [done, all] = t, left = Math.max(all - done, 0);
   const full = <>{'●'.repeat(done)}<i>{'●'.repeat(left)}</i></>;
   if (all <= DOTS_FULL) return <span className="dots" title={`tier ${done} из ${all}`}>{full}</span>;
   const more = Math.max(left - 1, 0);
+  // Подсказка — поверх всего (портал в body): над точками, а если сверху нет места — под ними.
+  const show = () => {
+    const r = ref.current?.getBoundingClientRect();
+    if (!r) return;
+    const up = r.top > 70;
+    setPos({ x: Math.min(Math.max(r.left + r.width / 2, 124), window.innerWidth - 124), y: up ? r.top - 8 : r.bottom + 8, up });
+  };
   return (
-    <span className={`dots dots-s${open ? ' open' : ''}`} tabIndex={0} aria-label={`tier ${done} из ${all}`}
-      onClick={e => { e.stopPropagation(); setOpen(o => !o); }} onBlur={() => setOpen(false)}>
+    <span ref={ref} className="dots dots-s" tabIndex={0} aria-label={`tier ${done} из ${all}`}
+      onMouseEnter={show} onMouseLeave={() => setPos(null)} onFocus={show} onBlur={() => setPos(null)}
+      onClick={e => { e.stopPropagation(); pos ? setPos(null) : show(); }}>
       {'●'.repeat(Math.min(done, 3))}{left > 0 && <i>●</i>}{more > 0 && <em>+{more}</em>}{count && <b>{done}/{all}</b>}
-      <span className="dots-pop" role="tooltip"><small>tier {done} из {all}</small>{full}</span>
+      {pos && createPortal(
+        <span className={`dots dots-pop${pos.up ? '' : ' down'}`} role="tooltip" style={{ left: pos.x, top: pos.y }}><small>tier {done} из {all}</small>{full}</span>,
+        document.body)}
     </span>);
 };
 
