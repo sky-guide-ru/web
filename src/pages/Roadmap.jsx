@@ -6,8 +6,25 @@ import { ItemIcon } from '../components/ItemIcon.jsx';
 import { useApp } from '../App.jsx';
 import { Rich } from '../guides/Rich.jsx';
 import { openNewsLink } from '../newsLinks.jsx';
+import { useInterests, applyInterests } from '../interests.js';
 
 const STATUS = { done: 'пройдено', current: 'сейчас', available: 'доступно', locked: 'закрыто' };
+
+// «Нравится / Не хочу»: нажатие по категории переключает её: обычная → нравится → не хочу → обычная
+const NEXT = { undefined: 'like', like: 'no', no: undefined };
+function Interests({ cats, interests, set, clear }) {
+  const like = cats.filter(c => interests[c] === 'like'), no = cats.filter(c => interests[c] === 'no');
+  return (
+    <details className="interests small" data-news="interests" open={like.length + no.length > 0 || undefined}>
+      <summary>Нравится / Не хочу{like.length + no.length > 0 ? `: ♥ ${like.length} · ✕ ${no.length}` : ''}</summary>
+      <div className="muted"><Rich text="Нажми категорию: ♥ поднимает её шаги выше, ✕ убирает их из плана, третье нажатие возвращает как было. Ironman и Bingo план учитывает сам." /></div>
+      <div className="chips">
+        {cats.map(c => <button key={c} className={`chip tiny interest ${interests[c] || ''}`} onClick={() => set(c, NEXT[interests[c]])}>{interests[c] === 'like' ? '♥ ' : interests[c] === 'no' ? '✕ ' : ''}{c}</button>)}
+        {like.length + no.length > 0 && <button className="chip tiny" onClick={clear}>сбросить</button>}
+      </div>
+    </details>
+  );
+}
 
 function ProgressMap({ map, goStep }) {
   if (!map?.branches?.length) return <Empty>Карта появится после загрузки профиля.</Empty>;
@@ -60,12 +77,16 @@ export default function Roadmap({ state, sub }) {
   const [cat, setCat] = useState('all');
   const [showHidden, setShowHidden] = useState(false);
   const [flash, setFlash] = useState(null);
-  const steps = state.analysis?.roadmap || [];
+  const { interests, setCat: setInterest, clear: clearInterests } = useInterests();
+  const allSteps = state.analysis?.roadmap || [];
+  const steps = useMemo(() => applyInterests(allSteps, interests), [allSteps, interests]);
   const cats = useMemo(() => {
     const n = new Map();
     for (const s of steps) if (!hidden[s.id]) n.set(s.cat, (n.get(s.cat) || 0) + 1);
     return [...n];
   }, [steps, hidden]);
+  // Все категории плана (и те, что убраны «Не хочу») — для строки интересов
+  const allCats = useMemo(() => [...new Set(allSteps.map(s => s.cat))], [allSteps]);
   const goStep = id => {
     setView('steps'); setCat('all');
     // Шаг скрыт — раскрываем список скрытых, иначе прокручивать некуда
@@ -80,7 +101,7 @@ export default function Roadmap({ state, sub }) {
     if (v.startsWith('cat:')) { setView('steps'); setCat(steps.some(s => s.cat === v.slice(4)) ? v.slice(4) : 'all'); }
     else goStep(v);
   }, [sub, steps.length]);
-  if (!steps.length) return <Empty>Нет рекомендаций — профиль не загружен.</Empty>;
+  if (!allSteps.length) return <Empty>Нет рекомендаций — профиль не загружен.</Empty>;
   const hiddenSteps = steps.filter(s => hidden[s.id]);
   const shown = steps.filter(s => (cat === 'all' || s.cat === cat) && !hidden[s.id]);
   const a = state.analysis;
@@ -94,6 +115,7 @@ export default function Roadmap({ state, sub }) {
           <button className={cat === 'all' ? 'chip active' : 'chip'} onClick={() => setCat('all')}>Все ({steps.length - hiddenSteps.length})</button>
           {cats.map(([c, n]) => <button key={c} className={cat === c ? 'chip active' : 'chip'} onClick={() => setCat(c)}>{c} ({n})</button>)}
         </div>}
+        {view === 'steps' && <Interests cats={allCats} interests={interests} set={setInterest} clear={clearInterests} />}
         {view === 'steps' && (
           <p className="muted small plan-note">
             Шаги уходят из плана сами, когда по данным игры видно, что они сделаны (профиль обновляется раз в несколько минут).{' '}

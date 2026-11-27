@@ -1817,3 +1817,39 @@ tr.grp td { background: rgba(255,255,255,.04); font-weight: 700; font-size: 12px
 .discord-card > div { flex: 1; }
 .discord-card-go { background: #5865f2; flex: none; }
 @media (max-width: 560px) { .discord-card-go { display: none; } }
+
+/* «С возвращением» и «Дела на сегодня» на «Обзоре» */
+.comeback { border-color: rgba(34, 211, 238, .35); background: linear-gradient(135deg, rgba(34, 211, 238, .07), rgba(124, 92, 255, .05)); }
+.comeback-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 8px; }
+.comeback-cols h4 { margin: 0 0 6px; font-size: 13px; color: var(--accent2); }
+.comeback-list { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13px; }
+.dailies .daily-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+.daily { display: flex; gap: 10px; align-items: flex-start; padding: 9px 10px; border-radius: var(--r-lg); background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); color: inherit; text-decoration: none; }
+.daily:hover { border-color: rgba(124,92,255,.4); }
+.daily-check { flex: none; width: 18px; height: 18px; border-radius: 5px; border: 2px solid rgba(255,255,255,.25); display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+.daily.done .daily-check { background: var(--green); border-color: var(--green); color: #0a0b14; }
+.daily.done b { opacity: .7; }
+.daily-body { display: grid; gap: 2px; min-width: 0; }
+.daily-note { margin-top: 6px; }
+
+/* «Нравится / Не хочу» в плане */
+.interests { display: grid; gap: 6px; margin-top: 8px; }
+.chip.interest.like { border-color: rgba(74, 222, 128, .5); background: rgba(74, 222, 128, .12); color: #bbf7d0; }
+.chip.interest.no { border-color: rgba(248, 113, 113, .45); background: rgba(248, 113, 113, .1); color: #fecaca; text-decoration: line-through; }
+
+/* «Прогресс»: сундуки данжей и SkyBlock XP */
+.chests { margin-top: 14px; }
+.chest-table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+.chest-table th { text-align: left; font-weight: 600; color: var(--muted, #9aa0b8); padding: 4px 6px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.chest-table td { padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,.04); }
+.sbxp-rows { display: grid; gap: 6px; }
+.sbxp-row { display: grid; grid-template-columns: 150px 170px 1fr 170px; gap: 12px; align-items: center; padding: 8px 10px; border-radius: var(--r-lg); background: rgba(255,255,255,.03); color: inherit; text-decoration: none; }
+.sbxp-row:hover { background: rgba(124,92,255,.08); }
+.sbxp-bar { display: grid; gap: 2px; }
+@media (max-width: 760px) { .sbxp-row { grid-template-columns: 1fr auto; } .sbxp-row .grow, .sbxp-row .sbxp-bar { grid-column: 1 / -1; } .chest-table th:nth-child(6), .chest-table td:nth-child(6) { display: none; } }
+
+/* «Где взять»: что уже лежит в Sacks */
+.ob-have { font-size: 11px; padding: 1px 7px; border-radius: var(--r-pill); background: rgba(34, 211, 238, .12); color: #a5f3fc; white-space: nowrap; }
+.ob-have.full { background: rgba(74, 222, 128, .14); color: #bbf7d0; }
+.ob-stock { margin: 6px 0 0 22px; color: #a5f3fc; }
+.interests > summary { cursor: pointer; color: var(--accent2); }
