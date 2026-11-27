@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Tabs, Empty, CountUp } from '../components/ui.jsx';
+import { Card, Tabs, Empty, CountUp, Progress } from '../components/ui.jsx';
 import { ItemIcon } from '../components/ItemIcon.jsx';
 import { coins, itemValue, useApi, api, usePart, RARITY_COLOR } from '../api.js';
 import { useApp } from '../App.jsx';
@@ -171,67 +171,73 @@ function Networth({ nw, pricing }) {
   );
 }
 
-// Magic Find после реворка 0.27.3: что уже даёт MF, что взять дальше (дешевле за 1 MF — выше) и что не видно в профиле
+// Magic Find после реворка 0.27.3: слева — сколько есть и из чего, справа — что взять дальше (дешевле за 1 MF — выше).
+// Под «Ещё» — что не видно в профиле и MF только на отдельных мобов
 const mfNum = v => `+${String(Math.round(v * 10) / 10).replace('.', DEC)}`;
+const mfIcon = (id, openItem, size = 30) => (id ? <ItemIcon id={id} size={size} onClick={openItem ? () => openItem(id) : undefined} /> : <span className="mf-noicon" style={{ width: size, height: size }} />);
+function MfRow({ icon, label, sub, mf, right, dim, openItem, title }) {
+  return (
+    <div className={`mf-row${dim ? ' dim' : ''}`} title={title}>
+      {mfIcon(icon, openItem)}
+      <div className="grow mf-row-text"><Rich text={label} />{sub && <div className="muted tiny"><Rich text={sub} /></div>}</div>
+      <b className="mf-plus">{mfNum(mf)}</b>
+      {right !== undefined && <div className="mf-price">{right}</div>}
+    </div>
+  );
+}
 function MagicFind({ mf, openItem }) {
   const [more, setMore] = useState(false);
+  const fmt = v => String(v).replace('.', DEC);
   const extra = (mf.hidden?.length || 0) + (mf.situational?.length || 0) + (mf.bestiary ? 1 : 0);
   return (
     <div className="mf">
-      <div className="mf-total"><b className="gold">{String(mf.total).replace('.', DEC)}</b><span className="muted small"> / {mf.cap} Magic Find</span></div>
-      <div className="chips mf-have">
-        {mf.sources.map(s => (
-          <span key={s.key} className="chip" title={[s.note, s.sure === false ? 'Примерно' : ''].filter(Boolean).join(' · ')}>
-            <Rich text={s.label} /> <b className="mf-plus">{mfNum(s.mf)}</b>
-          </span>
-        ))}
-      </div>
-      {mf.next.length > 0 && (
-        <>
-          <div className="muted tiny mf-sub">Что взять дальше</div>
-          <div className="item-list">
+      <div className="mf-cols">
+        <div className="mf-col">
+          <div className="mf-total"><b className="gold"><CountUp value={fmt(mf.total)} /></b><span className="muted"> / {fmt(mf.goal || mf.cap)}</span></div>
+          {mf.goal > 0 && <Progress value={mf.total / mf.goal} max={mf.total >= mf.goal} />}
+          <div className="muted tiny mf-goal"><Rich text={`Цель — всё, что даёт MF на любых мобах. Потолок стата ${mf.cap}: остальное дают баффы, Bestiary и бонусы на отдельных мобов.`} /></div>
+          <div className="mf-list">
+            {mf.sources.map(s => <MfRow key={s.key} icon={s.icon} label={s.label} sub={s.note} mf={s.mf} openItem={openItem} title={s.sure === false ? 'Примерно' : undefined} />)}
+          </div>
+        </div>
+        <div className="mf-col">
+          {mf.next.length > 0 && <h4 className="mf-h">Что взять дальше</h4>}
+          <div className="mf-list">
             {mf.next.slice(0, 4).map(n => (
-              <div key={n.key} className="item-line" onClick={n.id ? () => openItem(n.id) : undefined} style={n.id ? null : { cursor: 'default' }}>
-                <div className="grow"><Rich text={n.label} /><div className="muted tiny"><Rich text={n.how} /></div></div>
-                <b className="mf-plus">{mfNum(n.mf)}</b>
-                <div className="price">{n.cost ? <>{coins(n.cost)}<div className="muted tiny">{coins(n.perMf)} за 1 MF</div></> : <span className="muted small">бесплатно</span>}</div>
-              </div>
+              <MfRow key={n.key} icon={n.icon} label={n.label} sub={n.how} mf={n.mf} openItem={openItem}
+                right={n.cost ? <><b className="gold">{coins(n.cost)}</b><div className="muted tiny">{coins(n.perMf)} за 1 MF</div></> : <span className="muted small">бесплатно</span>} />
             ))}
           </div>
-        </>
-      )}
-      <div className="muted tiny mf-sub">На время охоты за дропом</div>
-      <div className="chips">
-        {mf.temp.map(t => (
-          <span key={t.key} className={`chip${t.active ? ' done' : ''}`} title={t.active ? 'Действует сейчас' : ''}>
-            <Rich text={t.label} /> <b className="mf-plus">{mfNum(t.mf)}</b>{t.active ? ' ✓' : ''}
-          </span>
-        ))}
+          <h4 className="mf-h">На время охоты за дропом</h4>
+          <div className="mf-list">
+            {mf.temp.map(t => <MfRow key={t.key} icon={t.icon} label={t.label} sub={t.active ? 'действует сейчас' : null} mf={t.mf} openItem={openItem} dim={!t.active} />)}
+          </div>
+        </div>
       </div>
       {extra > 0 && <button className="link-btn small mf-more" onClick={() => setMore(v => !v)}>{more ? 'Скрыть' : 'Ещё: что не видно в профиле и MF на отдельных мобов'}</button>}
       {more && (
-        <>
-          <div className="muted tiny mf-sub">Не видно в профиле — проверь в игре</div>
-          <div className="chips">
-            {mf.hidden.map(h => (
-              <span key={h.key} className="chip" title={h.note}><Rich text={h.label} /> <b className="mf-plus">{mfNum(h.mf)}</b>{h.cost ? <span className="muted"> · {coins(h.cost)}</span> : null}</span>
-            ))}
+        <div className="mf-cols">
+          <div className="mf-col">
+            <h4 className="mf-h">Не видно в профиле — проверь в игре</h4>
+            <div className="mf-list">
+              {mf.hidden.map(h => <MfRow key={h.key} icon={h.icon} label={h.label} sub={h.cost ? `${h.note} · ${coins(h.cost)}` : h.note} mf={h.mf} openItem={openItem} />)}
+            </div>
           </div>
-          {(mf.situational.length > 0 || mf.bestiary) && <div className="muted tiny mf-sub">Только на отдельных мобов</div>}
-          {mf.situational.length > 0 && (
-            <div className="chips">
-              {mf.situational.map(s => <span key={s.id} className="chip"><Rich text={`${s.label}: ${mfNum(s.mf)} на ${s.on}`} /></span>)}
+          <div className="mf-col">
+            <h4 className="mf-h">Только на отдельных мобов</h4>
+            <div className="mf-list">
+              {mf.situational.map(s => <MfRow key={s.id} icon={s.icon} label={s.label} sub={`на ${s.on}`} mf={s.mf} openItem={openItem} />)}
             </div>
-          )}
-          {mf.bestiary && (
-            <div className="small mf-best">
-              <Rich text={`Bestiary: моб на tier 15 даёт +45 Magic Find на нём, на tier 20 — +60, на tier 25 — +75. У тебя tier 15+ у ${mf.bestiary.t15} мобов, 20+ у ${mf.bestiary.t20}, 25 у ${mf.bestiary.t25}.`} />
-              {mf.bestiary.near.length > 0 && <div className="muted tiny"><Rich text={`Ближе всего к tier 15: ${mf.bestiary.near.map(b => `${b.name} (${b.kills}/${b.need})`).join(', ')}.`} /></div>}
-            </div>
-          )}
-        </>
+            {mf.bestiary && (
+              <div className="small mf-best">
+                <Rich text={`Bestiary: моб на tier 15 даёт +45 Magic Find на нём, на tier 20 — +60, на tier 25 — +75. У тебя tier 15+ у ${mf.bestiary.t15} мобов, 20+ у ${mf.bestiary.t20}, 25 у ${mf.bestiary.t25}.`} />
+                {mf.bestiary.near.length > 0 && <div className="muted tiny"><Rich text={`Ближе всего к tier 15: ${mf.bestiary.near.map(b => `${b.name} (${b.kills}/${b.need})`).join(', ')}.`} /></div>}
+              </div>
+            )}
+          </div>
+        </div>
       )}
-      <div className="muted tiny mf-foot"><Rich text="По правилам реворка Magic Find (17.11.2026): потолок 500, Looting даёт MF, пока оружие в руке. Сверх 100% шанса предмет иногда выпадает вдвое." /></div>
+      <div className="muted tiny"><Rich text="По правилам реворка Magic Find (17.11.2026): Looting даёт MF, пока оружие в руке. Сверх 100% шанса предмет иногда выпадает вдвое." /></div>
     </div>
   );
 }
