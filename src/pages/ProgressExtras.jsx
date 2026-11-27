@@ -289,7 +289,7 @@ function IslandCoop({ x, view }) {
   );
 }
 
-function Records({ x, h }) {
+function Records({ x, h, bingo }) {
   const r = x.races || {};
   const tiles = [
     ['DIAMOND_SWORD', 'Макс. урон за удар', num(x.highestDamage)],
@@ -310,6 +310,11 @@ function Records({ x, h }) {
   if (x.firstJoin) { const days = Math.floor((Date.now() - x.firstJoin) / 86400000); tiles.push(['WATCH', 'Возраст профиля', `${num(days)} ${plural(days, 'день', 'дня', 'дней')}`, `с ${new Date(x.firstJoin).toLocaleDateString(EN ? 'en-GB' : 'ru-RU')}`]); }
   // SkyBlock-достижения Hypixel (/player): счётчики сразу по всем профилям игрока
   for (const a of h?.achievements || []) tiles.push([a.icon, a.label, num(a.value), 'по всем профилям']);
+  // Bingo (/skyblock/bingo): очки за все ивенты и как идёт нынешний
+  if (bingo) {
+    const c = bingo.current;
+    tiles.push(['EMPTY_MAP', 'Bingo Points', num(bingo.points), c ? `${c.name || 'сейчас'}: ${c.total ? `${c.done}/${c.total}` : c.done} целей, ${num(c.points)} очков` : `ивентов: ${num(bingo.events)}`]);
+  }
   const races = [['End', r.end_race_best_time], ['Rift', r.rift_race_best_time], ['Foraging', r.foraging_race_best_time]].filter(([, v]) => v);
   return (
     <Card title="Рекорды и статистика" icon={<ItemIcon id="NETHER_STAR" size={22} />} className="span-12 ex-card">
@@ -331,7 +336,7 @@ export default function ProgressExtras({ m, advice }) {
       <Hunting x={x} view={view} />
       <Garden m={m} x={x} view={view} />
       <IslandCoop x={x} view={view} />
-      <Records x={x} h={m.hypixel} />
+      <Records x={x} h={m.hypixel} bingo={m.bingo} />
     </>
   );
 }

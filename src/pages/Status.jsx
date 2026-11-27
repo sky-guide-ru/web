@@ -191,7 +191,7 @@ const KEY = {
 };
 const SRC = { ok: 'ok', error: 'bad', none: 'idle' };
 
-const KINDS = { profiles: 'профили', garden: 'Garden', museum: 'музей', player: 'ранг игрока', guild: 'гильдия', other: 'прочее' };
+const KINDS = { profiles: 'профили', garden: 'Garden', museum: 'музей', player: 'ранг игрока', guild: 'гильдия', status: 'онлайн', other: 'прочее' };
 
 /** Расход ключа Hypixel за сутки (UTC): на что и чьё, пауза после лимита */
 function KeyUsageCard({ h }) {

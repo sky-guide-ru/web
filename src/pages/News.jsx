@@ -40,6 +40,15 @@ export default function News() {
           <h2>Новости сайта</h2>
           <p className="muted">Что появилось нового и что исправили. Самое свежее — сверху.</p>
         </div>
+        {data.skyblock?.length > 0 && (
+          <Card title="Патчноуты SkyBlock" className="news-sb" news="skyblock">
+            <ul className="news-sb-list">
+              {data.skyblock.slice(0, 5).map(n => (
+                <li key={n.link}><a className="link" href={n.link} target="_blank" rel="noopener noreferrer nofollow">{n.title}</a> <span className="muted small">{n.date}</span></li>
+              ))}
+            </ul>
+          </Card>
+        )}
         {days.length === 0 && <Card><Empty>Пока новостей нет.</Empty></Card>}
         {days.map(d => (
           <section key={d.date} className="news-day">
