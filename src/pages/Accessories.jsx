@@ -168,6 +168,13 @@ export default function Accessories({ state, sub }) {
   }, []);
 
   if (!acc) return <div className="muted small"><div className="spinner" />Загружаю аксессуары…</div>;
+  if (acc.hidden) {
+    return (
+      <Card className="span-12" title="Аксессуары не видны">
+        <p><Rich text="У игрока выключен Inventory API, поэтому содержимое Accessory Bag неизвестно и план покупок не строится. Включить: SkyBlock Menu → Settings → API Settings → Inventory API, затем подождать пару минут." /></p>
+        {m.magicalPower > 0 && <p className="muted small"><Rich text={`Наибольший Magical Power за всё время — ${num(m.magicalPower)}, сейчас он может быть меньше.`} /></p>}
+      </Card>);
+  }
   const noPrices = !(acc.steps || []).some(s => s.cost > 0);
 
   // ---- план: шаги под те же фильтры, что и список; «Что не доделано» выбирает виды шагов ----
