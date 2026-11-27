@@ -1,5 +1,6 @@
 // «Запасы» → «Что продать»: вещи из инвентаря, рюкзаков, Ender Chest и мешков, где их выгоднее продать и за сколько.
-// Без рынка (Ironman, Stranded, Bingo) — только торговцы и «На что потратить»: что из плана скрафтить из своих запасов.
+// Без рынка (Ironman, Stranded, Bingo) — только торговцы. «На что потратить»: что из плана скрафтить из своих запасов
+// (с рынком — только то, что так выходит дешевле покупки).
 // Данные — /api/sell (расчёт в core stash/sell.js и stash/craft.js).
 import { useMemo, useState } from 'react';
 import { Card, Stat, Empty, Progress } from '../components/ui.jsx';
@@ -58,7 +59,7 @@ export default function StashSell({ res }) {
         {d.keep.length > 0 && <Stat label="Лучше оставить" value={`${d.keep.length} ${plural(d.keep.length, 'вещь', 'вещи', 'вещей')}`} sub={`${coins(keepSum)} · нужны для плана`} accent="#60a5fa" icon={<ItemIcon id="CHEST" size={28} />} />}
       </div>
 
-      {iron && <Craft items={d.craft || []} openItem={openItem} />}
+      {iron && <Craft items={d.craft || []} openItem={openItem} iron />}
 
       <Card className="span-12" title={iron ? 'Продать торговцам' : 'Что продать'} news="sell">
         {!d.items.length ? <Empty>Ничего ценного без дела не лежит.</Empty> : <>
@@ -96,19 +97,23 @@ export default function StashSell({ res }) {
           ))}</div>
         </Card>
       )}
+
+      {!iron && d.craft?.length > 0 && <Craft items={d.craft} openItem={openItem} />}
     </>
   );
 }
 
-// Ironman: что из плана можно скрафтить из своих запасов и чего не хватает
-function Craft({ items, openItem }) {
+// Что из плана можно скрафтить из своих запасов и чего не хватает; с рынком — ещё сколько это экономит
+function Craft({ items, openItem, iron }) {
   return (
     <Card className="span-12" title="На что потратить" news="craft">
-      <p className="small muted">Вещи из плана, на которые уже есть часть ресурсов. Цифры — сколько есть из нужного по рецепту.</p>
+      <p className="small muted">{iron
+        ? 'Вещи из плана, на которые уже есть часть ресурсов. Цифры — сколько есть из нужного по рецепту.'
+        : 'Вещи из плана, которые дешевле собрать из своих запасов, чем купить готовыми. Цифры — сколько есть из нужного по рецепту.'}</p>
       {!items.length ? <Empty>Для вещей из плана в запасах пока ничего нет.</Empty> : (
         <div className="sl-craft">{items.map(x => (
           <div key={x.id} className="sl-crow">
-            <button className="sl-item" onClick={() => openItem(x.id)}><ItemIcon id={x.id} size={36} /><span><b>{x.name}</b>{x.step && <span className="tiny muted">{x.step}</span>}</span></button>
+            <button className="sl-item" onClick={() => openItem(x.id)}><ItemIcon id={x.id} size={36} /><span><b>{x.name}</b>{x.step && <span className="tiny muted">{x.step}</span>}{x.saving > 0 && <span className="tiny"><span className="gold">выгода {coins(x.saving)}</span><span className="muted"> · {x.missCost ? `докупить на ${coins(x.missCost)} вместо ${coins(x.buyCost)}` : `всё есть, готовая стоит ${coins(x.buyCost)}`}</span></span>}</span></button>
             <div className="sl-cprog"><Progress value={x.ready} color={x.ready >= 1 ? 'var(--green)' : 'var(--accent)'} sub={x.ready >= 1 ? 'можно крафтить' : `${Math.round(x.ready * 100)}%`} /></div>
             <div className="sl-parts">{x.parts.map(p => {
               const ok = p.have >= p.need, can = !ok && p.have + p.fromStash >= p.need;
