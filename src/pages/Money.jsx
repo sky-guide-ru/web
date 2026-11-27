@@ -726,7 +726,7 @@ export default function Money({ state: appState, sub }) {
   return (
     <div className="grid">
       <Card className="span-12" title="Как заработать с твоим профилем" right={<Tabs value={tab} onChange={setTab} tabs={[{ id: 'methods', label: 'Методы' }, { id: 'crops', label: 'Культуры' }, { id: 'flips', label: 'Флипы Bazaar', market: true }, { id: 'crafts', label: 'Крафт и Forge' }, { id: 'snipes', label: 'Дешёвые лоты AH', market: true }, { id: 'movers', label: 'Движение цен' }, { id: 'bank', label: 'Bank' }, { id: 'bits', label: 'Bits' }].filter(t => !t.market || st?.member?.mode?.market !== false)} />}>
-        {st?.member?.mode && !st.member.mode.market && <div className="mode-banner">⚠️ Профиль {st.member.mode.label}: {st.member.mode.note}. Флипы скрыты, а доход посчитан по ценам рынка, поэтому реальный ниже.</div>}
+        {st?.member?.mode && !st.member.mode.market && <div className="mode-banner">⚠️ Профиль {st.member.mode.label}: {st.member.mode.note}. Флипы скрыты, доход посчитан по ценам продажи NPC.</div>}
         {tab === 'methods' && <MoneyMethods openItem={openItem} />}
         {tab === 'crops' && <Crops />}
         {tab === 'flips' && <Flips openItem={openItem} />}
