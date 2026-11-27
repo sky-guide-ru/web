@@ -32,9 +32,39 @@ const API = process.env.SKY_API || 'http://localhost:3000';
 const toApi = { target: API, changeOrigin: true, cookieDomainRewrite: { '*': '' } };
 const proxy = Object.fromEntries(['/api', '/v1', '/login', '/logout', '/account'].map(p => [p, toApi]));
 
+// Главная часть сайта (start.jsx) и её стили подключаются из main.jsx уже после скачивания входного скрипта.
+// Ставим их в <head> заранее (preload), чтобы браузер качал всё сразу, а не по очереди: на медленном канале это секунды
+function preloadStart() {
+  return {
+    name: 'sb-preload-start',
+    apply: 'build',
+    transformIndexHtml: { order: 'post', handler(html, { bundle }) {
+      const chunks = Object.values(bundle || {}).filter(c => c.type === 'chunk');
+      const start = chunks.find(c => c.facadeModuleId?.endsWith('/src/start.jsx'));
+      if (!start) return html;
+      const have = new Set([...html.matchAll(/href="\/([^"]+)"/g)].map(m => m[1]));
+      const js = [], css = new Set(), seen = new Set();
+      const walk = name => {
+        if (seen.has(name)) return;
+        seen.add(name);
+        const c = bundle[name];
+        if (!c || c.type !== 'chunk') return;
+        if (!have.has(name) && !c.isEntry) js.push(name);
+        for (const f of c.viteMetadata?.importedCss || []) css.add(f);
+        c.imports.forEach(walk);
+      };
+      walk(start.fileName);
+      return [
+        ...[...css].map(f => ({ tag: 'link', attrs: { rel: 'preload', as: 'style', href: `/${f}`, crossorigin: true }, injectTo: 'head' })),
+        ...js.map(f => ({ tag: 'link', attrs: { rel: 'modulepreload', crossorigin: true, href: `/${f}` }, injectTo: 'head' })),
+      ];
+    } },
+  };
+}
+
 export default defineConfig({
   root: '.',
-  plugins: [i18n(), react()],
+  plugins: [i18n(), react(), preloadStart()],
   define: { __BUILD__: JSON.stringify(BUILD) },
   build: {
     outDir: 'dist', emptyOutDir: true,
