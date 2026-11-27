@@ -16,6 +16,7 @@ const TYPES = [
   ['translate', 'Перевод', 'Неправильный или непонятный русский текст'],
   ['data', 'Данные', 'Неверные цифры, цены, рецепты, советы'],
   ['idea', 'Идея', 'Чего не хватает на сайте'],
+  ['nick', 'Убрать ник', 'Убрать ник из рейтинга: владелец сайта проверит запрос и уберёт'],
 ];
 
 // Картинку уменьшаем на клиенте: на сервер и в письмо уходит лёгкий JPEG
@@ -35,8 +36,10 @@ async function shrink(file) {
   } finally { URL.revokeObjectURL(url); }
 }
 
-export function FeedbackModal({ onClose }) {
-  const [type, setType] = useState('bug');
+// initial — с чем открыть окно: { type: 'nick', target: 'Ник' } у кнопки «Убрать ник» в рейтинге
+export function FeedbackModal({ onClose, initial = {} }) {
+  const [type, setType] = useState(initial.type || 'bug');
+  const [target, setTarget] = useState(initial.target || '');
   const [text, setText] = useState('');
   const [contact, setContact] = useState('');
   const [shot, setShot] = useState(null);
@@ -48,7 +51,7 @@ export function FeedbackModal({ onClose }) {
   const page = location.pathname + location.hash;
 
   useEffect(() => {
-    box.current?.querySelector('textarea')?.focus();
+    box.current?.querySelector(initial.type === 'nick' && !initial.target ? '.fb-target' : 'textarea')?.focus();
     const k = e => { if (e.key === 'Escape') onClose(); };
     addEventListener('keydown', k);
     return () => removeEventListener('keydown', k);
@@ -66,14 +69,16 @@ export function FeedbackModal({ onClose }) {
 
   const submit = async e => {
     e.preventDefault();
-    if (text.trim().length < 5) { setState({ busy: false, error: 'Опиши подробнее — хотя бы пару слов', done: false }); return; }
+    const nick = type === 'nick';
+    if (nick && !/^[A-Za-z0-9_]{1,16}$/.test(target.trim())) { setState({ busy: false, error: 'Впиши ник Minecraft, который убрать из рейтинга', done: false }); return; }
+    if (!nick && text.trim().length < 5) { setState({ busy: false, error: 'Опиши подробнее — хотя бы пару слов', done: false }); return; }
     setState({ busy: true, error: null, done: false });
     const build = await fetch('/api/version').then(r => r.json()).then(v => v.build).catch(() => '');
     try {
       const r = await fetch('/api/feedback', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type, text, contact, website: hp, openedAt: opened.current, page, build,
+          type, text, contact, target: type === 'nick' ? target.trim() : '', website: hp, openedAt: opened.current, page, build,
           player: view?.player || '', profile: view?.profile || '',
           screen: `${innerWidth}×${innerHeight}`, ua: navigator.userAgent, screenshot: shot,
         }),
@@ -92,8 +97,8 @@ export function FeedbackModal({ onClose }) {
         <button className="x-btn modal-x" onClick={onClose} aria-label="Закрыть">×</button>
         {state.done ? (
           <div className="fb-done">
-            <h3>Спасибо! Отзыв отправлен ✓</h3>
-            <p className="muted">Владелец сайта его увидит и поправит. {contact ? 'Если понадобится уточнение — напишет по указанному контакту.' : ''}</p>
+            <h3>{type === 'nick' ? 'Запрос отправлен ✓' : 'Спасибо! Отзыв отправлен ✓'}</h3>
+            <p className="muted">{type === 'nick' ? 'Владелец сайта проверит его и уберёт ник из рейтинга. ' : 'Владелец сайта его увидит и поправит. '}{contact ? 'Если понадобится уточнение — напишет по указанному контакту.' : ''}</p>
             <button className="btn" onClick={onClose}>Закрыть</button>
           </div>
         ) : (
@@ -105,8 +110,9 @@ export function FeedbackModal({ onClose }) {
               ))}
             </div>
             <p className="muted small fb-hint">{TYPES.find(t => t[0] === type)[2]}</p>
-            <textarea className="input fb-text" rows={6} maxLength={4000} value={text} onChange={e => setText(e.target.value)}
-              placeholder={type === 'idea' ? 'Что добавить или сделать удобнее?' : 'Что не так и где? Например: «в карточке Hyperion цена 0 монет»'} />
+            {type === 'nick' && <input className="input fb-target" maxLength={16} value={target} onChange={e => setTarget(e.target.value)} placeholder="Ник, например Steve" spellCheck={false} autoComplete="off" aria-label="Какой ник убрать" />}
+            <textarea className="input fb-text" rows={type === 'nick' ? 3 : 6} maxLength={4000} value={text} onChange={e => setText(e.target.value)}
+              placeholder={type === 'nick' ? 'Комментарий (необязательно)' : type === 'idea' ? 'Что добавить или сделать удобнее?' : 'Что не так и где? Например: «в карточке Hyperion цена 0 монет»'} />
             <input className="input fb-contact" maxLength={120} value={contact} onChange={e => setContact(e.target.value)} placeholder="Как с тобой связаться (необязательно): Discord, Telegram, почта" />
             {/* Ловушка для ботов: человек это поле не видит */}
             <input className="fb-hp" tabIndex={-1} autoComplete="off" aria-hidden="true" value={hp} onChange={e => setHp(e.target.value)} name="website" />

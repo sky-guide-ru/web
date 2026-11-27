@@ -1,8 +1,10 @@
 import { LOCALE } from '../i18n.js';
 // Рейтинг игроков: самые богатые, уровень SkyBlock, Catacombs, слееры, навыки.
 // Hypixel не даёт общего списка игроков, поэтому в таблице только профили, которые посетители открывали на этом сайте.
-// Владелец сайта и его друзья в рейтинг не попадают (это решает сервер). Любой игрок может убрать себя сам.
+// Убрать ник — запросом владельцу (кнопка «Убрать ник из рейтинга» внизу).
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { FeedbackModal } from '../components/Feedback.jsx';
 import { Card, Empty } from '../components/ui.jsx';
 import { coins, num, ago, setView, useHashTab, plural } from '../api.js';
 
@@ -51,32 +53,15 @@ function open(r) {
   location.hash = '#/overview';
 }
 
-function RemoveMe({ onDone }) {
-  const [nick, setNick] = useState('');
-  const [msg, setMsg] = useState(null);
-  const [busy, setBusy] = useState(false);
-  const submit = async e => {
-    e.preventDefault();
-    if (!nick.trim()) return;
-    setBusy(true); setMsg(null);
-    try {
-      await lb('/remove', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ player: nick.trim() }) });
-      setMsg({ ok: true, text: `Готово: ${nick.trim()} убран из рейтинга и больше туда не попадёт.` });
-      setNick('');
-      onDone();
-    } catch (err) { setMsg({ ok: false, text: err.message || 'Не вышло, попробуй позже' }); }
-    setBusy(false);
-  };
+// Убрать ник из рейтинга сам гость не может (иначе любой убирал бы чужие ники): кнопка открывает окно отзыва
+// с типом «Убрать ник», запрос проверяет и выполняет владелец в разделе «Отзывы»
+function RemoveNick({ nick }) {
+  const [open, setOpen] = useState(false);
   return (
-    <details className="lb-remove">
-      <summary>Не хочу быть в рейтинге</summary>
-      <p className="muted small">Впиши свой ник: запись пропадёт сразу, и твой профиль больше не попадёт в эту таблицу, даже если его снова откроют. Сам профиль на сайте при этом открывается как обычно.</p>
-      <form onSubmit={submit} className="cmp-add">
-        <input value={nick} onChange={e => setNick(e.target.value)} placeholder="Ник, например Steve" maxLength={16} spellCheck={false} autoComplete="off" aria-label="Твой ник" />
-        <button className="btn ghost" disabled={busy || !nick.trim()}>{busy ? 'Убираю…' : 'Убрать меня'}</button>
-      </form>
-      {msg && <div className={`small lb-msg ${msg.ok ? 'green' : 'lb-bad'}`} role="status">{msg.text}</div>}
-    </details>
+    <div className="lb-remove" data-news="remove">
+      <button type="button" className="linklike small" onClick={() => setOpen(true)}>Убрать ник из рейтинга</button>
+      {open && createPortal(<FeedbackModal initial={{ type: 'nick', target: nick }} onClose={() => setOpen(false)} />, document.body)}
+    </div>
   );
 }
 
@@ -87,7 +72,6 @@ export default function Leaderboard({ sub }) {
   const [query, setQuery] = useState('');
   const [data, setData] = useState(null);
   const [err, setErr] = useState(null);
-  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -96,7 +80,7 @@ export default function Leaderboard({ sub }) {
       .then(d => { if (alive) setData(d); })
       .catch(e => { if (alive) setErr(e.message); });
     return () => { alive = false; };
-  }, [board, mode, query, tick]);
+  }, [board, mode, query]);
 
   const B = BOARDS.find(b => b.id === board);
   const rows = data?.board === board ? data.rows : null;
@@ -164,7 +148,7 @@ export default function Leaderboard({ sub }) {
             </div>
           )}
         {board === 'networth' && rows?.length > 0 && <p className="muted tiny lb-foot">Стоимость считается по ценам Bazaar и аукциона: предметы, питомцы, мешки, эссенции, монеты и музей. Профили с закрытым API инвентаря в эту таблицу не попадают, их стоимость не узнать.</p>}
-        <RemoveMe onDone={() => setTick(t => t + 1)} />
+        <RemoveNick nick={meRow?.name || query} />
       </Card>
     </>
   );
