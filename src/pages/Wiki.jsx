@@ -299,8 +299,10 @@ export function ItemModal({ id, uuid, onClose }) {
   return (
     <div className="modal-bg" onClick={onClose}>
       <div className="modal card" role="dialog" aria-modal="true" tabIndex={-1} ref={box} onClick={e => e.stopPropagation()}>
-        <button className="x-btn modal-x" onClick={onClose} aria-label="Закрыть">×</button>
-        {stack.length > 1 && <button className="modal-back" onClick={back}>← {stack.length > 2 ? `Назад (${stack.length - 1})` : 'Назад'}</button>}
+        <div className="modal-tools">
+          {stack.length > 1 && <button className="modal-back" onClick={back} aria-label="Назад" title="Назад">←<span className="modal-back-t">{stack.length > 2 ? `Назад (${stack.length - 1})` : 'Назад'}</span></button>}
+          <button className="x-btn modal-x" onClick={onClose} aria-label="Закрыть">×</button>
+        </div>
         <ItemView id={cur} uuid={stack.length === 1 ? uuid : null} onOpen={setCur} />
       </div>
     </div>

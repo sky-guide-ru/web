@@ -322,10 +322,12 @@ main { padding: 18px 26px 40px; min-width: 0; }
 .gsearch-item.sel { background: rgba(124,92,255,.18); }
 .gsearch-all { justify-content: center; color: var(--accent); font-weight: 500; margin-top: 2px; }
 .gsearch-empty { padding: 10px; }
-.modal-back { position: absolute; top: 15px; right: 56px; height: 30px; background: rgba(255,255,255,.06); border: 1px solid var(--card-b); color: var(--text); border-radius: var(--r-sm); padding: 5px 10px; cursor: pointer; font: inherit; font-size: 13px; }
-.modal-back:hover { background: rgba(124,92,255,.18); }
-/* Длинное название не уходит под кнопки «Назад» и «×» */
-.modal:has(.modal-back) .item-view-head { padding-right: 150px; }
+.modal-back { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 18px; border: 1px solid var(--card-b);
+  background: rgba(18,20,38,.94); color: var(--text); cursor: pointer; font: inherit; font-size: 13px; line-height: 1; white-space: nowrap; transition: background-color .15s, border-color .15s; }
+.modal-back:hover { background: rgba(124,92,255,.2); border-color: rgba(124,92,255,.5); }
+/* «Назад» и «×» — одной липкой строкой справа сверху, одной высоты и одного вида; название обтекает их */
+.modal-tools { position: sticky; top: 8px; float: right; display: flex; align-items: center; gap: 8px; margin: -6px -6px 0 8px; z-index: 3; }
+.modal-tools .modal-x { position: static; float: none; margin: 0; }
 /* ---------- Мобильная вёрстка ---------- */
 @media (max-width: 800px) {
   .layout { grid-template-columns: minmax(0, 1fr); }
@@ -356,10 +358,10 @@ main { padding: 18px 26px 40px; min-width: 0; }
   .table { font-size: 12px; } .card:has(> .table), .card .table-wrap { overflow-x: auto; }
   .modal-bg { padding: 0; place-items: end stretch; }
   .modal { max-height: 92vh; border-radius: 18px 18px 0 0; }
-  /* На телефоне «Назад» — отдельной строкой над карточкой, а не поверх названия */
-  .modal-back { position: static; margin: 0 0 10px; }
-  .modal:has(.modal-back) .item-view-head { padding-right: 0; }
-  .item-view-head h2 { overflow-wrap: anywhere; padding-right: 28px; }
+  .item-view-head h2 { overflow-wrap: anywhere; }
+  /* На телефоне «Назад» — круглая кнопка со стрелкой, как «×»: название не сжимается */
+  .modal-back { width: 36px; padding: 0; justify-content: center; font-size: 16px; }
+  .modal-back-t { display: none; }
   .tooltip-layer { max-width: calc(100vw - 16px); }
   .item-view-head { gap: 12px; } .item-view-head h2 { font-size: 20px; }
   .node { min-width: 120px; }
