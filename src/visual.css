@@ -207,6 +207,7 @@ html[lang="en"] .road-step.top .road-card h4::before { content: 'Top priority'; 
 .nw-bar { display: flex; height: 12px; border-radius: var(--r-pill); overflow: hidden; background: rgba(255,255,255,.05); gap: 2px; }
 .nw-bar i { display: block; height: 100%; min-width: 3px; animation: grow .9s cubic-bezier(.2,.8,.2,1) both; transform-origin: left; }
 .nw-parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+.nw-cos { margin-top: 8px; }
 .nw-part { display: grid; grid-template-columns: 10px 1fr auto auto; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--r-md); background: rgba(255,255,255,.03); font-size: 13px; }
 .nw-dot { width: 10px; height: 10px; border-radius: 3px; }
 
