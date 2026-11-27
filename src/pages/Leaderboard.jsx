@@ -77,10 +77,13 @@ export default function Leaderboard({ sub }) {
   useEffect(() => {
     let alive = true;
     setErr(null);
-    lb(`?board=${board}&mode=${mode}&limit=100${query ? `&find=${encodeURIComponent(query)}` : ''}`)
+    const q = `?board=${board}&mode=${mode}&limit=100${query ? `&find=${encodeURIComponent(query)}` : ''}`;
+    lb(q)
       .then(d => { if (alive) setData(d); })
       .catch(e => { if (alive) setErr(e.message); });
-    return () => { alive = false; };
+    // Открытый рейтинг тихо обновляется раз в минуту (только с нашего сервера, пока вкладка видна): цифры и точки «в игре»
+    const t = setInterval(() => { if (!document.hidden) lb(q).then(d => { if (alive) setData(d); }).catch(() => {}); }, 60_000);
+    return () => { alive = false; clearInterval(t); };
   }, [board, mode, query]);
 
   const B = BOARDS.find(b => b.id === board);
@@ -96,6 +99,7 @@ export default function Leaderboard({ sub }) {
             <div>
               {r.rank?.id && r.rank.id !== 'NONE' && <span className={`rank-chip rank-${r.rank.id.toLowerCase()}`}>{r.rank.label}</span>}
               <b>{r.name}</b>
+              {r.online && <span className="lb-online" title={r.online.island ? `В игре: ${r.online.island}` : 'В игре'} aria-label="в игре" />}
               {r.guild && <GuildTag tag={r.guild.tag} name={r.guild.name} color={r.guild.color} />}
               {MODE_LABEL[r.mode] && <span className="mode-chip">{MODE_LABEL[r.mode]}</span>}
             </div>
