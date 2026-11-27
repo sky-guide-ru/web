@@ -5,7 +5,7 @@ import { needsConsent, reopenConsent, pub } from '../ads.js';
 import { FeedbackModal } from './Feedback.jsx';
 
 /* global __BUILD__ */
-const BUILD = typeof __BUILD__ !== 'undefined' ? __BUILD__ : { v: '', date: '', sha: '' };
+const BUILD = typeof __BUILD__ !== 'undefined' ? __BUILD__ : { date: '', sha: '', core: '' };
 const YEAR = (BUILD.date || '').slice(0, 4) || String(new Date().getFullYear());
 const L = EN ? '/en' : '';
 /** Откуда данные: ссылки на сами источники (переход только по клику), условия и лицензии — на /legal */
@@ -63,9 +63,9 @@ export default function SiteFooter() {
       <div className="sf-bottom muted">
         <span>
           © {YEAR} Sky Guide · <a href="https://github.com/sky-guide-ru/web/blob/main/LICENSE" {...ext}>AGPL-3.0</a>
-          {BUILD.v && <> · v{BUILD.v}</>}
           {BUILD.date && <> · сборка {fmtDate(BUILD.date)}</>}
           {BUILD.sha && <> · <a href={`https://github.com/sky-guide-ru/web/commit/${BUILD.sha}`} {...ext}>{BUILD.sha.slice(0, 7)}</a></>}
+          {BUILD.core && <> · <a href={`https://github.com/sky-guide-ru/core/releases/tag/v${BUILD.core}`} {...ext}>core {BUILD.core}</a></>}
         </span>
         <span>Неофициальный фан-сайт, не связан с Hypixel, Mojang и Microsoft и не одобрен ими.</span>
       </div>
