@@ -470,7 +470,24 @@ img.tex-broken { visibility: hidden; }
 @media (min-width: 801px) {
   .gsearch { flex: 1 1 200px; min-width: 180px; }
   .topbar-right { flex-wrap: nowrap; }
+  /* Шапка ПК всегда в одну строку: длинная строка под ником (ранг, кооп, «без Cookie») сжимается с «…»,
+     поиск ужимается до 140px, а статус и «Обновить» не уезжают на вторую строку */
+  .topbar { flex-wrap: nowrap; }
+  .topbar .gsearch { min-width: 140px; }
+  .topbar-right { flex: none; }
+  .topbar .who-wrap { min-width: 0; flex: 0 1 auto; }
+  .topbar .who-btn, .topbar .who-btn > div { min-width: 0; }
+  .topbar .who-btn .muted.small, .topbar .who-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
+/* Узкий ПК (801-1199px): кооп-соседи — в списке игроков, от «Живых данных» остаётся точка (время — в подсказке) */
+@media (min-width: 801px) and (max-width: 1199px) {
+  .topbar .coop-quick { display: none; }
+  .topbar .live { font-size: 0; gap: 0; padding: 9px; }
+}
+/* Нагрузка в шапке — только цветная точка (жёлтая или красная с пульсом), причина — в подсказке */
+.topbar .load-dot { padding: 6px; }
+.topbar .load-dot > span { display: none; }
+.load-dot { cursor: help; }
 .live { white-space: nowrap; font-variant-numeric: tabular-nums; }
 
 /* Вторичная кнопка: под курсором светлеет, а не светится фиолетовым как главная */

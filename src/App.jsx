@@ -161,8 +161,9 @@ function LiveDot({ state, offline }) {
     : limited ? `Сайт израсходовал лимит запросов к Hypixel. Профиль обновится сам примерно в ${new Date(state.limitedUntil).toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' })}`
     : stale ? 'Профиль давно не обновлялся. Нажми «Обновить» или проверь сервер'
     : 'Профиль обновляется автоматически';
+  const when = state?.updatedAt ? ` · данные ${ago(state.updatedAt)}` : '';
   return (
-    <div className={`live ${cls}`} title={title}>
+    <div className={`live ${cls}`} title={title + when}>
       <span className="dot" />
       {offline ? <>Нет связи с сервером{state?.updatedAt ? ` · данные ${ago(state.updatedAt)}` : ''}</>
         : state?.fromCache ? <>Подключаюсь… · данные {ago(state.updatedAt)}</>
