@@ -91,9 +91,11 @@ function CartAdd({ onAdd }) {
 export function parseCoins(s) {
   const m = /^\s*([\d\s.,]+)\s*([kкmмbб]|тыс|млн|млрд)?\.?\s*$/i.exec(String(s || ''));
   if (!m) return null;
-  const n = Number(m[1].replace(/\s/g, '').replace(',', '.'));
-  if (!Number.isFinite(n) || n <= 0) return null;
   const u = (m[2] || '').toLowerCase();
+  const raw = m[1].replace(/\s/g, '');
+  // «2,500,000» и «1.000.000» без единиц — разделители тысяч, иначе запятая — десятичная («1,5m»)
+  const n = Number(!u && /^\d{1,3}([.,]\d{3}){2,}$/.test(raw) ? raw.replace(/[.,]/g, '') : raw.replace(',', '.'));
+  if (!Number.isFinite(n) || n <= 0) return null;
   const k = /^(k|к|тыс)$/.test(u) ? 1e3 : /^(m|м|млн)$/.test(u) ? 1e6 : /^(b|б|млрд)$/.test(u) ? 1e9 : 1;
   return Math.round(n * k);
 }

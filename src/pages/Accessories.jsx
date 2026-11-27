@@ -32,8 +32,10 @@ const P2V = p => (p <= 0 ? 0 : p >= 100 ? Infinity : (v => { const e = 10 ** Mat
 const V2P = v => (!v ? 0 : v === Infinity ? 100 : Math.max(1, Math.min(99, Math.round((Math.log10(v) - 4) * 100 / 6))));
 // «5m», «300к», «1,5 млрд», «2000000» → монеты; число без единиц меньше 1000 — миллионы
 function parseCoins(s) {
-  s = String(s || '').toLowerCase().replace(/\s/g, '').replace(',', '.');
+  s = String(s || '').toLowerCase().replace(/\s/g, '');
   if (!s) return null;
+  // «2,500,000» и «1.000.000» — разделители тысяч, иначе запятая — десятичная («1,5 млрд»)
+  s = /^\d{1,3}([.,]\d{3}){2,}$/.test(s) ? s.replace(/[.,]/g, '') : s.replace(',', '.');
   const m = s.match(/^([\d.]+)(млрд|b|bn|kkk|млн|m|kk|м|тыс|k|к|т)?$/);
   if (!m || Number.isNaN(+m[1])) return NaN;
   const n = +m[1], u = m[2] || '';

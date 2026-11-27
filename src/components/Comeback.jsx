@@ -9,7 +9,14 @@ import { LOCALE } from '../i18n.js';
 const dateOf = t => { const d = new Date(t); return d.toLocaleDateString(LOCALE, d.getFullYear() === new Date().getFullYear() ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'long', year: 'numeric' }).replace(/ г\.$/, ''); };
 const timeOf = t => new Date(t).toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' });
 
-// Патчноуты SkyBlock (форум Hypixel), вышедшие после начала перерыва. Дата в ленте — текстом («17 November 2026»)
+// Патчноуты SkyBlock (форум Hypixel), вышедшие после начала перерыва. Дата в ленте — текстом («17th November 2026»):
+// Date.parse такое не понимает, разбираем сами
+const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+function parseNewsDate(s) {
+  const m = /(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3})[A-Za-z]*\.?,?\s+(\d{4})/.exec(String(s || ''));
+  const mo = m ? MONTHS.indexOf(m[2].toLowerCase()) : -1;
+  return mo >= 0 ? Date.UTC(Number(m[3]), mo, Number(m[1])) : Date.parse(s);
+}
 function usePatchesSince(since) {
   const [list, setList] = useState(null);
   useEffect(() => {
@@ -18,7 +25,7 @@ function usePatchesSince(since) {
     api('/news').then(d => {
       if (off) return;
       const all = d?.skyblock || [];
-      const dated = all.map(n => ({ ...n, t: Date.parse(n.date) })).filter(n => Number.isFinite(n.t));
+      const dated = all.map(n => ({ ...n, t: parseNewsDate(n.date) })).filter(n => Number.isFinite(n.t));
       setList(dated.length ? dated.filter(n => n.t >= since - 86400_000).slice(0, 5) : all.slice(0, 4));
     }).catch(() => !off && setList([]));
     return () => { off = true; };
@@ -54,7 +61,7 @@ export function Returning({ info, steps }) {
         <div>
           <h4>Патчноуты за перерыв</h4>
           {patches == null ? <div className="muted small"><div className="spinner" /></div>
-            : patches.length ? <ul className="comeback-list">{patches.map(n => <li key={n.link}><a className="link" href={n.link} target="_blank" rel="noopener noreferrer nofollow">{n.title}</a> <span className="muted tiny">{n.date}</span></li>)}</ul>
+            : patches.length ? <ul className="comeback-list">{patches.map(n => <li key={n.link}><a className="link" href={n.link} target="_blank" rel="noopener noreferrer nofollow">{n.title}</a> <span className="muted tiny">{Number.isFinite(n.t) ? dateOf(n.t) : n.date}</span></li>)}</ul>
               : <div className="muted small">Свежих патчноутов не нашлось. Все — в разделе <a className="link" href="#/news">Новости</a>.</div>}
         </div>
       </div>
