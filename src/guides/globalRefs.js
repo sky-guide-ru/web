@@ -61,7 +61,9 @@ export function globalData(ref) {
 // Тот же разбор, что на сервере (findPhrases): слова, самая длинная фраза с каждой позиции
 const WORD = /[\p{L}\p{N}+][\p{L}\p{N}'’\-+]*/gu;
 const MAX_WORDS = 7;
-const GAP = /^(\s|\.\s|\s&\s|\s-\s)$/;
+// ™ ® © словарь не хранит («InfiniVacuum™ Hooverius» → «InfiniVacuum Hooverius»), между словами они допустимы
+const GAP = /^[™®©]?(\s|\.\s|\s&\s|\s-\s)$/;
+const MARKS = /[™®©]/g;
 
 /** Разбивает строку на куски текста и { ref, text } по общему словарю. */
 export function splitGlobal(s) {
@@ -79,7 +81,7 @@ export function splitGlobal(s) {
       let ok = true;
       for (let k = i + 1; k < i + n; k++) if (!GAP.test(s.slice(words[k - 1].end, words[k].start))) { ok = false; break; }
       if (!ok) continue;
-      const r = phrases.get(s.slice(words[i].start, words[i + n - 1].end).replace(/’/g, '\''));
+      const r = phrases.get(s.slice(words[i].start, words[i + n - 1].end).replace(/’/g, '\'').replace(MARKS, ''));
       if (r) { hit = n; ref = r; break; }
     }
     if (!hit) { i++; continue; }
