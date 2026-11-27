@@ -1890,21 +1890,47 @@ tr.grp td { background: rgba(255,255,255,.04); font-weight: 700; font-size: 12px
 .ob-have.full { background: rgba(74, 222, 128, .14); color: #bbf7d0; }
 .ob-stock { margin: 6px 0 0 22px; color: #a5f3fc; }
 .interests > summary { cursor: pointer; color: var(--accent2); }
-/* План покупок с правками игрока */
-.cart .table td:last-child { width: 1%; }
-.cart-item { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+/* План покупок: сверху бюджет с полосой и «+ Своя вещь», ниже — строки-карточки */
+.cart-top { display: flex; gap: var(--sp-3) var(--sp-4); align-items: flex-start; margin-bottom: var(--sp-3); }
+.cart-budget { flex: 1; min-width: 0; padding: var(--sp-3) var(--sp-3) var(--sp-2); border-radius: var(--r-lg); background: rgba(255,255,255,.03); border: 1px solid var(--card-b); }
+.cart-budget-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); }
+.cart-budget-in { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.cart-budget-in input { width: 150px; min-height: 32px; }
+.cart-budget-sum { margin-left: auto; }
+.cart-bar { height: 6px; margin-top: var(--sp-2); border-radius: var(--r-pill); background: rgba(255,255,255,.07); overflow: hidden; }
+.cart-bar-fill { height: 100%; border-radius: inherit; background: var(--green); transition: width .5s cubic-bezier(.2,.8,.2,1); }
+.cart-bar-legend { display: flex; justify-content: space-between; gap: var(--sp-2); margin-top: var(--sp-1); }
+.cart-add { display: flex; gap: var(--sp-2); align-items: center; width: 300px; flex: none; }
+.cart-add .gsearch { order: 0; flex: 1 1 auto; min-width: 0; max-width: none; }
+.cart-add .gsearch-input { padding-right: 14px; }
+.cart-add .gsearch-input { min-height: 40px; }
+.cart-qty { width: 56px; min-height: 40px; font: inherit; color: var(--text); background: var(--bg2); border: 1px solid var(--card-b); border-radius: var(--r-md); padding: 0 6px; text-align: center; }
+.cart-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.cart-row { display: grid; grid-template-columns: 22px 34px minmax(0, 1fr) auto 28px; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-3);
+  border-radius: var(--r-md); cursor: pointer; transition: background .15s; }
+.cart-row:hover { background: var(--surface-hover); }
+.cart-row.in-budget { background: rgba(74, 222, 128, .06); }
+.cart-row.in-budget:hover { background: rgba(74, 222, 128, .1); }
+.cart-n { color: var(--muted); font-size: var(--fs-sm); text-align: center; font-variant-numeric: tabular-nums; }
+.cart-row.in-budget .cart-n { color: var(--green); font-weight: 700; }
+.cart-ico { width: 34px; height: 34px; display: grid; place-items: center; border-radius: var(--r-sm); background: rgba(255,255,255,.04); }
+.cart-main { display: grid; gap: 2px; min-width: 0; }
+.cart-title { line-height: 1.35; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.cart-gives { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cart-price { display: grid; justify-items: end; gap: 2px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.cart-x { opacity: .35; transition: opacity .15s; }
+.cart-row:hover .cart-x, .cart-x:focus-visible { opacity: 1; }
 .cart-own { font-size: 11px; border-radius: var(--r-pill); padding: 1px 8px; background: rgba(124,92,255,.15); color: var(--accent); }
-.cart-add { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 12px 0 4px; }
-.cart-add .gsearch { max-width: 420px; }
-.cart-qty { display: inline-flex; align-items: center; gap: 6px; }
-.cart-qty input { width: 76px; font: inherit; color: var(--text); background: var(--bg2); border: 1px solid var(--card-b); border-radius: var(--r-md); min-height: 34px; padding: 0 8px; }
 .cart-bought { margin: 6px 0; }
 .item-cart { margin-top: 6px; }
-
-/* «План покупок»: бюджет и «Что даст» */
-.cart-budget { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
-.cart-budget input { width: 170px; display: inline-block; margin-left: 4px; }
-.cart tr.in-budget td { background: rgba(74, 222, 128, .07); }
-.cart tr.in-budget td:first-child { color: var(--green); font-weight: 700; }
-.cart-gives { max-width: 320px; }
-@media (max-width: 760px) { .cart th:nth-child(3), .cart td:nth-child(3) { display: none; } }
+@media (max-width: 900px) {
+  .cart-top { flex-direction: column; align-items: stretch; }
+  .cart-add { width: auto; }
+}
+@media (max-width: 600px) {
+  .cart-row { grid-template-columns: 34px minmax(0, 1fr) auto 24px; gap: var(--sp-2); padding: var(--sp-2) 0 var(--sp-2) var(--sp-1); }
+  .cart-n { display: none; }
+  .cart-row.in-budget .cart-ico { box-shadow: inset 0 0 0 1.5px rgba(74, 222, 128, .6); }
+  .cart-x { opacity: .5; width: 24px; height: 24px; }
+  .cart-budget-sum { margin-left: 0; flex-basis: 100%; }
+}
