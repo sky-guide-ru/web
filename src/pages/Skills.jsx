@@ -8,6 +8,7 @@ import TrophyTiers from '../components/TrophyTiers.jsx';
 import HistoryCharts from '../components/HistoryCharts.jsx';
 import { useEffect, useState } from 'react';
 import { Rich } from '../guides/Rich.jsx';
+import { useInterests, applyInterests } from '../interests.js';
 
 const fx2 = v => v.toFixed(2).replace('.', DEC);
 
@@ -71,7 +72,8 @@ function SbXp({ p }) {
 }
 
 export default function Skills({ state, sub }) {
-  const steps = state.analysis?.roadmap || [];
+  const { interests } = useInterests(); // категории «Не хочу» из плана не считаем
+  const steps = applyInterests(state.analysis?.roadmap || [], interests);
   const { hidden } = useHiddenSteps(state); // скрытые шаги плана не считаем
   const m = state.member;
   // Нижние блоки (Chocolate Factory, атрибуты, гонки…) — отдельным куском, когда открыт «Прогресс»

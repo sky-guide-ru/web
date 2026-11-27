@@ -1543,6 +1543,8 @@ html:has(.modal-bg) .news-pop { visibility: hidden; }
 /* Кнопка «Опрос» внизу слева и окно опроса поверх страницы */
 .survey-fab { position: fixed; left: 18px; bottom: 18px; z-index: 440; display: inline-flex; align-items: center; gap: 8px; padding: 10px 15px; border-radius: 99px; border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent); background: rgba(16,18,32,.92); color: var(--text); font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 10px 28px rgba(0,0,0,.45); animation: fadeUp .2s ease backwards; }
 .survey-fab.mini { padding: 10px; }
+.survey-fab { transition: opacity .2s, transform .2s; }
+.survey-fab.away { opacity: 0; transform: translateY(16px); pointer-events: none; }
 .survey-fab:hover, .survey-fab:focus-visible { border-color: var(--gold); filter: brightness(1.12); }
 @media (min-width: 801px) { .survey-fab { left: calc(230px + 18px); } }
 .survey-dock { position: fixed; left: 18px; bottom: 18px; z-index: 455; width: min(720px, calc(100vw - 36px)); height: min(820px, calc(100vh - 60px)); border-radius: 16px; background: #10111e; border: 1px solid var(--card-b); box-shadow: 0 20px 60px rgba(0,0,0,.6); overflow: hidden; animation: fadeUp .18s ease backwards; }

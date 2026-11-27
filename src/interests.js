@@ -16,12 +16,15 @@ export function useInterests() {
   return { interests: interests || {}, setCat, clear: () => set({}) };
 }
 
+/** Ключ категории: без перевода (catKey), чтобы выбор не терялся при смене языка; старые ответы — по названию */
+export const catKey = s => s.catKey || s.cat;
+
 /** Шаги с учётом интересов: «не хочу» — убраны, «нравится» — подняты на несколько мест (порядок плана в остальном тот же). */
 export function applyInterests(steps, interests) {
   if (!interests || !Object.keys(interests).length) return steps;
   return steps
-    .map((s, i) => ({ s, i, k: i - (interests[s.cat] === 'like' ? LIFT : 0) }))
-    .filter(x => interests[x.s.cat] !== 'no')
+    .map((s, i) => ({ s, i, k: i - (interests[catKey(s)] === 'like' ? LIFT : 0) }))
+    .filter(x => interests[catKey(x.s)] !== 'no')
     .sort((a, b) => a.k - b.k || a.i - b.i)
     .map(x => x.s);
 }

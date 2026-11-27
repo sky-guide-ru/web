@@ -7,20 +7,20 @@ import { ItemIcon } from '../components/ItemIcon.jsx';
 import { useApp } from '../App.jsx';
 import { Rich } from '../guides/Rich.jsx';
 import { openNewsLink } from '../newsLinks.jsx';
-import { useInterests, applyInterests } from '../interests.js';
+import { useInterests, applyInterests, catKey } from '../interests.js';
 
 const STATUS = { done: 'пройдено', current: 'сейчас', available: 'доступно', locked: 'закрыто' };
 
 // «Нравится / Не хочу»: нажатие по категории переключает её: обычная → нравится → не хочу → обычная
 const NEXT = { undefined: 'like', like: 'no', no: undefined };
 function Interests({ cats, interests, set, clear }) {
-  const like = cats.filter(c => interests[c] === 'like'), no = cats.filter(c => interests[c] === 'no');
+  const like = cats.filter(([k]) => interests[k] === 'like'), no = cats.filter(([k]) => interests[k] === 'no');
   return (
     <details className="interests small" data-news="interests" open={like.length + no.length > 0 || undefined}>
       <summary>Нравится / Не хочу{like.length + no.length > 0 ? `: ♥ ${like.length} · ✕ ${no.length}` : ''}</summary>
       <div className="muted"><Rich text="Нажми категорию: ♥ поднимает её шаги выше, ✕ убирает их из плана, третье нажатие возвращает как было. Ironman и Bingo план учитывает сам." /></div>
       <div className="chips">
-        {cats.map(c => <button key={c} className={`chip tiny interest ${interests[c] || ''}`} onClick={() => set(c, NEXT[interests[c]])}>{interests[c] === 'like' ? '♥ ' : interests[c] === 'no' ? '✕ ' : ''}{c}</button>)}
+        {cats.map(([k, label]) => <button key={k} className={`chip tiny interest ${interests[k] || ''}`} onClick={() => set(k, NEXT[interests[k]])}>{interests[k] === 'like' ? '♥ ' : interests[k] === 'no' ? '✕ ' : ''}{label}</button>)}
         {like.length + no.length > 0 && <button className="chip tiny" onClick={clear}>сбросить</button>}
       </div>
     </details>
@@ -194,7 +194,7 @@ export default function Roadmap({ state, sub }) {
     return [...n];
   }, [steps, hidden]);
   // Все категории плана (и те, что убраны «Не хочу») — для строки интересов
-  const allCats = useMemo(() => [...new Set(allSteps.map(s => s.cat))], [allSteps]);
+  const allCats = useMemo(() => [...new Map(allSteps.map(s => [catKey(s), s.cat])).entries()], [allSteps]);
   const goStep = id => {
     setView('steps'); setCat('all');
     // Шаг скрыт — раскрываем список скрытых, иначе прокручивать некуда
