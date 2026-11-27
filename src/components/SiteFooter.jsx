@@ -54,6 +54,7 @@ export default function SiteFooter() {
           <h4>Связь</h4>
           {pub.contactEmail && <a href={`mailto:${pub.contactEmail}`}>{pub.contactEmail}</a>}
           <a href="https://discord.gg/hHgJJFCGQe" {...ext}>Discord</a>
+          {pub.discordLink && <a href={`${L}/discord`}>Привязать Discord</a>}
           <button type="button" className="linklike" onClick={() => setFb(true)}>Сообщить об ошибке</button>
         </nav>
         <div className="sf-col sf-data">
