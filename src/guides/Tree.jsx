@@ -221,11 +221,11 @@ export function TreeView({ s }) {
         </div>
         <div className="tree-side">
           <PerkInfo p={byId[sel]} mk={plan ? marks[sel] : null} tg={build?.targets?.[sel]} buildTitle={build?.title} />
-          {/* главное — рядом с деревом, «для прохода» и «готово» — под ним на всю ширину, чтобы колонки были ровными */}
-          {build && <Goals build={build} byId={byId} onPick={pick} only={['add', 'up', 'later', 'remove']} />}
+          {/* главное — рядом с деревом, «позже», «для прохода» и «готово» — под ним на всю ширину, чтобы колонки были ровными */}
+          {build && <Goals build={build} byId={byId} onPick={pick} only={['add', 'up', 'remove']} />}
         </div>
       </div>
-      {build && <Goals build={build} byId={byId} onPick={pick} only={['bridge', 'done']} className="wide" />}
+      {build && <Goals build={build} byId={byId} onPick={pick} only={['later', 'bridge', 'done']} className="wide" />}
 
       {build && (
         <details className="tree-more">
