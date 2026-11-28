@@ -19,7 +19,13 @@ function Interests({ cats, interests, set, clear }) {
   const [open, setOpen] = useState(like.length + no.length > 0);
   return (
     <details className="interests small" data-news="interests" open={open} onToggle={e => setOpen(e.currentTarget.open)}>
-      <summary>Нравится / Не хочу{like.length + no.length > 0 ? `: ♥ ${like.length} · ✕ ${no.length}` : ''}</summary>
+      <summary className="interests-btn">
+        <span className="interests-ic" aria-hidden="true"><span className="h">♥</span><span className="x">✕</span></span>
+        Нравится / Не хочу
+        {like.length > 0 && <span className="interests-cnt like" title="Нравится">♥ {like.length}</span>}
+        {no.length > 0 && <span className="interests-cnt no" title="Не хочу">✕ {no.length}</span>}
+        <span className="interests-chev" aria-hidden="true">▼</span>
+      </summary>
       <div className="muted"><Rich text="Нажми категорию: ♥ поднимает её шаги выше, ✕ убирает их из плана, третье нажатие возвращает как было. Ironman и Bingo план учитывает сам." /></div>
       <div className="chips">
         {cats.map(([k, label]) => <button key={k} className={`chip tiny interest ${interests[k] || ''}`} onClick={() => set(k, NEXT[interests[k]])}>{interests[k] === 'like' ? '♥ ' : interests[k] === 'no' ? '✕ ' : ''}{label}</button>)}
