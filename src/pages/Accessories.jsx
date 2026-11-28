@@ -48,11 +48,18 @@ const LS = (k, v) => { try { if (v === undefined) return JSON.parse(localStorage
 const perMp = s => (s.gain > 0 && s.cost ? s.cost / s.gain : Infinity);
 const Bdg = ({ k, label }) => <span className="badge" style={{ '--badge': KIND[k][1] }}>{label || KIND[k][0]}</span>;
 // Длинная цепочка ступеней (Campfire и т. п.) сжимается: 3 последние цветные, одна серая, «+N» и «21/30».
-// Полная цепочка — во всплывашке по наведению или нажатию.
+// Полная цепочка — во всплывашке по наведению или нажатию, по 10 точек в ряд.
 const DOTS_FULL = 5;
 const Dots = ({ t, count = true }) => {
   const [pos, setPos] = useState(null);
   const ref = useRef(null);
+  // Подсказка привязана к экрану: при прокрутке прячем, чтобы не висела над чужой строкой
+  useEffect(() => {
+    if (!pos) return undefined;
+    const hide = () => setPos(null);
+    window.addEventListener('scroll', hide, true);
+    return () => window.removeEventListener('scroll', hide, true);
+  }, [pos]);
   if (!t) return null;
   const [done, all] = t, left = Math.max(all - done, 0);
   const full = <>{'●'.repeat(done)}<i>{'●'.repeat(left)}</i></>;
@@ -62,7 +69,7 @@ const Dots = ({ t, count = true }) => {
   const show = () => {
     const r = ref.current?.getBoundingClientRect();
     if (!r) return;
-    const up = r.top > 70;
+    const up = r.top > 96;
     setPos({ x: Math.min(Math.max(r.left + r.width / 2, 124), window.innerWidth - 124), y: up ? r.top - 8 : r.bottom + 8, up });
   };
   return (
@@ -71,7 +78,8 @@ const Dots = ({ t, count = true }) => {
       onClick={e => { e.stopPropagation(); pos ? setPos(null) : show(); }}>
       {'●'.repeat(Math.min(done, 3))}{left > 0 && <i>●</i>}{more > 0 && <em>+{more}</em>}{count && <b>{done}/{all}</b>}
       {pos && createPortal(
-        <span className={`dots dots-pop${pos.up ? '' : ' down'}`} role="tooltip" style={{ left: pos.x, top: pos.y }}><small>tier {done} из {all}</small>{full}</span>,
+        <span className={`dots dots-pop${pos.up ? '' : ' down'}`} role="tooltip" style={{ left: pos.x, top: pos.y }}><small>tier {done} из {all}</small>
+          <span className="dots-grid">{Array.from({ length: all }, (_, k) => k < done ? <span key={k}>●</span> : <i key={k}>●</i>)}</span></span>,
         document.body)}
     </span>);
 };

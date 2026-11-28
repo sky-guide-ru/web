@@ -1778,7 +1778,9 @@ a.stat { color: inherit; text-decoration: none; }
 .dots-s { display: inline-flex; align-items: center; cursor: help; outline: none; }
 .dots-s em, .dots-s b { font-style: normal; font-size: 10px; font-weight: 600; letter-spacing: 0; color: var(--muted); margin-left: 4px; }
 .dots-s b { color: var(--text); }
-.dots-pop { position: fixed; z-index: 1000; transform: translate(-50%, -100%); width: max-content; max-width: 230px; padding: 6px 9px; border-radius: var(--r-md); background: var(--surface-pop); border: 1px solid var(--card-b); box-shadow: 0 10px 26px rgba(0,0,0,.5); font-size: 11px; letter-spacing: 1px; line-height: 1.4; white-space: normal; word-break: break-all; pointer-events: none; }
+.dots-pop { position: fixed; z-index: 1000; transform: translate(-50%, -100%); width: max-content; max-width: calc(100vw - 16px); padding: 6px 9px; border-radius: var(--r-md); background: var(--surface-pop); border: 1px solid var(--card-b); box-shadow: 0 10px 26px rgba(0,0,0,.5); font-size: 11px; letter-spacing: 0; line-height: 1.3; white-space: normal; pointer-events: none; }
+.dots-grid { display: grid; grid-template-columns: repeat(10, 1em); gap: 1px 2px; margin-top: 3px; }
+.dots-grid > * { text-align: center; }
 .dots-pop.down { transform: translate(-50%, 0); }
 .dots-pop small { display: block; font-size: 10px; letter-spacing: 0; color: var(--muted); font-weight: 600; }
 .re { display: inline-flex; gap: 3px; }
