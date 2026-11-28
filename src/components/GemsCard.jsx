@@ -93,7 +93,7 @@ export default function GemsCard({ gems, openItem }) {
       </div>
       <p className="small muted gnote">
         <Rich text={market
-          ? 'Камень под роль вещи: Jasper на оружие и броню для боя (маг — Sapphire, танк — Amethyst), Jade, Amber и Topaz на Mining, Peridot на Farming, Aquamarine на Fishing, Citrine на Foraging. Качество — под бюджет: за слот не дороже 1% твоих денег. Fine даёт около половины статов Perfect за малую долю цены.'
+          ? 'Камень под роль вещи: Jasper на оружие и броню для боя (Onyx — если Strength больше Crit Damage на треть; маг — Sapphire, танк — Amethyst), Jade, Amber и Topaz на Mining, Peridot на Farming, Aquamarine на Fishing, Citrine на Foraging. Качество — под бюджет: за слот не дороже 1% твоих денег. Fine даёт около половины статов Perfect за малую долю цены.'
           : 'Камень под роль вещи: Jasper на оружие и броню для боя, Jade, Amber и Topaz на Mining, Peridot на Farming, Aquamarine на Fishing, Citrine на Foraging. Камни добываются в Crystal Hollows, 80 штук крафтятся в камень следующего качества.'} />
       </p>
       {gems.moves?.length > 0 && <>
@@ -136,7 +136,7 @@ export default function GemsCard({ gems, openItem }) {
           </tbody>
         </table>
       </div>
-      <p className="muted tiny gnote"><Rich text="Камни вставляет и снимает Gemstone Grinder рядом с Geo. Снять камень платно (Fine 10k, Flawless 100k, Perfect 500k), сам камень возвращается. Нажми на вещь — варианты Fine, Flawless и Perfect." /></p>
+      <p className="muted tiny gnote"><Rich text="Камни вставляет и снимает Gemstone Grinder у Geo в Dwarven Mines (Dwarven Village). Снять камень платно (Fine 10k, Flawless 100k, Perfect 500k), сам камень возвращается. Нажми на вещь — варианты Fine, Flawless и Perfect." /></p>
     </div>
   );
 }
