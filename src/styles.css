@@ -483,6 +483,15 @@ a.stat-link:hover { transform: translateY(-2px); border-color: var(--stat-accent
 .guide-steps li.done .guide-step-dot { background: var(--green); color: #0b1020; }
 .guide-steps li.done b { color: var(--muted); }
 .guide-steps li.current .guide-step-dot { background: var(--accent); box-shadow: 0 0 0 4px rgba(124,92,255,.25); }
+/* Фигуры на сетке (Fossil Excavator) */
+.guide-shapes { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+.guide-shape { --cell: 11px; display: flex; gap: 12px; align-items: center; padding: 10px; border-radius: var(--r-md); background: rgba(255,255,255,.03); border: 1px solid transparent; }
+.guide-shape.done { border-color: rgba(74,222,128,.35); }
+.guide-shape-grid { display: grid; gap: 2px; flex-shrink: 0; }
+.guide-shape-grid i { width: var(--cell); height: var(--cell); border-radius: 2px; background: rgba(255,255,255,.06); }
+.guide-shape-grid i.on { background: #d6b98c; }
+.guide-shape-name { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-weight: 600; }
+.guide-shape-badge { font-size: 12px; font-weight: 500; padding: 0 6px; border-radius: 6px; background: rgba(124,92,255,.2); color: #c4b5fd; }
 .guide-check { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
 .guide-check li { display: flex; gap: 8px; align-items: center; }
 .guide-check-box { width: 18px; height: 18px; border-radius: var(--r-xs); border: 1px solid var(--card-b); display: grid; place-items: center; font-size: 12px; flex-shrink: 0; }

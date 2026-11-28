@@ -139,6 +139,36 @@ function Cell({ c }) {
   );
 }
 
+// Фигуры на сетке (окаменелости Fossil Excavator): клетки [x, y], значок с процентом, отметка «сдан»
+function Shapes({ items }) {
+  const { openItem } = useApp();
+  return (
+    <div className="guide-shapes">
+      {items.map((it, i) => {
+        const w = Math.max(...it.cells.map(c => c[0])) + 1;
+        const h = Math.max(...it.cells.map(c => c[1])) + 1;
+        const on = new Set(it.cells.map(c => `${c[0]},${c[1]}`));
+        return (
+          <div key={i} className={`guide-shape${it.done ? ' done' : ''}`}>
+            <div className="guide-shape-grid" style={{ gridTemplateColumns: `repeat(${w}, var(--cell))` }} aria-hidden="true">
+              {Array.from({ length: w * h }, (_, k) => <i key={k} className={on.has(`${k % w},${Math.floor(k / w)}`) ? 'on' : ''} />)}
+            </div>
+            <div className="guide-shape-body">
+              <div className="guide-shape-name">
+                {it.item && <ItemIcon id={it.item} size={22} onClick={() => openItem(it.item)} />}
+                <b><Rich text={it.name} item={it.item} /></b>
+                {it.badge && <span className="guide-shape-badge">{it.badge}</span>}
+              </div>
+              {it.text && <div className="muted small"><Rich text={it.text} /></div>}
+              {it.hint && <div className={`small ${it.done ? 'tone-good' : 'muted'}`}><Rich text={it.hint} /></div>}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 const lines = t => (Array.isArray(t) ? t : [t]).filter(Boolean);
 
 export function Section({ s }) {
@@ -176,6 +206,8 @@ export function Section({ s }) {
     body = <TreeView s={s} />;
   } else if (s.kind === 'sources') {
     body = <Sources s={s} />;
+  } else if (s.kind === 'shapes') {
+    body = <Shapes items={s.items || []} />;
   } else if (s.kind === 'table') {
     body = (
       <div className="table-scroll">
