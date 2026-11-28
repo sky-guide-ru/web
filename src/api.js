@@ -199,7 +199,7 @@ export function useLiveState() {
   }, [vk, load]);
   useEffect(() => {
     load();
-    let es = null, retry = null, tries = 0;
+    let es = null, retry = null, tries = 0, opened = false;
     const connect = () => {
       es = new EventSource('/api/stream');
       // События профиля — про свой профиль; чужой обновляется опросом ниже
@@ -213,8 +213,9 @@ export function useLiveState() {
         // ни живых событий, ни «Подключаюсь…» → «Live» до перезагрузки вкладки. Открываем поток заново сами
         if (es.readyState === 2 && !retry) retry = setTimeout(() => { retry = null; connect(); }, Math.min(30_000, 2000 * 2 ** tries++));
       };
-      // После переподключения потока сразу подтягиваем свежие данные
-      es.onopen = () => { tries = 0; load(); checkBuild(); };
+      // После переподключения потока сразу подтягиваем свежие данные. Первое открытие пропускаем:
+      // состояние уже запрошено выше, второй такой же /api/state при каждом открытии сайта не нужен
+      es.onopen = () => { tries = 0; if (opened) load(); opened = true; checkBuild(); };
     };
     connect();
     // Запасной путь, если поток не переподключился сам: раз в 30 с и при возврате на вкладку
