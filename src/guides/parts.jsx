@@ -5,6 +5,7 @@ import { ItemIcon } from '../components/ItemIcon.jsx';
 import { useApp } from '../App.jsx';
 import { Rich } from './Rich.jsx';
 import { TreeView } from './Tree.jsx';
+import { MiningEventsLive } from './MiningEvents.jsx';
 
 export const STATUS = {
   start: { text: 'не начато', color: '#8b90b0' },
@@ -206,6 +207,8 @@ export function Section({ s }) {
     body = <TreeView s={s} />;
   } else if (s.kind === 'sources') {
     body = <Sources s={s} />;
+  } else if (s.kind === 'miningEvents') {
+    body = <MiningEventsLive />;
   } else if (s.kind === 'shapes') {
     body = <Shapes items={s.items || []} />;
   } else if (s.kind === 'table') {

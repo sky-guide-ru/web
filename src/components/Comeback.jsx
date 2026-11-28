@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Card } from './ui.jsx';
 import { Rich } from '../guides/Rich.jsx';
+import { MiningEventRow } from '../guides/MiningEvents.jsx';
 import { api, useProfileStore } from '../api.js';
 import { LOCALE } from '../i18n.js';
 
@@ -70,7 +71,7 @@ export function Returning({ info, steps }) {
 }
 
 export function Dailies({ d }) {
-  if (!d?.items?.length) return null;
+  if (!d?.items?.length) return d?.mining ? <MiningEventRow card /> : null;
   return (
     <Card className="span-12 dailies" news="dailies" title="Дела на сегодня"
       right={<span className="muted small">{d.done}/{d.total} · новый день в {timeOf(d.next)}</span>}>
@@ -85,6 +86,7 @@ export function Dailies({ d }) {
           </a>
         ))}
       </div>
+      {d.mining && <MiningEventRow />}
       <div className="muted tiny daily-note">Отметки ставятся сами по данным профиля, он обновляется раз в несколько минут.</div>
     </Card>
   );
