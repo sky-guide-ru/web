@@ -12,7 +12,7 @@ const ROMAN = ['0', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X',
 const roman = n => ROMAN[n] || String(n);
 // «1,2 млн», «45 тыс.»: как в остальном сайте, без английских B/M/k
 const dec = v => v.toFixed(1).replace(/\.0$/, '').replace('.', DEC);
-const short = n => (n >= 1e9 ? `${dec(n / 1e9)} млрд` : n >= 1e6 ? `${dec(n / 1e6)} млн` : n >= 1e4 ? `${Math.round(n / 1e3)} тыс.` : num(n));
+const short = n => (n >= 999_950_000 ? `${dec(n / 1e9)} млрд` : n >= 999_500 ? `${dec(n / 1e6)} млн` : n >= 1e4 ? `${Math.round(n / 1e3)} тыс.` : num(n));
 
 export default function Collections({ state }) {
   const { openItem } = useApp();
