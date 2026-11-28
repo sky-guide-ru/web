@@ -1,4 +1,4 @@
-// Общие части страницы «Гайды»: шапка гайда, «что делать дальше», секции (text / steps / checklist / table / tree / sources / shapes / cards / tool).
+// Общие части страницы «Гайды»: шапка гайда, «что делать дальше», секции (text / steps / checklist / table / tree / sources / shapes / cards / equip / tool).
 import { createContext, useContext } from 'react';
 import { Card, Progress, Badge, Empty } from '../components/ui.jsx';
 import { ItemIcon } from '../components/ItemIcon.jsx';
@@ -7,6 +7,7 @@ import { Rich } from './Rich.jsx';
 import { TreeView } from './Tree.jsx';
 import { MiningEventsLive } from './MiningEvents.jsx';
 import { GuideTool } from './DungeonTools.jsx';
+import { EquipSection } from './Equip.jsx';
 
 export const STATUS = {
   start: { text: 'не начато', color: '#8b90b0' },
@@ -239,6 +240,8 @@ export function Section({ s }) {
     body = <Shapes items={s.items || []} />;
   } else if (s.kind === 'cards') {
     body = <Cards items={s.items || []} />;
+  } else if (s.kind === 'equip') {
+    body = <EquipSection s={s} />;
   } else if (s.kind === 'tool') {
     body = <GuideTool s={s} />;
   } else if (s.kind === 'table') {
