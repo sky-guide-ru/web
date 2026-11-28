@@ -6,6 +6,7 @@ import { useApp } from '../App.jsx';
 import PlayerModel from '../components/PlayerModel.jsx';
 import { Rich } from '../guides/Rich.jsx';
 import { DEC } from '../i18n.js';
+import GemsCard from '../components/GemsCard.jsx';
 
 // Шлем → нагрудник → поножи → ботинки, как в игре
 const PIECE_ORDER = ['HELMET', 'CHESTPLATE', 'LEGGINGS', 'BOOTS'];
@@ -283,6 +284,7 @@ export default function Gear({ state }) {
       <Card title="Инструменты"><ItemList items={g.tools.slice(0, 8)} openItem={openItem} /></Card>
       </div>
       </div>
+      {g.gems?.items?.length > 0 && <Card title="Гемы в снаряжении" className="span-12" news="gems"><GemsCard gems={g.gems} openItem={openItem} /></Card>}
       {g.mf && <Card title="Magic Find" className="span-12" news="mf"><MagicFind mf={g.mf} openItem={openItem} /></Card>}
       <Card title="Хранилища" className="span-12"><Storage openItem={openItem} /></Card>
       <Card title="Оценка состояния" className="span-12" news="networth"><Networth nw={g.networth} pricing={!pricesLoaded(state)} /></Card>
