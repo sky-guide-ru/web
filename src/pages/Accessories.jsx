@@ -173,6 +173,31 @@ export default function Accessories({ state, sub }) {
     return () => removeEventListener('scroll', on);
   }, []);
 
+  // Фильтр длиннее экрана едет вместе со страницей: вниз — до своего низа, вверх — до своего верха.
+  // Липкий top сдвигается на ту же прокрутку и зажат между 12px и «низ виден над кнопкой «Опрос»»
+  // (место под кнопку держим и когда она спрятана на время прокрутки, чтобы фильтр не прыгал).
+  const sideRef = useRef(null);
+  useEffect(() => {
+    const S = sideRef.current; if (!S) return;
+    const mq = matchMedia('(min-width: 901px)');
+    let y = scrollY, top = 12;
+    const place = () => {
+      const dy = scrollY - y; y = scrollY;
+      if (!mq.matches) { S.style.top = ''; return; }
+      const r = S.getBoundingClientRect();
+      const fab = document.querySelector('.survey-fab'); // offset*, а не rect: у спрятанной кнопки есть сдвиг transform
+      const gap = fab?.offsetWidth && fab.offsetLeft + fab.offsetWidth > r.left && fab.offsetLeft < r.right ? innerHeight - fab.offsetTop + 10 : 12;
+      top = Math.max(Math.min(12, innerHeight - gap - S.offsetHeight), Math.min(12, top - dy));
+      S.style.top = top + 'px';
+    };
+    place();
+    const ro = new ResizeObserver(place); ro.observe(S);
+    addEventListener('scroll', place, { passive: true });
+    addEventListener('resize', place);
+    mq.addEventListener('change', place);
+    return () => { ro.disconnect(); removeEventListener('scroll', place); removeEventListener('resize', place); mq.removeEventListener('change', place); };
+  }, [!!acc && !acc.hidden, narrow]);
+
   if (!acc) return <div className="muted small"><div className="spinner" />Загружаю аксессуары…</div>;
   if (acc.hidden) {
     return (
@@ -303,7 +328,7 @@ export default function Accessories({ state, sub }) {
   const howPresent = Object.fromEntries(Object.entries(HOW_L).filter(([k]) => rows.some(a => a.how === k)));
   const bp = V2P(budget);
   const side = (
-          <aside className={`acc-side ${sheet ? 'open' : ''}`}>
+          <aside ref={sideRef} className={`acc-side ${sheet ? 'open' : ''}`}>
               <div className="acc-sheet-head"><b>Фильтры</b><button className="acc-x" onClick={() => setSheet(false)} aria-label="Закрыть">×</button></div>
               <input className="search" placeholder="Название…" value={F.q} onChange={e => setF(f => ({ ...f, q: e.target.value }))} />
               <div className="acc-g"><div className="acc-gt">Показать</div><div className="acc-seg">
