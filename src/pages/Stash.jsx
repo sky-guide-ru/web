@@ -8,6 +8,7 @@ import { ItemIcon } from '../components/ItemIcon.jsx';
 import { useApi, coins, num, plural, useHashTab } from '../api.js';
 import { useApp } from '../App.jsx';
 import StashSell, { sellTile } from './StashSell.jsx';
+import { WarpChip } from '../guides/warps.jsx';
 
 const HOW_RU = { bazaar: 'на базаре', npc: 'торговцу', none: '—' };
 
@@ -319,7 +320,7 @@ function ShopBox({ t }) {
       {sp && (
         <div className="tiny essence-route">
           NPC <b>{sp.npc}</b> · {sp.island}{sp.coords && <> · координаты {sp.coords.join(' ')}</>}
-          {sp.warp && <> · дорога: <code>/warp {sp.warp}</code>{sp.dist > 15 ? `, дальше ~${sp.dist} блоков пешком` : ', NPC рядом'}</>}
+          {sp.warp && <> · дорога: <WarpChip warp={sp.warp} />{sp.dist > 15 ? `, дальше ~${sp.dist} блоков пешком` : ', NPC рядом'}</>}
           {sp.note && <div className="muted">{sp.note}</div>}
         </div>
       )}

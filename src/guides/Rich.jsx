@@ -9,6 +9,7 @@ import { ItemIcon } from '../components/ItemIcon.jsx';
 import { RARITY_COLOR } from '../api.js';
 import { useApp } from '../App.jsx';
 import { ensureLexicon, globalData, splitGlobal, subscribe, getVersion } from './globalRefs.js';
+import { WarpChip, WarpAlt, WarpTip, splitWarps } from './warps.jsx';
 
 const KIND_RU = { mech: 'Механика', stat: 'Характеристика', place: 'Место', event: 'Событие', cur: 'Валюта', npc: 'NPC', mob: 'Существо', skill: 'Навык', item: 'Предмет',
   floor: 'Этаж данжа', rarity: 'Редкость', reforge: 'Reforge', gem: 'Гем' };
@@ -40,7 +41,7 @@ export function RefsProvider({ refs, children }) {
   }, []);
   // Данные подсказок: сначала свои (refs страницы), потом общего словаря
   const own = refs?.data;
-  const getData = useCallback(ref => own?.[ref] || globalData(ref), [own, gv]); // eslint-disable-line react-hooks/exhaustive-deps
+  const getData = useCallback(ref => (ref.startsWith('w:') ? { kind: 'warp', warp: ref.slice(2) } : own?.[ref] || globalData(ref)), [own, gv]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const show = useCallback((ref, e, pinned = false) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -88,6 +89,14 @@ function RefTip({ d, tip, onClose, openItem }) {
     setPos({ left, top: below ? tip.y + 6 : Math.max(8, tip.top - h - 6), vis: true });
   }, [tip, d]);
   const isItem = d.kind === 'item';
+  if (d.kind === 'warp') {
+    return (
+      <div ref={ref} className="gref-tip pinned" style={{ left: pos.left, top: pos.top, visibility: pos.vis ? 'visible' : 'hidden' }} role="dialog">
+        <button className="x-btn sm gref-x" onClick={onClose} aria-label="Закрыть">×</button>
+        <WarpTip warp={d.warp} />
+      </div>
+    );
+  }
   return (
     <div ref={ref} className={`gref-tip ${tip.pinned ? 'pinned' : ''}`} style={{ left: pos.left, top: pos.top, visibility: pos.vis ? 'visible' : 'hidden' }} role="dialog">
       <div className="gref-tip-head">
@@ -114,7 +123,7 @@ function RefTip({ d, tip, onClose, openItem }) {
           )}
           {(d.warp || d.coords) && (
             <p className="gref-text small">
-              {d.warp && <>Телепорт: <code>/warp {d.warp}</code></>}
+              {d.warp && <>Телепорт: <WarpChip warp={d.warp} /></>}
               {d.coords && <>{d.warp ? ' · ' : ''}координаты {d.coords.join(' ')}</>}
             </p>
           )}
@@ -174,11 +183,20 @@ export function Rich({ text, item, auto = true }) {
   const ctx = useContext(RefsCtx);
   useGlobalVersion();
   if (text == null || text === '') return null;
-  let parts = splitRefs(text, ctx);
+  // /warp name — плашка, которая знает, сработает ли телепорт у игрока (warps.jsx); остальной текст — ссылки
+  let parts = splitWarps(String(text)).flatMap(p => (typeof p === 'string' ? splitRefs(p, ctx) : [p]));
   if (auto) parts = parts.flatMap(p => (typeof p === 'string' ? splitGlobal(p) : [p]));
   const linked = parts.some(p => typeof p === 'object');
   if (item && !linked) return <RefLink refKey={`i:${item}`}>{String(text)}</RefLink>;
-  return <>{parts.map((p, i) => typeof p === 'string' ? <span key={i}>{p}</span> : <RefLink key={i} refKey={p.ref}>{p.text}</RefLink>)}</>;
+  const warps = [...new Set(parts.filter(p => p?.warp).map(p => p.warp))];
+  return (
+    <>
+      {parts.map((p, i) => typeof p === 'string' ? <span key={i}>{p}</span>
+        : p.warp ? <WarpChip key={i} warp={p.warp} onOpen={ctx?.activate} />
+        : <RefLink key={i} refKey={p.ref}>{p.text}</RefLink>)}
+      {warps.map(w => <WarpAlt key={`alt-${w}`} warp={w} />)}
+    </>
+  );
 }
 
 export const useRefs = () => useContext(RefsCtx);

@@ -4,6 +4,7 @@
 // термина подтягиваются пачкой (GET /api/refs/data) и кешируются до перезагрузки страницы.
 
 let phrases = null;   // Map: фраза (с ' вместо ’) → ref
+let warps = {};       // /warp name → { warp, place, rarity, scroll?, how?, via?, route? } (core/src/guides/warps.js)
 let loading = false;
 let refetch = false; // словарь был неполным (сервер грузил базу) — перезапросить
 let version = 0;
@@ -26,6 +27,7 @@ export function ensureLexicon() {
     .then(j => {
       if (!j?.phrases) throw new Error('нет словаря');
       phrases = new Map(Object.entries(j.phrases).map(([p, r]) => [p.replace(/’/g, '\''), r]));
+      if (j.warps) warps = j.warps;
       bump();
       // Сервер только что запустился и ещё грузит предметы: пока пользуемся тем, что есть, и спросим ещё раз
       if (j.ready === false) setTimeout(() => { loading = false; refetch = true; ensureLexicon(); }, 30_000);
@@ -33,6 +35,11 @@ export function ensureLexicon() {
     })
     .catch(() => { setTimeout(() => { loading = false; ensureLexicon(); }, 60_000); }); // сервер недоступен — попробуем позже
 }
+
+/** Запись о варпе или null (словарь ещё не пришёл или варп неизвестен). */
+export const getWarp = w => warps[w] || null;
+/** Все варпы без синонимов, по порядку таблицы. */
+export const warpList = () => Object.entries(warps).filter(([k, e]) => k === e.warp).map(([, e]) => e);
 
 function flush() {
   timer = null;

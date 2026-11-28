@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Badge } from '../components/ui.jsx';
 import { Rich } from './Rich.jsx';
+import { WarpScrolls } from './warps.jsx';
 
 // ---------- Калькулятор счёта ----------
 
@@ -229,5 +230,6 @@ export function PuzzleHelpers({ s }) {
 export function GuideTool({ s }) {
   if (s.tool === 'dungeon-score') return <ScoreCalc s={s} />;
   if (s.tool === 'puzzle-helpers') return <PuzzleHelpers s={s} />;
+  if (s.tool === 'warp-scrolls') return <WarpScrolls />;
   return null;
 }
