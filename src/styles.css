@@ -1084,7 +1084,8 @@ button.coll-unlock { cursor: pointer; } button.coll-unlock:hover { border-color:
 .tree-tag.good { color: var(--gold); } .tree-tag.bad { color: var(--red); }
 .nowrap { white-space: nowrap; }
 /* Сетка */
-.tree-main { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-4); align-items: start; }
+.tree-main { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: 'grid side' 'wide wide'; gap: var(--sp-4); align-items: start; }
+.tree-main > .tree-grid-box { grid-area: grid; } .tree-main > .tree-side { grid-area: side; } .tree-main > .tree-goals.wide { grid-area: wide; }
 .tree-grid-box { display: flex; flex-direction: column; gap: var(--sp-2); }
 .tree-grid { display: grid; gap: 3px; padding: var(--sp-2); border-radius: var(--r-lg); background: rgba(0,0,0,.25); border: 1px solid var(--card-b); width: max-content; }
 .tree-row-n { display: grid; place-items: center; font-size: var(--fs-2xs); color: var(--muted); }
@@ -1122,7 +1123,7 @@ button.coll-unlock { cursor: pointer; } button.coll-unlock:hover { border-color:
 .tree-goal.tg-remove { box-shadow: inset 3px 0 0 var(--red); } .tree-goal.tg-done { box-shadow: inset 3px 0 0 var(--accent2); }
 .tree-goals { display: flex; flex-direction: column; gap: var(--sp-2); }
 /* «для прохода» и «готово» — под деревом на всю ширину: на ПК рядом, на телефоне друг под другом */
-.tree-goals.wide { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--sp-3) var(--sp-4); align-items: start; margin-top: var(--sp-3); }
+.tree-goals.wide { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 420px)); gap: var(--sp-3) var(--sp-4); align-items: start; }
 .tree-goals:empty { display: none; }
 .tree-goal-h { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); font-weight: 700; }
 .tree-goal-i { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; font-style: normal; font-size: 11px; font-weight: 800; background: var(--gold); color: #1a1405; }
@@ -1152,10 +1153,15 @@ button.coll-unlock { cursor: pointer; } button.coll-unlock:hover { border-color:
 .tree-pc ul { margin: 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: var(--sp-1); font-size: var(--fs-md); }
 .tree-pros li::before { content: '+ '; color: var(--green); font-weight: 700; }
 .tree-cons li::before { content: '− '; color: var(--red); font-weight: 700; }
-@media (max-width: 800px) { .tree-main { grid-template-columns: 1fr; } .tree-grid { margin: 0 auto; } }
+@media (max-width: 800px) { .tree-main { grid-template-columns: 1fr; grid-template-areas: 'grid' 'side' 'wide'; } .tree-grid { margin: 0 auto; } }
 /* Гайд рядом со списком гайдов (окно ~1000px): колонка уже, чем экран телефона, — дерево и цели друг под другом, а не узкой полосой за край */
 .tree-wrap { container-type: inline-size; }
-@container (max-width: 600px) { .tree-main { grid-template-columns: 1fr; } .tree-grid { margin: 0 auto; } }
+@container (max-width: 600px) { .tree-main { grid-template-columns: 1fr; grid-template-areas: 'grid' 'side' 'wide'; } .tree-grid { margin: 0 auto; } }
+/* широкий экран: правая колонка шире дерева — главное раскладываем в колонки, остальное ставим под ним справа, без пустоты */
+@container (min-width: 800px) {
+  .tree-main { grid-template-areas: 'grid side' 'grid wide'; grid-template-rows: auto 1fr; }
+  .tree-side .tree-goals { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 420px)); gap: var(--sp-3) var(--sp-4); align-items: start; }
+}
 @media (max-width: 560px) { .tree-pc { grid-template-columns: 1fr; } }
 /* ---------- Запасы: мешки и эссенции ---------- */
 .stash-switch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2); }
