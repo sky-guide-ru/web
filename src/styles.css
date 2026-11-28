@@ -945,7 +945,9 @@ table.cmp { width: 100%; border-collapse: separate; border-spacing: 0; min-width
 .st-log li.update b { color: var(--green); }
 .st-scroll { height: 300px; overflow-y: auto; overscroll-behavior: contain; margin-top: 12px; padding-right: 4px; }
 .st-scroll h4 + .st-log { margin-top: 6px; }
-.st-scroll .st-log + h4 { margin-top: 12px; }
+/* Заголовки списков прилипают к верху окна прокрутки: строки уходят под них, а не наезжают сверху */
+.st-scroll h4 { position: sticky; top: 0; z-index: 1; margin: 0; padding: 4px 0 6px; background: #131523; }
+.st-scroll .st-log + h4 { margin-top: 6px; padding-top: 10px; }
 @media (max-width: 600px) { .st-log li { grid-template-columns: 1fr; } }
 
 /* ---------- Чат советчика поверх сайта (ChatDock) ---------- */
