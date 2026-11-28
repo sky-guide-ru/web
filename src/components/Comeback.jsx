@@ -5,6 +5,7 @@ import { Rich } from '../guides/Rich.jsx';
 import { MiningEventRow } from '../guides/MiningEvents.jsx';
 import { api, useProfileStore } from '../api.js';
 import { LOCALE } from '../i18n.js';
+import { openNewsLink } from '../newsLinks.jsx';
 
 // Без года, если он текущий: «18 сентября»; иначе «18 сентября 2025»
 const dateOf = t => { const d = new Date(t); return d.toLocaleDateString(LOCALE, d.getFullYear() === new Date().getFullYear() ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'long', year: 'numeric' }).replace(/ г\.$/, ''); };
@@ -70,24 +71,54 @@ export function Returning({ info, steps }) {
   );
 }
 
+// Fetchur и Puzzler API не видит: отметку ставит игрок. «day» — до сброса дня, «24h» — сутки после отметки (Puzzler)
+const DAY = 86400_000;
+function manualState(i, marks, d, now) {
+  const t = marks[i.id] || 0;
+  if (i.manual === 'day') return { done: t >= d.reset && t < d.next, ready: null };
+  const ready = t + DAY;
+  return ready > now ? { done: true, ready } : { done: false, ready: null };
+}
+
 export function Dailies({ d }) {
+  const [marks, setMarks] = useProfileStore('sb-daily-marks', {});
   if (!d?.items?.length) return d?.mining ? <MiningEventRow card /> : null;
+  const now = Date.now();
+  const items = d.items.map(i => (i.manual ? { ...i, ...manualState(i, marks || {}, d, now) } : i));
+  const done = items.filter(i => i.done).length;
+  const toggle = i => {
+    setMarks({ ...(marks || {}), [i.id]: i.done ? 0 : Date.now() });
+  };
   return (
     <Card className="span-12 dailies" news="dailies" title="Дела на сегодня"
-      right={<span className="muted small">{d.done}/{d.total} · новый день в {timeOf(d.next)}</span>}>
+      right={<span className="muted small">{done}/{items.length} · новый день в {timeOf(d.next)}</span>}>
       <div className="daily-row">
-        {d.items.map(i => (
-          <a key={i.id} href={i.href || '#/guides'} className={`daily ${i.done ? 'done' : ''}`}>
-            <span className="daily-check" aria-hidden>{i.done ? '✓' : ''}</span>
+        {items.map(i => {
+          const body = (
             <span className="daily-body">
               <b>{i.title}{i.progress ? <span className="muted"> {i.progress[0]}/{i.progress[1]}</span> : null}</b>
               <span className="muted tiny"><Rich text={i.ready && i.done ? `${i.text} Снова в ${timeOf(i.ready)}.` : i.text} /></span>
             </span>
-          </a>
-        ))}
+          );
+          // Ручную отметку нельзя класть внутрь ссылки: плитка — блок с кнопкой, ссылка — на названии
+          if (i.manual) return (
+            <div key={i.id} className={`daily manual ${i.done ? 'done' : ''}`}>
+              <button type="button" className="daily-check" aria-pressed={i.done} title={i.done ? 'Снять отметку' : 'Отметить: сделано'} aria-label={`${i.title}: ${i.done ? 'снять отметку' : 'отметить, что сделано'}`} onClick={() => toggle(i)}>{i.done ? '✓' : ''}</button>
+              <a className="daily-link" href={i.href || '#/guides'} onClick={i.anchor ? e => { e.preventDefault(); openNewsLink(i.href.replace(/^#\//, ''), i.anchor); } : undefined}>{body}</a>
+            </div>
+          );
+          return (
+            <a key={i.id} href={i.href || '#/guides'} className={`daily ${i.done ? 'done' : ''}`}>
+              <span className="daily-check" aria-hidden>{i.done ? '✓' : ''}</span>
+              {body}
+            </a>
+          );
+        })}
       </div>
       {d.mining && <MiningEventRow />}
-      <div className="muted tiny daily-note">Отметки ставятся сами по данным профиля, он обновляется раз в несколько минут.</div>
+      <div className="muted tiny daily-note">{items.some(i => i.manual)
+        ? 'Отметки ставятся сами по данным профиля, он обновляется раз в несколько минут. Fetchur и Puzzler игра не показывает: отметьте их сами, нажав на квадрат.'
+        : 'Отметки ставятся сами по данным профиля, он обновляется раз в несколько минут.'}</div>
     </Card>
   );
 }

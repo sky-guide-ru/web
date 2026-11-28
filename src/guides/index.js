@@ -3,6 +3,7 @@ import Fishing from './Fishing.jsx';
 import Trophy from './Trophy.jsx';
 import Collectibles from './Collectibles.jsx';
 import Forge from './Forge.jsx';
+import Bestiary from './Bestiary.jsx';
 
 // Свои компоненты для гайдов: id гайда → компонент ({ guide, state }).
 // Гайды без своего компонента рисуются общим рендером (GenericGuide из parts.jsx).
@@ -13,4 +14,5 @@ export const CUSTOM = {
   rift: Rift,
   collectibles: Collectibles,
   forge: Forge,
+  bestiary: Bestiary,
 };
