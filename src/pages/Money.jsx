@@ -30,6 +30,8 @@ const inBand = (v, band) => {
 };
 const pct = (v, d = 1) => (v == null || isNaN(v) ? '—' : `${v.toFixed(d).replace('.', DEC)}%`);
 const lc = s => String(s || '').toLowerCase();
+// время ковки Forge: улучшения буров и часть деталей куются за секунды — «0,02 ч» не читается
+const forgeDur = h => (h >= 1 ? `${(Math.round(h * 100) / 100).toLocaleString(LOCALE)} ч` : h * 60 >= 1 ? `${Math.round(h * 60)} мин` : `${Math.max(1, Math.round(h * 3600))} с`);
 const RISK_CLS = { низкий: 'low', средний: 'mid', высокий: 'high', low: 'low', mid: 'mid', high: 'high' };
 
 /** Чипы категорий с количеством: «Все 40 · Farming 12 · Добыча 7…» */
@@ -266,7 +268,7 @@ function Crafts({ openItem }) {
     { key: 'perHour', label: '~В час', cls: 'num gold', title: 'Крафт: сколько успеешь продать за час. Forge: доход одного слота в час с учётом спроса', sort: c => c.perHour * (c.slotFill ?? 1), render: c => coins(c.perHour * (c.slotFill ?? 1)) },
     { key: 'hotm', label: 'HotM', cls: 'num', title: 'Какой уровень Heart of the Mountain нужен для рецепта Forge', sort: c => c.hotm || 0,
       render: c => (c.hotm ? <span className={c.locked?.some(x => /HotM/i.test(x)) ? 'red' : ''}>{c.hotm}{c.locked?.some(x => /HotM/i.test(x)) ? ' 🔒' : ' ✓'}</span> : '—') },
-    { key: 'durationH', label: 'Время', cls: 'num', sort: c => c.durationH ?? 0, render: c => (c.durationH ? `${c.durationH.toLocaleString(LOCALE)} ч` : 'сразу') },
+    { key: 'durationH', label: 'Время', cls: 'num', sort: c => c.durationH ?? 0, render: c => (c.durationH ? forgeDur(c.durationH) : 'сразу') },
     { key: 'market', label: 'Где продать', text: true },
   ];
   const expand = c => (
@@ -281,7 +283,7 @@ function Crafts({ openItem }) {
       </div>
       <div className="mt-facts">
         <span>Себестоимость <b>{coins(c.cost)}</b> → продажа <b>{coins(c.sell)}</b> = <b className="green">+{coins(c.profit)}</b></span>
-        {c.kind === 'forge' ? <span>Ковка <b>{c.durationH} ч</b> на слот, доход слота ≈ <b>{coins((c.perHourLow || 0) * (c.slotFill ?? 1))}–{coins(c.perHour * (c.slotFill ?? 1))}/ч</b>{c.slotFill < 1 ? ' (спроса хватает не на весь слот)' : ''}</span>
+        {c.kind === 'forge' ? <span>Ковка <b>{forgeDur(c.durationH)}</b> на слот, доход слота ≈ <b>{coins((c.perHourLow || 0) * (c.slotFill ?? 1))}–{coins(c.perHour * (c.slotFill ?? 1))}/ч</b>{c.slotFill < 1 ? ' (спроса хватает не на весь слот)' : ''}</span>
           : <span>Продать реально ≈ <b>{(c.craftsPerHour || 0).toLocaleString(LOCALE, { maximumFractionDigits: 1 })}</b> шт. в час, доход ≈ <b>{coins(c.perHourLow)}–{coins(c.perHour)}/ч</b></span>}
         {c.demandDay != null && <span>Спрос: реально продать ≈ <b>{c.demandDay < 1 ? c.demandDay.toLocaleString(LOCALE, { maximumFractionDigits: 1 }) : num(c.demandDay)}</b> шт. в день{c.kind === 'forge' && c.maxSlots != null ? `, слотов под него: ${c.maxSlots < 1 ? 'меньше одного' : Math.round(c.maxSlots)}` : ''}</span>}
         {c.req && <span>{c.req}</span>}
