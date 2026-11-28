@@ -1022,6 +1022,66 @@ a.acct.acct-login:hover { background: rgba(124,92,255,.16); border-color: rgba(1
   .forge-seg button { font-size: var(--fs-xs); }
 }
 
+/* ---------- Гайд «Драконы и Zealots» (guides/Dragons.jsx) ---------- */
+.drg-path { margin-top: var(--sp-4); }
+.drg-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3); counter-reset: drg; }
+.drg-steps li { position: relative; display: flex; flex-direction: column; gap: 3px; padding: 12px; border-radius: var(--r-lg); background: rgba(255,255,255,.035); border: 1px solid var(--card-b); min-width: 0; }
+.drg-steps li:not(:last-child)::after { content: '→'; position: absolute; right: -12px; top: 22px; color: var(--muted); font-size: var(--fs-lg); }
+.drg-steps li b { font-size: var(--fs-base); }
+.drg-step-ico { display: inline-flex; width: 42px; height: 42px; align-items: center; justify-content: center; border-radius: var(--r-md); background: rgba(124,92,255,.14); margin-bottom: 4px; }
+.drg-path-me { margin: var(--sp-3) 0 0; }
+.drg-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--sp-4); align-items: start; margin-top: var(--sp-4); }
+.drg-grid > .card { margin: 0; }
+.drg-wrap { container-type: inline-size; }
+@container (max-width: 980px) { .drg-grid { grid-template-columns: minmax(0, 1fr); } }
+.drg-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.drg-tiles > div { background: rgba(255,255,255,.04); border-radius: var(--r-md); padding: 8px 10px; display: flex; flex-direction: column; min-width: 0; }
+.drg-tiles b { font-size: var(--fs-lg); }
+.drg-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--sp-2); }
+.drg-card { --c: #8b90b0; text-align: left; font: inherit; color: inherit; cursor: pointer; display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: var(--r-lg);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--c) 14%, transparent), rgba(255,255,255,.02)); border: 1px solid color-mix(in srgb, var(--c) 35%, transparent); min-width: 0; }
+.drg-card:hover { border-color: color-mix(in srgb, var(--c) 65%, transparent); }
+.drg-card:focus-visible { outline: none; box-shadow: var(--ring); }
+.drg-protector { --c: #94a3b8; } .drg-old { --c: #d4a373; } .drg-wise { --c: #22d3ee; } .drg-unstable { --c: #a78bfa; }
+.drg-young { --c: #e2e8f0; } .drg-strong { --c: #f87171; } .drg-superior { --c: #f5c542; }
+.drg-card-top { display: flex; align-items: center; gap: 8px; }
+.drg-card-name { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.drg-card-name b { color: var(--c); font-size: var(--fs-lg); }
+.drg-chance { font-weight: 700; font-size: var(--fs-sm); padding: 2px 8px; border-radius: var(--r-pill); background: rgba(255,255,255,.08); }
+.drg-chance.rare { background: rgba(245,197,66,.18); color: var(--gold); }
+.drg-card-note { line-height: 1.35; }
+.drg-card-more { display: flex; flex-direction: column; gap: 3px; padding-top: 6px; border-top: 1px solid var(--card-b); }
+.drg-card-foot { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: auto; }
+.drg-more { margin-left: auto; }
+.drg-calc-ctrl { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: flex-end; margin: var(--sp-2) 0 var(--sp-3); }
+.drg-calc-ctrl label, .drg-calc-ctrl > div { display: flex; flex-direction: column; gap: 4px; }
+.drg-calc-ctrl select { background: var(--surface-pop); color: var(--text); border: 1px solid var(--card-b); border-radius: var(--r-sm); padding: 6px 8px; font: inherit; font-size: var(--fs-md); }
+.drg-eyes { display: flex; gap: 3px; flex-wrap: wrap; }
+.drg-eyes button { width: 30px; height: 30px; border-radius: var(--r-sm); border: 1px solid var(--card-b); background: rgba(255,255,255,.04); color: var(--text); font: inherit; font-weight: 600; cursor: pointer; }
+.drg-eyes button.on { background: var(--accent); border-color: var(--accent); }
+.drg-meter { position: relative; height: 22px; border-radius: var(--r-pill); background: rgba(255,255,255,.07); overflow: hidden; }
+.drg-meter > i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: var(--r-pill); }
+.drg-meter > s { position: absolute; top: 4px; bottom: 4px; width: 2px; background: rgba(255,255,255,.25); }
+.drg-meter > s.ok { background: rgba(10,11,20,.55); }
+.drg-meter > b { position: absolute; right: 10px; top: 0; line-height: 22px; font-size: var(--fs-sm); }
+.drg-loot { display: flex; flex-direction: column; gap: 2px; margin: var(--sp-3) 0; }
+.drg-loot-row { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 4px 6px; border-radius: var(--r-sm); }
+.drg-loot-row.open { background: rgba(74,222,128,.07); }
+.drg-loot-row.closed { opacity: .45; }
+.drg-loot-name { min-width: 0; font-size: var(--fs-md); }
+.drg-sum { display: flex; gap: var(--sp-2); margin-bottom: var(--sp-2); }
+.drg-sum > div { flex: 1; background: rgba(255,255,255,.04); border-radius: var(--r-md); padding: 8px; display: flex; flex-direction: column; min-width: 0; }
+.drg-sum > div.good b { color: var(--green); } .drg-sum > div.bad b { color: var(--red); }
+@media (max-width: 760px) {
+  .drg-steps { grid-template-columns: 1fr 1fr; }
+  .drg-steps li:not(:last-child)::after { display: none; }
+  .drg-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 420px) { .drg-cards { grid-template-columns: 1fr; } .drg-loot-row > .tiny { max-width: 120px; text-align: right; } }
+.drg-loot-p { text-align: right; }
+.drg-p { color: var(--green); font-size: var(--fs-md); margin-right: 4px; }
+.drg-luck { margin: 0 0 var(--sp-2); }
+@media (max-width: 560px) { .drg-p-base { display: none; } }
 /* ── Гайд Bestiary (guides/Bestiary.jsx): карточки и полоски из делений ── */
 .bx-hero { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-5); align-items: center; margin-top: var(--sp-3); }
 .bx-ms-num { font-size: 40px; font-weight: 800; line-height: 1; color: var(--gold); letter-spacing: -.5px; }
