@@ -70,7 +70,7 @@ export function fmtPrice(v) {
   if (a >= 10) return nf(v, 1);
   return nf(v, 2);
 }
-export const fmtVol = v => (v == null ? '—' : v >= 1e6 ? `${nf(v / 1e6, 2)} млн` : v >= 1e4 ? `${nf(v / 1e3, 1)} тыс.` : nf(v, 0));
+export const fmtVol = v => (v == null ? '—' : v >= 999_950 ? `${nf(v / 1e6, 2)} млн` : v >= 1e4 ? `${nf(v / 1e3, 1)} тыс.` : nf(v, 0));
 const pctTxt = p => (p == null || !Number.isFinite(p) ? '' : `${p > 0 ? '+' : ''}${nf(p, 2)}%`);
 
 /** Свечи API → бары нужной стороны (покупка/продажа) с местным временем. */

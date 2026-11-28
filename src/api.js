@@ -285,15 +285,17 @@ export function usePart(state, name, legacy = null) {
   return res.data?.status === 'ok' ? res.data.data : null;
 }
 
+// Единица выбирается после округления: 999 960 — «1 млн», а не «1 000 тыс.»
+const COIN_UNITS = [[1e3, 'тыс.', 1], [1e6, 'млн', 2], [1e9, 'млрд', 2], [1e12, 'трлн', 2]];
 export function coins(n) {
   if (n == null || isNaN(n)) return '—';
   const a = Math.abs(n);
-  const f = (v, u, d) => `${(n / v).toLocaleString(LOCALE, { maximumFractionDigits: d })}${EN ? '' : '\u00a0'}${u}`; // неразрывный пробел: «75,8 млн» не рвётся
-  if (a >= 1e12) return f(1e12, 'трлн', 2);
-  if (a >= 1e9) return f(1e9, 'млрд', 2);
-  if (a >= 1e6) return f(1e6, 'млн', 2);
-  if (a >= 1e3) return f(1e3, 'тыс.', 1);
-  return Math.round(n).toLocaleString(LOCALE);
+  let i = COIN_UNITS.findLastIndex(([v]) => a >= v);
+  if (i < 0) return Math.round(n).toLocaleString(LOCALE);
+  const round = j => { const [v, , d] = COIN_UNITS[j]; return Math.round((a / v) * 10 ** d) / 10 ** d; };
+  while (i < COIN_UNITS.length - 1 && round(i) >= 1000) i++;
+  const [v, u, d] = COIN_UNITS[i];
+  return `${(n / v).toLocaleString(LOCALE, { maximumFractionDigits: d })}${EN ? '' : '\u00a0'}${u}`; // неразрывный пробел: «75,8 млн» не рвётся
 }
 
 // Стоимость предмета: 0/нет данных — это «цена неизвестна», а не «бесплатно»
