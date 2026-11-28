@@ -2019,3 +2019,5 @@ tr.grp td { background: rgba(255,255,255,.04); font-weight: 700; font-size: 12px
 .me-row:hover { border-color: rgba(124,92,255,.4); }
 .me-row-more { margin-left: auto; }
 .card-body > .me-row:first-child, .dailies > .me-row:first-child { margin-top: 0; }
+.me-fiesta { margin-top: 10px; padding: 9px 12px; border-radius: var(--r-lg); background: rgba(201,163,107,.07); border: 1px solid rgba(201,163,107,.22); line-height: 1.5; }
+.me-fiesta.on { background: rgba(245,197,66,.1); border-color: rgba(245,197,66,.35); }

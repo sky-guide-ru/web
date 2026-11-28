@@ -1,7 +1,7 @@
 // Ивенты майнинга сейчас: /v1/mining-events (сводка трекера Soopy по лобби), раз в минуту.
 // Живой блок в гайде Mining и строка в «Делах на сегодня».
 import { useEffect, useState } from 'react';
-import { EN } from '../i18n.js';
+import { EN, LOCALE } from '../i18n.js';
 import { Rich } from './Rich.jsx';
 import { Card } from '../components/ui.jsx';
 import { useNow, left } from '../pages/Events.jsx';
@@ -61,16 +61,50 @@ function Island({ isl, now }) {
   );
 }
 
+const when = t => new Date(t).toLocaleString(LOCALE, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const pct = n => `${Number(n).toLocaleString(LOCALE)}%`;
+const GIVES = '+25% Mining Fortune, Refined Mineral и Glossy Gemstone';
+
+/** Mining Fiesta: идёт сейчас или будет ли в следующий срок (по выборам). */
+export function FiestaLine({ f, now }) {
+  if (!f) return null;
+  const e = f.election || {};
+  let head, rest = null;
+  if (f.now) {
+    head = <>идёт сейчас ({f.now.role === 'minister' ? 'министр' : 'мэр'} {f.now.by}), ещё {left(f.now.until - now)}</>;
+    rest = <>{GIVES}.</>;
+  } else if (e.open && e.cole) {
+    const c = e.cole;
+    head = <>на выборах Cole: {c.place}-е место{c.pct != null ? `, ${pct(c.pct)}` : ''}</>;
+    rest = !c.fiesta ? <>В этот раз у Cole нет перка Mining Fiesta: фиесты в следующий срок не будет.</>
+      : <>Итог выборов — {when(e.closes)} (через {left(e.closes - now)}). Если Cole победит, фиеста будет весь следующий срок, до {when(f.next.to)}.{c.ministerFiesta ? ' Второе место тоже даст фиесту: это его перк министра.' : ''}{c.place > 1 && e.leader ? ` Сейчас впереди ${e.leader.name}${e.leader.pct != null ? ` (${pct(e.leader.pct)})` : ''}.` : ''}</>;
+  } else if (e.open) {
+    head = <>Cole в этих выборах нет</>;
+    rest = <>Фиесты в следующий срок не будет. Новые выборы — с {when(f.next.from + (f.next.to - f.next.from) / 4)}.</>;
+  } else {
+    head = <>сейчас не идёт</>;
+    rest = <>Голосование откроется {when(e.opens)} (через {left(e.opens - now)}): тогда станет видно, есть ли среди кандидатов Cole.</>;
+  }
+  return (
+    <div className={`me-fiesta ${f.now ? 'on' : ''}`}>
+      <b>Mining Fiesta:</b> <span>{head}.</span> <span className="muted small">{rest}</span>
+      {!f.now && <a className="link small" href="#/events"> Выборы →</a>}
+    </div>
+  );
+}
+
 /** Секция гайда kind: 'miningEvents' */
 export function MiningEventsLive() {
   const d = useMiningEvents();
   const now = useNow(15_000);
   if (!d) return <div className="muted small">Загрузка…</div>;
-  if (!d.islands?.length) return <div className="muted small">Трекер ивентов сейчас не отвечает. Что идёт в лобби, видно в игре: таблица справа на экране.</div>;
   return (
     <>
-      <div className="me-grid">{d.islands.map(isl => <Island key={isl.id} isl={isl} now={now} />)}</div>
-      <div className="muted tiny me-foot">Данные: трекер Soopy · обновлено {left(now - d.at)} назад</div>
+      {d.islands?.length
+        ? <div className="me-grid">{d.islands.map(isl => <Island key={isl.id} isl={isl} now={now} />)}</div>
+        : <div className="muted small">Трекер ивентов сейчас не отвечает. Что идёт в лобби, видно в игре: таблица справа на экране.</div>}
+      <FiestaLine f={d.fiesta} now={now} />
+      {d.at && <div className="muted tiny me-foot">Ивенты: трекер Soopy · обновлено {left(now - d.at)} назад</div>}
     </>
   );
 }
