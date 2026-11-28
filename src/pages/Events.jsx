@@ -6,6 +6,7 @@ import { Card, Empty, Badge } from '../components/ui.jsx';
 import { ItemIcon } from '../components/ItemIcon.jsx';
 import { useApi } from '../api.js';
 import { RefsProvider, Rich } from '../guides/Rich.jsx';
+import { ElectionCard, NextMayorsCard } from '../components/Election.jsx';
 
 /** Текущее время, тикает раз в секунду (для обратного отсчёта). */
 export function useNow(step = 1000) {
@@ -73,34 +74,6 @@ function MayorCard({ cal, now }) {
               {mi.perk && <ul className="ev-perks"><Perk p={mi.perk} /></ul>}</div>
           </div>
         </div>
-      )}
-    </Card>
-  );
-}
-
-function ElectionCard({ cal, now }) {
-  const e = cal.election;
-  return (
-    <Card title="Выборы" className="span-6 ev-fit"
-      right={<span className="muted small" title={when(e.open ? e.closes : e.opens)}>{e.open ? `итоги через ${left(e.closes - now)}` : `откроются через ${left(e.opens - now)}`}</span>}>
-      {e.open && e.candidates ? (
-        <>
-          <div className="ev-cands">
-            {e.candidates.map((c, i) => (
-              <div key={c.name} className="ev-cand" style={{ '--ev': c.color }}>
-                {c.icon && <ItemIcon id={c.icon} size={28} />}
-                <div className="grow">
-                  <div className="ev-cand-top"><b>{c.name}</b>{c.role && <span className="muted small">{c.role}</span>}<span className="ev-cand-pct">{c.pct != null ? `${c.pct}%` : '—'}</span></div>
-                  <div className="ev-bar"><i style={{ width: `${c.pct || 0}%` }} /></div>
-                  <div className="muted tiny">{c.perks.map(perkName).join(' · ')}{i === 0 ? ' — сейчас побеждает' : i === 1 ? ' — станет министром' : ''}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="muted small">Голосуют у Election Booth в Hub. Победитель станет мэром {when(e.closes)}.</p>
-        </>
-      ) : (
-        <p className="small">Голосование откроется {when(e.opens)} (27 число позднего лета) и продлится до 27 числа поздней весны: примерно 4 дня реального времени. Здесь появятся кандидаты и проценты голосов.</p>
       )}
     </Card>
   );
@@ -222,6 +195,7 @@ export default function Events() {
       </div>
       <MayorCard cal={cal} now={now} />
       <ElectionCard cal={cal} now={now} />
+      <NextMayorsCard now={now} />
       <Card title="Идёт сейчас" className="span-6 ev-fit">
         {active.length ? <ul className="ev-list">{active.map(e => <EventRow key={e.id + e.start} e={e} now={now} active />)}</ul>
           : <Empty>Сейчас ничего не идёт. Ближайшее — справа.</Empty>}

@@ -2111,3 +2111,27 @@ table.gt tr.gdetail td { background: rgba(124,92,255,.05); padding: 10px 14px; }
 .gmoves li .price { text-align: right; }
 .gems .gt-name { display: flex; gap: 10px; align-items: center; }
 table.gt .gchev { color: var(--muted); margin-left: 10px; font-size: 11px; }
+
+/* Выборы мэра: шансы, «Ближайшие мэры», строка на главной, всплывашка, строка в гайде (components/Election.jsx) */
+.el-chance { font-size: var(--fs-2xs); padding: 1px 7px; border-radius: var(--r-pill); background: rgba(255,255,255,.07); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.el-chance.hi { background: rgba(74,222,128,.15); color: var(--green); }
+.el-new { font-size: 10px; padding: 1px 6px; border-radius: var(--r-pill); background: rgba(74,222,128,.15); color: var(--green); margin-left: 4px; vertical-align: middle; }
+.el-votes { font-variant-numeric: tabular-nums; }
+.el-why { margin-top: 2px; color: var(--text); opacity: .85; }
+.el-ifwin { margin-top: 4px; font-size: var(--fs-sm); padding: 4px 8px; border-radius: var(--r-md); background: rgba(255,255,255,.035); }
+.el-tl { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.el-tl li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; border-radius: var(--r-md); background: rgba(255,255,255,.03); border-left: 3px solid var(--ev, var(--accent)); }
+.el-tl .grow { min-width: 0; }
+.el-when { margin-left: auto; text-align: right; white-space: nowrap; font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.el-dot { width: 28px; height: 28px; border-radius: 6px; background: var(--ev, #9aa4b2); opacity: .8; flex: none; display: inline-block; }
+.el-odds-title { margin-top: var(--sp-3); }
+.el-odds, .el-pop-rows { display: grid; gap: 6px; margin-top: 6px; }
+.el-odds-row { display: grid; grid-template-columns: 96px 1fr 44px; gap: 10px; align-items: center; font-size: var(--fs-md); }
+.el-odds-row .ev-bar { margin: 0; }
+.el-odds-row b { text-align: right; font-variant-numeric: tabular-nums; }
+.el-line { display: flex; gap: 10px; align-items: center; padding: 10px 16px; font-size: var(--fs-md); color: inherit; text-decoration: none; flex-wrap: wrap; }
+.el-line .grow { flex: 1; min-width: 200px; }
+.el-line:hover { border-color: rgba(124,92,255,.35); }
+.news-pop.el-pop { --news-c: #c3a6ff; }
+.el-guide { padding: 10px 14px; margin-bottom: var(--sp-3); line-height: 1.5; }
+@media (max-width: 640px) { .el-tl li { flex-wrap: wrap; } .el-when { margin-left: 38px; text-align: left; } }

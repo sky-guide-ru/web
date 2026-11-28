@@ -23,6 +23,7 @@ import BottomNav from './components/BottomNav.jsx';
 import { useNewsUnread } from './news.js';
 import SurveyDock from './components/SurveyDock.jsx';
 import NewsPopup, { NewsBadge, UpdateBar } from './components/NewsPopup.jsx';
+import { ElectionPopup } from './components/Election.jsx';
 import { LangSwitch } from './components/LangSwitch.jsx';
 import { DiscordButton } from './components/Discord.jsx';
 
@@ -399,6 +400,7 @@ export default function App() {
         {!item && <ToTop />}
         {P.id !== 'news' && !item && <NewsPopup />}
         {!item && <UpdateBar />}
+        {P.id !== 'events' && P.id !== 'news' && !item && <ElectionPopup />}
         <LiveToasts feed={state?.feed} profileKey={state?.player?.uuid && state?.member?.profileId ? `${state.player.uuid}:${state.member.profileId}` : null} />
         <CookieBanner />
         {!landing && <Suspense fallback={null}><ChatDock /></Suspense>}
