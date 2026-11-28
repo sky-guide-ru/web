@@ -158,7 +158,7 @@ function StallsCard({ st }) {
         </ul>
       </>}
       {st.slow.length > 0 && <>
-        <h4 style={{ marginTop: 12 }}>Долгие ответы</h4>
+        <h4>Долгие ответы</h4>
         <ul className="st-log">
           {st.slow.slice(0, 8).map((x, i) => (
             <li key={i}><b>{sec(x.ms)}</b><span>{x.en ? 'en ' : ''}{x.route}</span><span className="muted">{ago(x.at)}</span></li>
