@@ -11,6 +11,7 @@ import PlayerModel from '../components/PlayerModel.jsx';
 import GuildTag from '../components/GuildTag.jsx';
 import LiveAdvisor from '../components/LiveAdvisor.jsx';
 import { EventsStrip } from './Events.jsx';
+import { ElectionLine } from '../components/Election.jsx';
 import ShareCard from '../components/ShareCard.jsx';
 import { Returning, Dailies } from '../components/Comeback.jsx';
 import { useInterests, applyInterests } from '../interests.js';
@@ -154,6 +155,7 @@ export default function Overview({ state }) {
 
       {share && <ShareCard name={state.player.name} member={m} analysis={a} onClose={() => setShare(false)} />}
       <EventsStrip className="span-12" />
+      <ElectionLine className="span-12" />
       <Returning info={a.returning} steps={visible} />
       <Dailies d={a.dailies} />
 

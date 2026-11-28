@@ -6,6 +6,7 @@ import { ItemIcon } from '../components/ItemIcon.jsx';
 import { GenericGuide, StatusBadge, GuideListCtx } from '../guides/parts.jsx';
 import { CUSTOM } from '../guides/index.js';
 import { RefsProvider, Rich } from '../guides/Rich.jsx';
+import { GuideMayorLine } from '../components/Election.jsx';
 
 export default function Guides({ state, sub }) {
   const upd = state?.updatedAt || 0;
@@ -73,7 +74,7 @@ export default function Guides({ state, sub }) {
       <div className="guides-body">
         {gErr && !shown ? <Card><Empty>Гайд не загрузился: <Rich text={gErrText || gErr} /></Empty></Card>
           : !shown ? <div className="muted small"><div className="spinner" />{gErrText ? <Rich text={gErrText} /> : 'Собираю гайд…'}</div>
-          : <GuideListCtx.Provider value={guides}><RefsProvider refs={shown.refs}>{C ? <C guide={shown} state={state} /> : <GenericGuide guide={shown} />}</RefsProvider></GuideListCtx.Provider>}
+          : <GuideListCtx.Provider value={guides}><RefsProvider refs={shown.refs}><GuideMayorLine id={shown.id} />{C ? <C guide={shown} state={state} /> : <GenericGuide guide={shown} />}</RefsProvider></GuideListCtx.Provider>}
       </div>
     </div>
   );
