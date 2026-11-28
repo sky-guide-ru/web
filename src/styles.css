@@ -2043,3 +2043,11 @@ table.gt tr.gdetail td { background: rgba(124,92,255,.05); padding: 10px 14px; }
   table.gt tr.gt-group th { grid-column: 1 / 3; }
   .gmoves li { align-items: flex-start; }
 }
+.gems .gwhich { margin: 0 0 6px; color: var(--muted); }
+.gems .gwhich summary { cursor: pointer; color: var(--accent2); }
+.gems .gwhich ul { margin: 6px 0 0; padding-left: 18px; }
+.gems .gmore { margin: -6px 0 10px; }
+.gmoves li .gdot { display: inline-block; width: 8px; height: 8px; margin-right: 5px; vertical-align: 1px; }
+.gmoves li .price { text-align: right; }
+.gems .gt-name { display: flex; gap: 10px; align-items: center; }
+table.gt .gchev { color: var(--muted); margin-left: 10px; font-size: 11px; }

@@ -1,6 +1,7 @@
 import { Fragment, useState } from 'react';
 import { coins, RARITY_COLOR } from '../api.js';
 import { Rich } from '../guides/Rich.jsx';
+import { ItemIcon } from './ItemIcon.jsx';
 
 // Блок «Гемы в снаряжении»: какие слоты есть у вещей, что в них стоит, что вставить выгоднее всего под деньги игрока.
 // Расчёт — core/src/calc/gems.js (gear.gems из куска «Снаряжение»).
@@ -39,16 +40,16 @@ function unlockText(u) {
   return parts.join(' + ');
 }
 
-function MoveLine({ m, market }) {
+function MoveLine({ m, market, openItem }) {
   const how = m.locked ? `открыть слот (${unlockText(m.unlock)}) и вставить ${m.name}` : m.current ? `${m.current} → ${m.name}` : `вставить ${m.name}`;
   return (
-    <li>
-      <span className="gdot" style={{ '--g': COLOR[m.gem] }} />
+    <li style={{ '--g': COLOR[m.gem] }}>
+      <ItemIcon id={m.itemId} size={34} onClick={() => openItem?.(m.itemId)} />
       <div className="grow">
-        <b>{m.item}</b> <span className="muted">· {m.typeRu} слот</span>
-        <div className="small"><Rich text={`${how}: ${m.text}${m.wrongType ? ' (сейчас стат не под роль вещи)' : ''}`} /></div>
+        <b>{m.item}</b> <span className="muted small">· <span className="gdot" />{m.typeRu} слот</span>
+        <div className="small"><Rich text={how} />: <span className="green">{m.text}</span>{m.wrongType && <span className="muted"> (сейчас стат не под роль вещи)</span>}</div>
       </div>
-      {market && <div className="price">{m.have ? 'уже есть' : m.cost != null ? `~${coins(m.cost)}` : '—'}</div>}
+      {market && <div className="price">{m.have ? <span className="green">уже есть</span> : m.cost != null ? `~${coins(m.cost)}` : '—'}{m.locked && m.cost != null && <div className="muted tiny">с открытием</div>}</div>}
     </li>
   );
 }
@@ -56,9 +57,9 @@ function MoveLine({ m, market }) {
 function Detail({ it, market }) {
   return (
     <div className="gdetail-body">
-      {it.slots.map(s => (
+      {it.slots.map((s, i) => (
         <div key={s.slot} className="gopt">
-          <b>{s.typeRu} слот</b>{' '}
+          <b>{s.typeRu} слот{it.slots.filter(x => x.typeRu === s.typeRu).length > 1 ? ` №${it.slots.slice(0, i + 1).filter(x => x.typeRu === s.typeRu).length}` : ''}</b>{' '}
           <span className="muted small">
             {s.current ? <Rich text={`сейчас ${s.current.name}: ${s.current.text}`} /> : s.locked ? <Rich text={`закрыт: открыть за ${unlockText(s.unlock)}${market && s.unlock?.cost ? ` (~${coins(s.unlock.cost)})` : ''}`} /> : 'пусто'}
           </span>
@@ -80,6 +81,7 @@ function Detail({ it, market }) {
 
 export default function GemsCard({ gems, openItem }) {
   const [open, setOpen] = useState(null);
+  const [more, setMore] = useState(false);
   if (!gems?.items?.length) return <div className="muted small">У твоих вещей нет слотов для гемов.</div>;
   const s = gems.summary;
   const market = gems.market !== false;
@@ -92,18 +94,26 @@ export default function GemsCard({ gems, openItem }) {
         {market && s.budget?.steps > 0 && <span><b className="gold">{s.budget.steps}</b>выгодных шагов на ~{coins(s.budget.cost)}</span>}
       </div>
       <p className="small muted gnote">
-        <Rich text={market
-          ? 'Камень под роль вещи: Jasper на оружие и броню для боя (Onyx — если Strength больше Crit Damage на треть; маг — Sapphire, танк — Amethyst), Jade, Amber и Topaz на Mining, Peridot на Farming, Aquamarine на Fishing, Citrine на Foraging. Качество — под бюджет: за слот не дороже 1% твоих денег. Fine даёт около половины статов Perfect за малую долю цены.'
-          : 'Камень под роль вещи: Jasper на оружие и броню для боя, Jade, Amber и Topaz на Mining, Peridot на Farming, Aquamarine на Fishing, Citrine на Foraging. Камни добываются в Crystal Hollows, 80 штук крафтятся в камень следующего качества.'} />
+        <Rich text={market ? 'Камни подобраны под роль каждой вещи и под твои деньги: за один слот — не дороже 1% монет. Fine даёт около половины статов Perfect за малую долю цены.' : 'Камни подобраны под роль каждой вещи. Добываются в Crystal Hollows, 80 штук крафтятся в камень следующего качества.'} />
       </p>
+      <details className="gwhich small">
+        <summary>Какой камень куда</summary>
+        <ul>
+          <li><Rich text="Бой: Jasper (Strength). Onyx (Crit Damage) — если Strength больше Crit Damage хотя бы на треть." /></li>
+          <li><Rich text="Маг — Sapphire (Intelligence), танк — Amethyst (Defense) или Ruby (Health)." /></li>
+          <li><Rich text="Mining: Jade (Mining Fortune), Amber (Mining Speed), Topaz (Pristine)." /></li>
+          <li><Rich text="Farming — Peridot, Fishing — Aquamarine (Fishing Speed), Foraging — Citrine." /></li>
+        </ul>
+      </details>
       {gems.moves?.length > 0 && <>
         <h4 className="gh">Выгоднее всего сейчас</h4>
-        <ol className="gmoves">{gems.moves.slice(0, 6).map((m, i) => <MoveLine key={i} m={m} market={market} />)}</ol>
+        <ol className="gmoves">{gems.moves.slice(0, more ? 12 : 5).map((m, i) => <MoveLine key={i} m={m} market={market} openItem={openItem} />)}</ol>
+        {gems.moves.length > 5 && <button type="button" className="link-btn small gmore" onClick={() => setMore(!more)}>{more ? 'Свернуть' : `Ещё ${Math.min(12, gems.moves.length) - 5}`}</button>}
       </>}
       <h4 className="gh">По вещам</h4>
       <div className="table-scroll">
         <table className="gt">
-          <thead><tr><th>Вещь</th><th>Слоты</th>{market && <th className="num">До Perfect</th>}</tr></thead>
+          <thead><tr><th>Вещь</th><th>Слоты</th><th className="num">{market ? 'До Perfect' : ''}</th></tr></thead>
           <tbody>
             {GROUPS.map(([g, t]) => {
               const rows = merge(gems.items.filter(it => it.group === g));
@@ -118,13 +128,18 @@ export default function GemsCard({ gems, openItem }) {
                       <Fragment key={k}>
                         <tr className={`gt-row${open === k ? ' open' : ''}`} onClick={() => setOpen(open === k ? null : k)}>
                           <td>
+                            <div className="gt-name">
+                            <ItemIcon id={it.id} size={30} />
+                            <div>
                             <b style={{ color: RARITY_COLOR[it.rarity] || undefined }} onClick={e => { e.stopPropagation(); openItem?.(it.id, it.uuid); }} className="link-like">
                               {it.n > 1 ? `${it.name.replace(PIECE, '')} · ${it.n} ${it.n < 5 ? 'части' : 'частей'}` : it.name}
                             </b>
                             <div className="muted tiny">{[cap(it.rarity), it.roleRu].filter(Boolean).join(' · ')}</div>
+                            </div>
+                            </div>
                           </td>
                           <td><div className="gchips">{it.slots.map(x => <Chip key={x.slot} s={x} />)}</div></td>
-                          {market && <td className="num">{done ? <span className="green">✓ максимум</span> : it.toP ? `~${coins(it.toP)}` : '—'}</td>}
+                          <td className="num">{market && (done ? <span className="green">✓ максимум</span> : it.toP ? `~${coins(it.toP)}` : '—')}{!market && done && <span className="green">✓ максимум</span>}<span className="gchev">{open === k ? '▾' : '▸'}</span></td>
                         </tr>
                         {open === k && <tr className="gdetail"><td colSpan={3}><Detail it={it} market={market} /></td></tr>}
                       </Fragment>
@@ -136,7 +151,7 @@ export default function GemsCard({ gems, openItem }) {
           </tbody>
         </table>
       </div>
-      <p className="muted tiny gnote"><Rich text="Камни вставляет и снимает Gemstone Grinder у Geo в Dwarven Mines (Dwarven Village). Снять камень платно (Fine 10k, Flawless 100k, Perfect 500k), сам камень возвращается. Нажми на вещь — варианты Fine, Flawless и Perfect." /></p>
+      <p className="muted tiny gnote"><Rich text="Камни вставляет и снимает Gemstone Grinder у Geo в Dwarven Mines (Dwarven Village). Снять камень платно (Fine 10k, Flawless 100k, Perfect 500k), сам камень возвращается." /></p>
     </div>
   );
 }
