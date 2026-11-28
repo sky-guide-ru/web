@@ -2111,3 +2111,18 @@ table.gt tr.gdetail td { background: rgba(124,92,255,.05); padding: 10px 14px; }
 .gmoves li .price { text-align: right; }
 .gems .gt-name { display: flex; gap: 10px; align-items: center; }
 table.gt .gchev { color: var(--muted); margin-left: 10px; font-size: 11px; }
+
+/* Телепорты /warp (guides/warps.jsx): ✓ работает, 🔒 нужен свиток, ⛔ только с MVP+ */
+.warp-chip { display: inline-block; padding: 0 7px; border-radius: var(--r-pill); border: 1px solid; font-size: .92em; white-space: nowrap; line-height: 1.45; }
+.warp-chip[role="button"] { cursor: pointer; }
+.warp-chip.warp-ok { color: var(--green); border-color: rgba(74,222,128,.4); background: rgba(74,222,128,.08); }
+.warp-chip.warp-scroll { color: var(--gold); border-color: rgba(245,197,66,.45); background: rgba(245,197,66,.08); }
+.warp-chip.warp-rank { color: var(--muted); border-color: rgba(139,144,176,.35); background: rgba(139,144,176,.06); }
+.warp-chip.warp-plain { border-color: var(--card-b); }
+.warp-alt { display: block; margin: 5px 0 2px; padding: 6px 10px; border-left: 2px solid rgba(245,197,66,.5); background: rgba(245,197,66,.05); border-radius: 0 var(--r-sm) var(--r-sm) 0; font-size: 13px; color: var(--text); }
+.warp-alt-rank { border-left-color: rgba(139,144,176,.5); background: rgba(139,144,176,.06); }
+.warp-scroll { color: var(--muted); }
+.warp-rare { color: #5c8cff; font-size: .9em; }
+.warp-epic { color: #d65cd6; font-size: .9em; }
+.warp-check { display: inline-flex; gap: 4px; align-items: center; cursor: pointer; }
+.gref-x { position: absolute; top: 6px; right: 6px; }
