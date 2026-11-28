@@ -1202,3 +1202,24 @@ a.acct.acct-login:hover { background: rgba(124,92,255,.16); border-color: rgba(1
 .eq-step.past { opacity: .3; }
 .eq-step.have { opacity: 1; box-shadow: 0 0 0 2px var(--green); }
 .eq-step.next { opacity: 1; box-shadow: 0 0 0 2px var(--gold); }
+
+.eq-path { margin-top: 10px; border-top: 1px dashed rgba(255,255,255,.08); padding-top: 8px; }
+.eq-path > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.eq-path > summary::-webkit-details-marker { display: none; }
+.eq-path > summary .eq-ladder { margin: 0; padding: 0; border: 0; }
+.eq-path-label { font-size: 12px; color: var(--accent2); white-space: nowrap; }
+.eq-path-label::after { content: ' ▾'; }
+.eq-path[open] .eq-path-label::after { content: ' ▴'; }
+.eq-path-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; }
+.eq-pstep { display: flex; gap: 10px; position: relative; padding-bottom: 12px; }
+.eq-pstep:not(:last-child)::before { content: ''; position: absolute; left: 15px; top: 34px; bottom: 2px; width: 2px; background: rgba(255,255,255,.08); }
+.eq-pstep.past { opacity: .6; }
+.eq-pdot { flex: none; width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+.eq-pstep.have .eq-pdot { box-shadow: inset 0 0 0 2px #4ade80; }
+.eq-pstep.next .eq-pdot { box-shadow: inset 0 0 0 2px #f5c542; }
+.eq-pbody { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.eq-phead { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.eq-zone { font-size: 11px; padding: 1px 6px; border-radius: 999px; background: rgba(34,211,238,.1); color: var(--accent2); }
+.eq-ok { color: #4ade80; } .eq-no { color: #f87171; }
+.eq-from { display: inline-block; margin-right: 6px; padding: 0 6px; border-radius: 999px; background: rgba(74,222,128,.12); color: #4ade80; font-size: 11px; }
+.eq-from.fresh { background: rgba(245,197,66,.12); color: #f5c542; }

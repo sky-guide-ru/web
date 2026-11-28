@@ -34,6 +34,49 @@ function Item({ it, label, dim }) {
   );
 }
 
+const STEP_TAG = { have: ['есть', 'good'], next: ['следующая', 'warn'], past: ['пройдено', 'muted'] };
+
+// Весь путь слота: каждая ступень — что даёт, где сильнее, что нужно и из чего делается
+function Path({ ladder }) {
+  return (
+    <details className="eq-path">
+      <summary>
+        <span className="eq-ladder" aria-hidden="true">
+          {ladder.map((x, i) => (
+            <span key={x.id} className="eq-step-wrap">
+              {i > 0 && <span className="eq-chev">›</span>}
+              <span className={`eq-step ${x.state}`}><ItemIcon id={x.id} size={28} title={x.name} /></span>
+            </span>
+          ))}
+        </span>
+        <span className="eq-path-label">Весь путь слота · {ladder.length}</span>
+      </summary>
+      <ol className="eq-path-list">
+        {ladder.map(x => (
+          <li key={x.id} className={`eq-pstep ${x.state}`}>
+            <span className="eq-pdot"><ItemIcon id={x.id} size={28} /></span>
+            <div className="eq-pbody">
+              <div className="eq-phead">
+                <b><Rich text={x.name} item={x.id} /></b>
+                {STEP_TAG[x.state] && <Badge color={TONE[STEP_TAG[x.state][1]]}>{STEP_TAG[x.state][0]}</Badge>}
+                {x.zone && <span className="eq-zone"><Rich text={x.zone} /></span>}
+              </div>
+              <Stats text={x.why} />
+              {x.req && <div className={`small ${x.reqOk ? 'eq-ok' : 'eq-no'}`}>{x.reqOk ? '✓' : '✕'} <Rich text={x.req} /></div>}
+              {x.made && (
+                <div className="muted small">
+                  {x.from ? <span className="eq-from">из <Rich text={x.from} /></span> : x.fresh ? <span className="eq-from fresh">новая вещь</span> : null}
+                  <Rich text={x.made} />
+                </div>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </details>
+  );
+}
+
 function Slot({ s }) {
   const n = s.next;
   const have = s.recipe ? s.recipe.inputs.filter(x => x.id !== 'SKYBLOCK_COIN') : [];
@@ -96,16 +139,7 @@ function Slot({ s }) {
         </details>
       )}
 
-      {s.ladder?.length > 1 && (
-        <div className="eq-ladder" aria-label="Порядок улучшений">
-          {s.ladder.map((x, i) => (
-            <span key={x.id} className="eq-step-wrap">
-              {i > 0 && <span className="eq-chev" aria-hidden="true">›</span>}
-              <span className={`eq-step ${x.state}`} title={x.name}><ItemIcon id={x.id} size={28} title={x.name} /></span>
-            </span>
-          ))}
-        </div>
-      )}
+      {s.ladder?.length > 1 && <Path ladder={s.ladder} />}
     </div>
   );
 }
