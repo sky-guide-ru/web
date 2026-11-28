@@ -1,7 +1,7 @@
-import { LOCALE } from '../i18n.js';
+import { LOCALE, DEC } from '../i18n.js';
 // Посещения, ошибки и почта на странице «Сервер» (только владелец). Данные — свой учёт сайта (server/monitor),
 // без внешних счётчиков: IP не хранится, уникальные посетители считаются по хешу с солью, которая меняется каждые сутки.
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { ago } from '../api.js';
 
 const SECTIONS = {
@@ -210,6 +210,17 @@ export default function StatusMonitor() {
           <span>Телефон (половина / ¾)</span><b>{sec(s.load.mobile.p50)} / {sec(s.load.mobile.p75)}</b>
           <span>Вошедших на сайт</span><b>{num(s.who.user)}</b>
         </div>
+        {s.jank && (s.jank.desktop.minutes > 0 || s.jank.mobile.minutes > 0) && <>
+          <h3 style={{ marginTop: 18 }}>Подвисания</h3>
+          <p className="muted small">Сколько раз страница не отвечала на клики дольше 0,1 с. Только Chrome, Edge, Opera и Android: Safari и Firefox такого не сообщают.</p>
+          <div className="st-kv">
+            {['desktop', 'mobile'].map(k => { const j = s.jank[k]; return j.minutes > 0 && <Fragment key={k}>
+              <span title={`Наблюдали ${num(j.minutes)} мин, подвисаний ${num(j.n)}, в среднем по ${j.avgMs ?? '—'} мс. Дольше 0,5 с — в ${num(j.over500)} из ${num(j.reports)} открытий раздела`}>{k === 'desktop' ? 'Компьютер' : 'Телефон'} (в минуту)</span>
+              <b>{j.perMin == null ? '—' : String(j.perMin).replace('.', DEC)}{j.avgMs ? <span className="muted"> · по {j.avgMs} мс</span> : null}</b>
+            </Fragment>; })}
+            {s.jank.sections.slice(0, 5).map(([k, v, min]) => <Fragment key={k}><span title={`Открыт ${num(min)} мин`}>{SECTIONS[k] || k}</span><b>{String(v).replace('.', DEC)} в мин</b></Fragment>)}
+          </div>
+        </>}
       </div>
 
       <div className="card span-12">
