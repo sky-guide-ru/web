@@ -1142,3 +1142,5 @@ a.acct.acct-login:hover { background: rgba(124,92,255,.16); border-color: rgba(1
   .bx-chips { grid-template-columns: 1fr 1fr; }
   .bx-isles { grid-template-columns: 1fr 1fr; }
 }
+.forge-pick { display: flex; flex-direction: column; gap: 4px; margin: 0 0 8px; }
+.forge-pick select { width: 100%; min-width: 0; padding: 8px 10px; border-radius: var(--r-sm); border: 1px solid var(--card-b); background: var(--surface-pop, rgba(0,0,0,.25)); color: var(--text); font: inherit; font-size: 13px; }
