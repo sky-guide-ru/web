@@ -1,10 +1,12 @@
-// Общие части страницы «Гайды»: шапка гайда, «что делать дальше», секции (text / steps / checklist / table / tree / sources).
+// Общие части страницы «Гайды»: шапка гайда, «что делать дальше», секции (text / steps / checklist / table / tree / sources / shapes / cards / tool).
 import { createContext, useContext } from 'react';
 import { Card, Progress, Badge, Empty } from '../components/ui.jsx';
 import { ItemIcon } from '../components/ItemIcon.jsx';
 import { useApp } from '../App.jsx';
 import { Rich } from './Rich.jsx';
 import { TreeView } from './Tree.jsx';
+import { MiningEventsLive } from './MiningEvents.jsx';
+import { GuideTool } from './DungeonTools.jsx';
 
 export const STATUS = {
   start: { text: 'не начато', color: '#8b90b0' },
@@ -171,6 +173,31 @@ function Shapes({ items }) {
 
 const lines = t => (Array.isArray(t) ? t : [t]).filter(Boolean);
 
+// Карточки с раскрываемыми подробностями (загадки Dungeons): название, метки, суть, решение, «Подробнее»
+const TAG_COLOR = { good: '#4ade80', warn: '#f5c542', bad: '#f87171', muted: '#8b90b0' };
+function Cards({ items }) {
+  return (
+    <div className="guide-cards">
+      {items.map((it, i) => (
+        <div key={i} className={`guide-card-item${it.dim ? ' dim' : ''}`}>
+          <div className="guide-card-name">
+            <b><Rich text={it.name} /></b>
+            {(it.tags || []).map((t, j) => <Badge key={j} color={TAG_COLOR[t.tone]}>{t.text}</Badge>)}
+          </div>
+          <p className="muted small"><Rich text={it.text} /></p>
+          {it.lines?.length > 0 && <ul className="guide-card-lines">{it.lines.map((t, j) => <li key={j}><Rich text={t} /></li>)}</ul>}
+          {it.more?.lines?.length > 0 && (
+            <details className="guide-card-more">
+              <summary>{it.more.title || 'Подробнее'}</summary>
+              <ul>{it.more.lines.map((t, j) => <li key={j}><Rich text={t} /></li>)}</ul>
+            </details>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function Section({ s }) {
   let body;
   if (s.kind === 'text') {
@@ -206,8 +233,14 @@ export function Section({ s }) {
     body = <TreeView s={s} />;
   } else if (s.kind === 'sources') {
     body = <Sources s={s} />;
+  } else if (s.kind === 'miningEvents') {
+    body = <MiningEventsLive />;
   } else if (s.kind === 'shapes') {
     body = <Shapes items={s.items || []} />;
+  } else if (s.kind === 'cards') {
+    body = <Cards items={s.items || []} />;
+  } else if (s.kind === 'tool') {
+    body = <GuideTool s={s} />;
   } else if (s.kind === 'table') {
     body = (
       <div className="table-scroll">
