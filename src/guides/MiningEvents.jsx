@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { EN, LOCALE } from '../i18n.js';
 import { Rich } from './Rich.jsx';
 import { Card } from '../components/ui.jsx';
+import { useApp } from '../App.jsx';
 import { useNow, left } from '../pages/Events.jsx';
 
 const URL = `/v1/mining-events${EN ? '?lang=en' : ''}`;
@@ -32,20 +33,28 @@ export function useMiningEvents() {
   return data;
 }
 
+// Остров, где игрок сейчас (/status в профиле: только свой профиль и если статус не скрыт в Hypixel)
+const MODE_ISLAND = { mining_3: 'DWARVEN_MINES', crystal_hollows: 'CRYSTAL_HOLLOWS', mineshaft: 'MINESHAFT' };
+export function useHereIsland() {
+  const o = useApp()?.state?.member?.online;
+  return o?.online ? MODE_ISLAND[String(o.mode || '').toLowerCase()] || null : null;
+}
+
 /** Самый полезный идущий ивент: 2x Powder первым, дальше — где больше лобби. */
-export function headline(d) {
+export function headline(d, here = null) {
   const now = Date.now();
-  const all = (d?.islands || []).flatMap(i => (i.now || []).filter(e => e.ends > now).map(e => ({ ...e, island: i.name })));
-  all.sort((a, b) => (b.hot - a.hot) || (b.lobbies - a.lobbies));
+  const all = (d?.islands || []).flatMap(i => (i.now || []).filter(e => e.ends > now).map(e => ({ ...e, island: i.name, here: i.id === here })));
+  all.sort((a, b) => (b.here - a.here) || (b.hot - a.hot) || (b.lobbies - a.lobbies));
   return all[0] || null;
 }
 
-function Island({ isl, now }) {
+function Island({ isl, now, here }) {
   const running = (isl.now || []).filter(e => e.ends > now);
   const soon = (isl.soon || []).filter(e => e.from > now).slice(0, 1);
   return (
-    <div className="me-isl">
-      <h4>{isl.name}</h4>
+    <div className={`me-isl ${here ? 'here' : ''}`}>
+      <h4>{isl.name}{here && <span className="badge me-here">ты здесь</span>}</h4>
+      {here && running.length > 0 && <div className="muted tiny">У каждого лобби своё расписание: что идёт именно у тебя — в табличке справа на экране.</div>}
       {running.map(e => (
         <div key={e.id} className="me-ev-wrap">
           <div className="me-now">
@@ -97,11 +106,12 @@ export function FiestaLine({ f, now }) {
 export function MiningEventsLive() {
   const d = useMiningEvents();
   const now = useNow(15_000);
+  const here = useHereIsland();
   if (!d) return <div className="muted small">Загрузка…</div>;
   return (
     <>
       {d.islands?.length
-        ? <div className="me-grid">{d.islands.map(isl => <Island key={isl.id} isl={isl} now={now} />)}</div>
+        ? <div className="me-grid">{d.islands.map(isl => <Island key={isl.id} isl={isl} now={now} here={isl.id === here} />)}</div>
         : <div className="muted small">Трекер ивентов сейчас не отвечает. Что идёт в лобби, видно в игре: таблица справа на экране.</div>}
       <FiestaLine f={d.fiesta} now={now} />
       {d.at && <div className="muted tiny me-foot">Ивенты: трекер Soopy · обновлено {left(now - d.at)} назад</div>}
@@ -113,7 +123,7 @@ export function MiningEventsLive() {
 export function MiningEventRow({ card = false }) {
   const d = useMiningEvents();
   const now = useNow(15_000);
-  const e = headline(d);
+  const e = headline(d, useHereIsland());
   if (!e) return null;
   // Других дел на сегодня нет — строка одна, в своей карточке
   if (card) return <Card className="span-12 dailies" news="dailies" title="Дела на сегодня"><MiningEventRow /></Card>;
@@ -121,7 +131,7 @@ export function MiningEventRow({ card = false }) {
     <a className={`me-row ${e.hot ? 'hot' : ''}`} href="#/guides/mining">
       <span className="badge warn">⛏ сейчас</span>
       <b>{e.name}</b>
-      <span className="muted small">{e.island} · ещё {left(e.ends - now)}{e.tip ? ' · ' : ''}{e.tip && <Rich text={e.tip} />}</span>
+      <span className="muted small">{e.here ? `ты в ${e.island}` : e.island} · ещё {left(e.ends - now)}{e.tip ? ' · ' : ''}{e.tip && <Rich text={e.tip} />}</span>
       <span className="link small me-row-more">Ивенты майнинга →</span>
     </a>
   );
