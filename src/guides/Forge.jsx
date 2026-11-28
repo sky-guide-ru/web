@@ -159,15 +159,34 @@ function SelfCard({ list }) {
 }
 
 function DrillCard({ f }) {
-  const parts = f.parts || [];
-  const first = parts.find(p => !p.locked && p.key !== 'drill') || parts[0];
-  const [sel, setSel] = useState(first?.key);
+  const drills = f.drills || [];
+  const [pick, setPick] = useState(() => { try { return localStorage.getItem('sb-forge-drill') || ''; } catch { return ''; } });
+  const drill = drills.find(d => d.key === pick) || drills[0] || null;
+  const parts = drill ? drill.upgrades : f.parts || [];
+  const firstOf = list => (list.find(p => !p.locked && p.key !== 'drill') || list[0])?.key;
+  const [sel, setSel] = useState(() => firstOf(parts));
   const [ticks, setTicks] = useState(() => { try { return JSON.parse(localStorage.getItem('sb-forge-ticks') || '{}'); } catch { return {}; } });
   const tick = k => { const next = { ...ticks, [k]: !ticks[k] }; setTicks(next); saveLocal('sb-forge-ticks', JSON.stringify(next)); };
+  const choose = key => {
+    setPick(key); saveLocal('sb-forge-drill', key);
+    const d = drills.find(x => x.key === key);
+    setSel(firstOf(d?.upgrades || []));
+  };
   if (f.guest) return <Card title="Улучшить бур" news="forge-drill"><p className="muted small">Введи свой ник на «Обзоре» — здесь появятся твой бур, его детали и пошаговые цепочки рецептов.</p></Card>;
+  const place = d => (d.where?.length ? d.where.join(', ') : '') + (d.count > 1 ? ` ×${d.count}` : '');
   return (
     <Card title="Улучшить бур" news="forge-drill" className="forge-drill">
-      <p className="muted small">{f.drill ? <>Твой бур: <Rich text={f.drill.name} item={f.drill.id} /></> : 'Бура пока нет: первый — Mithril Drill SX-R226.'}</p>
+      {drills.length > 1 ? (
+        <label className="forge-pick small">
+          <span className="muted">Какой бур улучшить</span>
+          <select value={drill.key} onChange={e => choose(e.target.value)}>
+            {drills.map(d => <option key={d.key} value={d.key}>{d.name}{place(d) ? ` — ${place(d)}` : ''}</option>)}
+          </select>
+        </label>
+      ) : (
+        <p className="muted small">{drill ? <>Твой бур: <Rich text={drill.name} item={drill.id} />{place(drill) ? ` · ${place(drill)}` : ''}</>
+          : f.drill ? <>Твой бур: <Rich text={f.drill.name} item={f.drill.id} /></> : 'Бура пока нет: первый — Mithril Drill SX-R226.'}</p>
+      )}
       {parts.map(p => (
         <div key={p.key}>
           <button type="button" className={`forge-part ${sel === p.key ? 'sel' : ''}`} onClick={() => setSel(sel === p.key ? null : p.key)} aria-expanded={sel === p.key}>
