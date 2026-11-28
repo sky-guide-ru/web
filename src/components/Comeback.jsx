@@ -70,52 +70,26 @@ export function Returning({ info, steps }) {
   );
 }
 
-// Fetchur и Puzzler API не видит: отметку ставит игрок. «day» — до сброса дня, «24h» — сутки после отметки (Puzzler)
-const DAY = 86400_000;
-function manualState(i, marks, d, now) {
-  const t = marks[i.id] || 0;
-  if (i.manual === 'day') return { done: t >= d.reset && t < d.next, ready: null };
-  const ready = t + DAY;
-  return ready > now ? { done: true, ready } : { done: false, ready: null };
-}
-
 export function Dailies({ d }) {
-  const [marks, setMarks] = useProfileStore('sb-daily-marks', {});
   if (!d?.items?.length) return null;
-  const now = Date.now();
-  const items = d.items.map(i => (i.manual ? { ...i, ...manualState(i, marks || {}, d, now) } : i));
-  const done = items.filter(i => i.done).length;
-  const toggle = i => {
-    setMarks({ ...(marks || {}), [i.id]: i.done ? 0 : Date.now() });
-  };
+  const go = i => (i.anchor ? e => { e.preventDefault(); openNewsLink(i.href.replace(/^#\//, ''), i.anchor); } : undefined);
   return (
     <Card className="span-12 dailies" news="dailies" title="Дела на сегодня"
-      right={<span className="muted small">{done}/{items.length} · новый день в {timeOf(d.next)}</span>}>
+      right={d.total ? <span className="muted small">{d.done}/{d.total} · новый день в {timeOf(d.next)}</span> : <span className="muted small">новый день в {timeOf(d.next)}</span>}>
       <div className="daily-row">
-        {items.map(i => {
-          const body = (
+        {d.items.map(i => (
+          // reminder — напоминание (Fetchur, Puzzler): игра не сообщает, сделано ли, поэтому без отметки
+          <a key={i.id} href={i.href || '#/guides'} onClick={go(i)} className={`daily ${i.done ? 'done' : ''} ${i.reminder ? 'reminder' : ''}`}>
+            <span className="daily-check" aria-hidden>{i.reminder ? '!' : i.done ? '✓' : ''}</span>
             <span className="daily-body">
               <b>{i.title}{i.progress ? <span className="muted"> {i.progress[0]}/{i.progress[1]}</span> : null}</b>
               <span className="muted tiny"><Rich text={i.ready && i.done ? `${i.text} Снова в ${timeOf(i.ready)}.` : i.text} /></span>
             </span>
-          );
-          // Ручную отметку нельзя класть внутрь ссылки: плитка — блок с кнопкой, ссылка — на названии
-          if (i.manual) return (
-            <div key={i.id} className={`daily manual ${i.done ? 'done' : ''}`}>
-              <button type="button" className="daily-check" aria-pressed={i.done} title={i.done ? 'Снять отметку' : 'Отметить: сделано'} aria-label={`${i.title}: ${i.done ? 'снять отметку' : 'отметить, что сделано'}`} onClick={() => toggle(i)}>{i.done ? '✓' : ''}</button>
-              <a className="daily-link" href={i.href || '#/guides'} onClick={i.anchor ? e => { e.preventDefault(); openNewsLink(i.href.replace(/^#\//, ''), i.anchor); } : undefined}>{body}</a>
-            </div>
-          );
-          return (
-            <a key={i.id} href={i.href || '#/guides'} className={`daily ${i.done ? 'done' : ''}`}>
-              <span className="daily-check" aria-hidden>{i.done ? '✓' : ''}</span>
-              {body}
-            </a>
-          );
-        })}
+          </a>
+        ))}
       </div>
-      <div className="muted tiny daily-note">{items.some(i => i.manual)
-        ? 'Отметки ставятся сами по данным профиля, он обновляется раз в несколько минут. Fetchur и Puzzler игра не показывает: отметьте их сами, нажав на квадрат.'
+      <div className="muted tiny daily-note">{d.items.some(i => i.reminder)
+        ? 'Отметки ставятся сами по данным профиля, он обновляется раз в несколько минут. Fetchur и Puzzler — напоминания: игра не сообщает, сделаны ли они.'
         : 'Отметки ставятся сами по данным профиля, он обновляется раз в несколько минут.'}</div>
     </Card>
   );
