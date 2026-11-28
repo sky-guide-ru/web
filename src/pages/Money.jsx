@@ -264,6 +264,8 @@ function Crafts({ openItem }) {
     { key: 'pct', label: 'Маржа %', cls: 'num', render: c => pct(c.pct, 0) },
     { key: 'volumeDay', label: 'Продаж/день', cls: 'num', render: c => num(c.volumeDay) },
     { key: 'perHour', label: '~В час', cls: 'num gold', title: 'Крафт: сколько успеешь продать за час. Forge: доход одного слота в час с учётом спроса', sort: c => c.perHour * (c.slotFill ?? 1), render: c => coins(c.perHour * (c.slotFill ?? 1)) },
+    { key: 'hotm', label: 'HotM', cls: 'num', title: 'Какой уровень Heart of the Mountain нужен для рецепта Forge', sort: c => c.hotm || 0,
+      render: c => (c.hotm ? <span className={c.locked?.some(x => /HotM/i.test(x)) ? 'red' : ''}>{c.hotm}{c.locked?.some(x => /HotM/i.test(x)) ? ' 🔒' : ' ✓'}</span> : '—') },
     { key: 'durationH', label: 'Время', cls: 'num', sort: c => c.durationH ?? 0, render: c => (c.durationH ? `${c.durationH.toLocaleString(LOCALE)} ч` : 'сразу') },
     { key: 'market', label: 'Где продать', text: true },
   ];
