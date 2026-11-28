@@ -11,6 +11,14 @@ import { Rich } from './Rich.jsx';
 
 const VISIT_LABEL = { 4: 'каждые 4 ч', 12: '2 раза в день', 24: 'раз в сутки' };
 const hrs = h => `${(Math.round(h * 10) / 10).toLocaleString(LOCALE)} ч`;
+// длительность ковки: часть рецептов (улучшения буров, некоторые детали) куётся за секунды — «0 ч» сбивает с толку
+const dur = h => (h >= 1 ? hrs(h) : h * 60 >= 1 ? `${Math.round(h * 60)} мин` : `${Math.max(1, Math.round(h * 3600))} с`);
+const TAIL = 'Быстрые рецепты (секунды или минуты) забираешь в тот же заход, их доход ограничен спросом. Покупка материалов и продажа ордером на Bazaar, слотов на рецепт не больше, чем реально продать.';
+const FOOT = {
+  4: 'Доход в час — на твой ритм: рецепт на 3 ч при заходе каждые 4 ч держит слот 4 ч, а на 6 ч — 8 ч.',
+  12: 'Доход в час — на твой ритм: рецепт на 6 ч при заходе 2 раза в день держит слот 12 ч.',
+  24: 'Доход в час — на твой ритм: рецепт на 6 ч при заходе раз в сутки держит слот 24 ч.',
+};
 const days = h => (h >= 36 ? `≈ ${(Math.round(h / 24 * 10) / 10).toLocaleString(LOCALE)} дн.` : `≈ ${hrs(h)}`);
 
 function left(ms) {
@@ -89,21 +97,22 @@ function ProfitCard({ f }) {
         {plan.top.map(t => {
           const r = row(t.id);
           if (!r) return null;
-          return <ProfitRow key={t.id} r={r} perHour={t.perHour} slots={t.slots} slotH={t.slotH} />;
+          return <ProfitRow key={t.id} r={r} perHour={t.perHour} slots={t.slots} slotH={t.slotH} instant={t.instant} />;
         })}
-        {(f.goals || []).map(g => <ProfitRow key={g.id} r={g} perHour={g.perHour} locked />)}
+        {(f.goals || []).map(g => <ProfitRow key={g.id} r={g} perHour={g.perHour} instant={g.instant} locked />)}
       </div>
       <p className="tiny muted">
-        Доход в час — на твой ритм: рецепт на 6 ч при заходе 2 раза в день держит слот 12 ч. Покупка материалов и продажа ордером на Bazaar,
-        слотов на рецепт не больше, чем реально продать.
+        <Rich text={FOOT[plan.visitH] || FOOT[12]} />{' '}
+        <Rich text={TAIL} />
       </p>
       <a className="link-btn small" href="#/money/crafts" onClick={() => saveLocal('sb-money-crafts-kind', JSON.stringify('forge'))}>Все рецепты Forge в «Заработке» →</a>
     </Card>
   );
 }
 
-function ProfitRow({ r, perHour, slots, slotH, locked }) {
-  const sl = slots > 0 ? (slots < 1 ? '<1 сл.' : `${Math.round(slots)} сл.`) : null;
+function ProfitRow({ r, perHour, slots, slotH, locked, instant }) {
+  const fast = instant ?? r.durationH < 0.25;
+  const sl = fast ? null : slots > 0 ? (slots < 1 ? '<1 сл.' : `${Math.round(slots)} сл.`) : null;
   const parts = (r.parts || []).slice(0, 3).map(p => `${num(p.n)} ${p.name}`).join(', ');
   return (
     <div className={`forge-row ${locked ? 'locked' : ''}`}>
@@ -112,13 +121,14 @@ function ProfitRow({ r, perHour, slots, slotH, locked }) {
         <div className="forge-row-name">
           <Rich text={r.name} item={r.id} />{r.count > 1 ? ` ×${r.count}` : ''}
           {sl && <span className="forge-pill" title="Сколько твоих слотов занять этим рецептом">{sl}</span>}
+          {fast && !locked && <span className="forge-pill" title="Куётся за секунды или минуты: забираешь в тот же заход, слот потом свободен">сразу</span>}
           {r.own && !locked && <span className="forge-pill own" title="Материалы на одну ковку уже есть у тебя">свои</span>}
           {locked && <span className="forge-pill lock">🔒 {(r.locked || []).join(', ') || `HotM ${r.hotm}`}</span>}
         </div>
-        <div className="tiny muted forge-row-sub"><span className="forge-phone">{hrs(r.durationH)} · </span>{parts ? <Rich text={parts} /> : null}{slotH && slotH > r.durationH + 0.5 ? <span> · слот занят {hrs(slotH)}</span> : null}</div>
+        <div className="tiny muted forge-row-sub"><span className="forge-phone">{dur(r.durationH)} · </span>{parts ? <Rich text={parts} /> : null}{slotH && slotH > r.durationH + 0.5 ? <span> · слот занят {hrs(slotH)}</span> : null}</div>
       </div>
       <span className="num forge-desk">{r.hotm || '—'}</span>
-      <span className="num forge-desk">{hrs(r.durationH)}</span>
+      <span className="num forge-desk">{dur(r.durationH)}</span>
       <span className="num green">+{coins(r.profit)}</span>
       <span className="num gold">{coins(perHour)}</span>
     </div>
@@ -136,7 +146,7 @@ function SelfCard({ list }) {
             <Item id={s.id} />
             <div className="forge-row-main">
               <div className="forge-row-name"><Rich text={s.name} item={s.id} />{s.crafts > 1 ? ` ×${s.crafts}` : ''}</div>
-              <div className="tiny muted">{hrs(s.durationH)} · для <Rich text={s.forName} item={s.forId} /></div>
+              <div className="tiny muted">{dur(s.durationH)} · для <Rich text={s.forName} item={s.forId} /></div>
             </div>
             <span className={`small forge-self-st ${s.enough ? 'green' : 'gold'}`}>
               {s.enough ? 'всё есть' : <>не хватает <Rich text={s.missing.map(x => `${num(x.n)} ${x.name}`).join(', ')} /></>}
@@ -192,7 +202,7 @@ function Chain({ p, f, ticks, tick }) {
               aria-label={done ? 'Сделано' : 'Отметить сделанным'}>{done ? '✓' : ''}</button>
             <div>
               <div className="forge-row-name">{s.need > 1 ? `${num(s.need)}× ` : ''}<Rich text={s.name} item={s.id} /></div>
-              <div className="tiny muted">{s.durationH > 0.05 ? `по ${hrs(s.durationH)}` : 'сразу'} · <Rich text={s.inputs.map(i => `${num(i.n)} ${i.name || nameOf(i.id, p)}`).join(', ')} /></div>
+              <div className="tiny muted">{s.durationH > 0.05 ? `по ${dur(s.durationH)}` : 'сразу'} · <Rich text={s.inputs.map(i => `${num(i.n)} ${i.name || nameOf(i.id, p)}`).join(', ')} /></div>
             </div>
             <span className={`tiny ${s.done ? 'green' : s.have ? 'gold' : 'muted'}`}>{s.id === p.next ? 'в конце' : s.done ? `есть ${num(s.have)}` : s.have ? `есть ${num(s.have)} из ${num(s.need)}` : 'нет'}</span>
           </div>
