@@ -154,6 +154,7 @@ export function Section({ s }) {
             <div>
               <b><Rich text={it.title} /></b> <Items ids={it.items} />
               {lines(it.text).map((t, j) => <div key={j} className="muted small"><Rich text={t} /></div>)}
+              {it.link?.guide && <a className="link-btn small" href={`#/guides/${it.link.guide}`}>{it.link.label || 'Открыть гайд'} →</a>}
             </div>
           </li>
         ))}
