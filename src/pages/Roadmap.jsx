@@ -15,8 +15,10 @@ const STATUS = { done: 'пройдено', current: 'сейчас', available: '
 const NEXT = { undefined: 'like', like: 'no', no: undefined };
 function Interests({ cats, interests, set, clear }) {
   const like = cats.filter(([k]) => interests[k] === 'like'), no = cats.filter(([k]) => interests[k] === 'no');
+  // Открыт ли блок — решает только игрок: выбор категорий его не сворачивает
+  const [open, setOpen] = useState(like.length + no.length > 0);
   return (
-    <details className="interests small" data-news="interests" open={like.length + no.length > 0 || undefined}>
+    <details className="interests small" data-news="interests" open={open} onToggle={e => setOpen(e.currentTarget.open)}>
       <summary>Нравится / Не хочу{like.length + no.length > 0 ? `: ♥ ${like.length} · ✕ ${no.length}` : ''}</summary>
       <div className="muted"><Rich text="Нажми категорию: ♥ поднимает её шаги выше, ✕ убирает их из плана, третье нажатие возвращает как было. Ironman и Bingo план учитывает сам." /></div>
       <div className="chips">
