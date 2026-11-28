@@ -1886,6 +1886,10 @@ tr.grp td { background: rgba(255,255,255,.04); font-weight: 700; font-size: 12px
 .daily.done .daily-check { background: var(--green); border-color: var(--green); color: #0a0b14; }
 .daily.done b { opacity: .7; }
 .daily-body { display: grid; gap: 2px; min-width: 0; }
+.daily.manual .daily-check { background: none; color: inherit; padding: 0; cursor: pointer; border-style: dashed; }
+.daily.manual.done .daily-check { background: var(--green); border-style: solid; color: #0a0b14; }
+.daily.manual .daily-check:hover { border-color: var(--green); }
+.daily-link { color: inherit; text-decoration: none; min-width: 0; }
 .daily-note { margin-top: 6px; }
 
 /* «Нравится / Не хочу» в плане */
