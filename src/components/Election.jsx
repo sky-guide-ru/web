@@ -116,7 +116,7 @@ export function NextMayorsCard({ now }) {
                   {r.minister && <div className="muted tiny">министр — вероятно {r.minister}</div>}</>}
                 {r.kind === 'election' && <><b>{i === 0 ? 'Выборы' : 'Следующие выборы'}</b> <span className="muted small">кандидаты появятся при открытии</span>
                   {r.skip && <div className="muted tiny">{r.skip} в них не будет: действующий мэр не выдвигается</div>}</>}
-                {r.kind === 'special' && <><b>Особый мэр</b> <span className="muted small">{r.names.join(', ')}{r.every ? ` — раз в ${r.every} лет SkyBlock` : ''}</span></>}
+                {r.kind === 'special' && <><b>Особый мэр</b> <span className="muted small">{r.likely ? `скорее всего ${r.likely} (идут по кругу: ${r.names.join(', ')})` : r.names.join(', ')}{r.every ? ` — раз в ${r.every} лет SkyBlock` : ''}</span></>}
               </div>
               <div className="el-when">
                 {r.kind === 'now' && <><b>до {when(r.until)}</b><div className="muted">ещё {left(r.until - now)}</div></>}
