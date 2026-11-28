@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Card } from './ui.jsx';
 import { Rich } from '../guides/Rich.jsx';
+import { MiningEventRow } from '../guides/MiningEvents.jsx';
 import { api, useProfileStore } from '../api.js';
 import { LOCALE } from '../i18n.js';
 import { openNewsLink } from '../newsLinks.jsx';
@@ -81,7 +82,7 @@ function manualState(i, marks, d, now) {
 
 export function Dailies({ d }) {
   const [marks, setMarks] = useProfileStore('sb-daily-marks', {});
-  if (!d?.items?.length) return null;
+  if (!d?.items?.length) return d?.mining ? <MiningEventRow card /> : null;
   const now = Date.now();
   const items = d.items.map(i => (i.manual ? { ...i, ...manualState(i, marks || {}, d, now) } : i));
   const done = items.filter(i => i.done).length;
@@ -114,6 +115,7 @@ export function Dailies({ d }) {
           );
         })}
       </div>
+      {d.mining && <MiningEventRow />}
       <div className="muted tiny daily-note">{items.some(i => i.manual)
         ? 'Отметки ставятся сами по данным профиля, он обновляется раз в несколько минут. Fetchur и Puzzler игра не показывает: отметьте их сами, нажав на квадрат.'
         : 'Отметки ставятся сами по данным профиля, он обновляется раз в несколько минут.'}</div>
