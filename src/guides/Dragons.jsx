@@ -10,6 +10,7 @@ import { GuideHero, NextSteps, Section } from './parts.jsx';
 import { Rich } from './Rich.jsx';
 
 const pct = x => `${(Math.round(x * 1000) / 10).toLocaleString(LOCALE)}%`;
+const pctFine = x => `${(x * 100).toLocaleString(LOCALE, { maximumFractionDigits: x < 0.01 ? 2 : 1 })}%`;
 const mln = hp => `${(hp / 1e6).toLocaleString(LOCALE)} млн`;
 
 function Item({ id, size = 28 }) {
@@ -123,6 +124,9 @@ function WeightCard({ d }) {
           </select>
         </label>
       </div>
+      {d.luck && (
+        <p className="tiny muted drg-luck"><Rich text={`Твой шанс за дракона — с твоим Magic Find ${num(d.luck.mf)}${d.luck.bestiary?.mf ? ` (из них +${d.luck.bestiary.mf} за Bestiary)` : ''}${d.luck.pl ? ` и Pet Luck ${num(d.luck.pl)}` : ''}, порядком проверки дропа и шансами каждого дракона.`} /></p>
+      )}
       <div className="drg-meter" aria-label={`Вклад ${cell.weight}`}>
         <i style={{ width: `${Math.min(100, cell.weight / max * 100)}%` }} />
         {marks.filter(r => r <= max).map(r => <s key={r} style={{ left: `${r / max * 100}%` }} className={cell.weight >= r ? 'ok' : ''} />)}
@@ -133,7 +137,9 @@ function WeightCard({ d }) {
           <div key={i} className={`drg-loot-row ${open.has(i) ? 'open' : 'closed'}`}>
             <ItemIcon id={m.id} size={24} />
             <span className="drg-loot-name"><Rich text={m.label} item={m.id} /></span>
-            <span className="tiny muted">{open.has(i) ? <Rich text={m.text} /> : cell.weight < m.req ? `нужно ${num(m.req)}` : 'нужны свои глаза'}</span>
+            <span className="tiny muted drg-loot-p">{open.has(i)
+              ? <>{cell.chance?.[i] > 0 && <b className="drg-p">{pctFine(cell.chance[i])}</b>} <span className="drg-p-base"><Rich text={m.text} /></span></>
+              : cell.weight < m.req ? `нужно ${num(m.req)}` : 'нужны свои глаза'}</span>
           </div>
         ))}
       </div>
@@ -146,7 +152,7 @@ function WeightCard({ d }) {
             <div className={cell.net >= 0 ? 'good' : 'bad'}><span className="tiny muted">Итог за дракона</span><b>{cell.net >= 0 ? '+' : '−'}{coins(Math.abs(cell.net))}</b></div>
           </div>
         )}
-      {!d.noMarket && <p className="tiny muted"><Rich text={`Среднее за много боёв по нынешним ценам, без Magic Find. Summoning Eye сейчас ${coins(d.eyePrice)}. Обычно в минус: плюс дают редкие Ender Dragon и Aspect of the Dragons.`} /></p>}
+      {!d.noMarket && <p className="tiny muted"><Rich text={`Среднее за много боёв по нынешним ценам, с твоим Magic Find. Summoning Eye сейчас ${coins(d.eyePrice)}. Обычно в минус: плюс дают редкие Ender Dragon и Aspect of the Dragons.`} /></p>}
     </Card>
   );
 }
