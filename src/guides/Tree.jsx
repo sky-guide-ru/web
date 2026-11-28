@@ -127,12 +127,12 @@ function PerkInfo({ p, mk, tg, buildTitle }) {
 }
 
 // Цели сборки списком: что взять, что докачать и до какого уровня, что снять
-function Goals({ build, byId, onPick }) {
+function Goals({ build, byId, onPick, only, className = '' }) {
   const seq = [...new Set([...(build.order || []), ...build.perks])];
   const rank = id => { const i = seq.indexOf(id); return i < 0 ? 999 : i; };
-  const groups = ['add', 'up', 'later', 'remove', 'bridge', 'done'].map(st => [st, Object.entries(build.targets || {}).filter(([, t]) => t.status === st).map(([id]) => byId[id]).filter(Boolean).sort((a, b) => rank(a.id) - rank(b.id))]);
+  const groups = (only || ['add', 'up', 'later', 'remove', 'bridge', 'done']).map(st => [st, Object.entries(build.targets || {}).filter(([, t]) => t.status === st).map(([id]) => byId[id]).filter(Boolean).sort((a, b) => rank(a.id) - rank(b.id))]);
   return (
-    <div className="tree-goals">
+    <div className={`tree-goals ${className}`}>
       {groups.map(([st, list]) => list.length > 0 && (
         <div key={st} className={`tree-goal-g tg-${st}`}>
           <div className="tree-goal-h"><i className="tree-goal-i">{TG[st]}</i>{TG_RU[st][0].toUpperCase() + TG_RU[st].slice(1)} · {list.length}</div>
@@ -221,9 +221,11 @@ export function TreeView({ s }) {
         </div>
         <div className="tree-side">
           <PerkInfo p={byId[sel]} mk={plan ? marks[sel] : null} tg={build?.targets?.[sel]} buildTitle={build?.title} />
-          {build && <Goals build={build} byId={byId} onPick={pick} />}
+          {/* главное — рядом с деревом, «позже», «для прохода» и «готово» — под ним на всю ширину, чтобы колонки были ровными */}
+          {build && <Goals build={build} byId={byId} onPick={pick} only={['add', 'up', 'remove']} />}
         </div>
       </div>
+      {build && <Goals build={build} byId={byId} onPick={pick} only={['later', 'bridge', 'done']} className="wide" />}
 
       {build && (
         <details className="tree-more">
