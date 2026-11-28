@@ -23,23 +23,36 @@ function Meter({ label, value, max, unit = '', hint }) {
   );
 }
 
+// Один опрос на адрес для всей страницы: лампочка нагрузки и баннер Hypixel читают одни и те же данные,
+// а раньше каждый спрашивал сервер сам (два одинаковых /api/status при открытии и каждые 30 с)
+const polls = new Map();
+function poll(path, every) {
+  let p = polls.get(path);
+  if (p) return p;
+  p = { s: null, down: false, subs: new Set(), timer: null };
+  const emit = () => p.subs.forEach(f => f(p));
+  p.load = () => {
+    if (document.hidden) return; // вкладка в фоне — не дёргаем сервер
+    fetch(path, { cache: 'no-store' }).then(r => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then(j => { p.s = j; p.down = false; emit(); })
+      .catch(() => { p.down = true; emit(); });
+  };
+  p.start = () => { p.load(); p.timer = setInterval(p.load, every); document.addEventListener('visibilitychange', p.load); };
+  p.stop = () => { clearInterval(p.timer); document.removeEventListener('visibilitychange', p.load); polls.delete(path); };
+  polls.set(path, p);
+  return p;
+}
+
 export function useServerStatus(path = '/api/status', every = 30_000) {
-  const [s, setS] = useState(null);
-  const [down, setDown] = useState(false);
+  const [v, setV] = useState(() => { const p = polls.get(path); return { s: p?.s || null, down: !!p?.down }; });
   useEffect(() => {
-    let stop = false;
-    const load = () => {
-      if (document.hidden) return; // вкладка в фоне — не дёргаем сервер
-      fetch(path, { cache: 'no-store' }).then(r => (r.ok ? r.json() : Promise.reject(r.status)))
-        .then(j => { if (!stop) { setS(j); setDown(false); } })
-        .catch(() => { if (!stop) setDown(true); });
-    };
-    load();
-    const t = setInterval(load, every);
-    document.addEventListener('visibilitychange', load);
-    return () => { stop = true; clearInterval(t); document.removeEventListener('visibilitychange', load); };
+    const p = poll(path, every);
+    const on = q => setV({ s: q.s, down: q.down });
+    p.subs.add(on);
+    if (p.subs.size === 1) p.start(); else on(p);
+    return () => { p.subs.delete(on); if (!p.subs.size) p.stop(); };
   }, [path, every]);
-  return { s, down };
+  return v;
 }
 
 const kb = b => b >= 1048576 ? `${(b / 1048576).toFixed(1).replace('.', DEC)} МБ` : `${Math.max(1, Math.round(b / 1024))} КБ`;
